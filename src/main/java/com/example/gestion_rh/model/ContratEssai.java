@@ -1,4 +1,4 @@
-package com.example.gestion_rh.lysaModel;
+package com.example.gestion_rh.Model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

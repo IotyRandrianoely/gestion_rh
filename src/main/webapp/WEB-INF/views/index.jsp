@@ -1,5 +1,5 @@
 <%@ page import="java.util.List" %>
-<%@ page import="com.example.gestion_rh.lysaModel.Annonce, com.example.gestion_rh.lysaModel.Candidat" %>
+<%@ page import="com.example.gestion_rh.Model.Annonce, com.example.gestion_rh.Model.Candidat" %>
 <%
     List<Annonce> annonces = (List<Annonce>) request.getAttribute("annonces");
     List<Candidat> candidats = (List<Candidat>) request.getAttribute("candidats");

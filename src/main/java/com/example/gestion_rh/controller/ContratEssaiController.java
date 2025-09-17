@@ -1,9 +1,9 @@
-package com.example.gestion_rh.lysaController;
+package com.example.gestion_rh.Controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.example.gestion_rh.lysaModel.ContratEssai;
-import com.example.gestion_rh.lysaService.ContratEssaiService;
+import com.example.gestion_rh.Model.ContratEssai;
+import com.example.gestion_rh.Service.ContratEssaiService;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
-package com.example.gestion_rh.lysaService;
+package com.example.gestion_rh.Service;
 
 import org.springframework.stereotype.Service;
 
-import com.example.gestion_rh.lysaModel.ContratEssai;
+import com.example.gestion_rh.Model.ContratEssai;
 import com.example.gestion_rh.lysaRepository.ContratEssaiRepository;
 
 import java.util.List;
