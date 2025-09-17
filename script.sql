@@ -94,7 +94,7 @@ create table poste_employe(
     id INT,
     id_employee INT,
     id_poste INT,
-    last_date DATE
+    last_date DATE 
 );
 create table departement(
     id INT,
