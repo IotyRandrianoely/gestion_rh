@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.*;
 
 @Service
 public class QcmQuestionService {
@@ -31,5 +32,20 @@ public class QcmQuestionService {
 
     public void deleteQuestion(Integer id) {
         questionRepository.deleteById(id);
+    }
+    public List<QcmQuestion> getQuestionEntretien(int filiere) {
+        // Récupérer d'abord toutes les questions de la filière spécifique
+        List<QcmQuestion> questionsFiliere = questionRepository.findByEntityId(filiere);
+        
+        // Si on a moins de 7 questions, on retourne toutes les questions disponibles
+        if (questionsFiliere.size() <= 7) {
+            return questionsFiliere;
+        }
+        
+        // Mélanger les questions
+        Collections.shuffle(questionsFiliere);
+        
+        // Prendre les 7 premières questions
+        return questionsFiliere.subList(0, 7);
     }
 }

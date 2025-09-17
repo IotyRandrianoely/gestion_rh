@@ -29,6 +29,14 @@ public class QcmController {
         return "qcm/questions";
     }
 
+    @GetMapping("/entretien/{filiereId}")
+    public String getQuestionsEntretien(@PathVariable int filiereId, Model model) {
+        List<QcmQuestion> questionsEntretien = questionService.getQuestionEntretien(filiereId);
+        model.addAttribute("questions", questionsEntretien);
+        model.addAttribute("filiereId", filiereId);
+        return "qcm/entretien";
+    }
+
     @GetMapping("/question/{id}/correct-options")
     public String showCorrectOptions(@PathVariable Integer id, Model model) {
         QcmQuestion question = questionService.getQuestionById(id).orElse(null);
