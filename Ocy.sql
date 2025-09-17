@@ -91,3 +91,7 @@ VALUES
  ('Développeur Java', 'Développement et maintenance des applications', 1, DATE '2025-01-15'),
  ('Comptable', 'Gestion des écritures comptables et bilans financiers', 1, DATE '2025-02-10'),
  ('Guide touristique', 'Accompagner les visiteurs et expliquer les sites', 1, DATE '2025-03-05');
+create table genre(
+    id INT,
+    genre VARCHAR(20)
+);

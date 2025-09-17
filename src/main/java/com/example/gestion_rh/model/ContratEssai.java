@@ -1,7 +1,7 @@
-package com.example.gestion_rh.Model;
+package com.example.gestion_rh.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contrat_essai")
@@ -19,9 +19,11 @@ public class ContratEssai {
     @JoinColumn(name = "id_poste", nullable = false)
     private Poste poste;
 
-    private LocalDate dateDebut;
+    @Column(name = "date_debut", columnDefinition = "TIMESTAMP")
+    private LocalDateTime dateDebut;
     private Integer duree; // en jours
-    private LocalDate dateFin;
+    @Column(name = "date_fin", columnDefinition = "TIMESTAMP")
+    private LocalDateTime dateFin;
     private Double salaire;
 
     @Column(length = 500)
@@ -54,11 +56,11 @@ public class ContratEssai {
         this.poste = poste;
     }
 
-    public LocalDate getDateDebut() {
+    public LocalDateTime getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(LocalDate dateDebut) {
+    public void setDateDebut(LocalDateTime dateDebut) {
         this.dateDebut = dateDebut;
     }
 
@@ -70,11 +72,11 @@ public class ContratEssai {
         this.duree = duree;
     }
 
-    public LocalDate getDateFin() {
+    public LocalDateTime getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(LocalDate dateFin) {
+    public void setDateFin(LocalDateTime dateFin) {
         this.dateFin = dateFin;
     }
 
@@ -102,10 +104,4 @@ public class ContratEssai {
         this.etat = etat;
     }
 
-    @PrePersist
-    public void calculerDateFin() {
-        if (dateDebut != null && duree != null) {
-            this.dateFin = dateDebut.plusDays(duree);
-        }
-    }
 }

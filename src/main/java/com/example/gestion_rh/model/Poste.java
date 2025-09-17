@@ -1,4 +1,4 @@
-package com.example.gestion_rh.Model;
+package com.example.gestion_rh.model;
 
 import jakarta.persistence.*;
 

@@ -137,7 +137,6 @@ create table organisme(
     detail VARCHAR(30)
 );
 
-// lysa
 create table contrat_essai (
     id INT primary key auto_increment,
     id_candidat INT,
