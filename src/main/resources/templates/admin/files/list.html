@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Gestion des fichiers - Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+        .header { background-color: #007bff; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .filter-tabs { margin-bottom: 20px; }
+        .filter-tab { padding: 10px 20px; background-color: #e9ecef; border: none; margin-right: 5px; border-radius: 5px; cursor: pointer; text-decoration: none; color: #333; }
+        .filter-tab.active { background-color: #007bff; color: white; }
+        .files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .file-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #007bff; }
+        .file-card.image { border-left-color: #28a745; }
+        .file-header { display: flex; justify-content: between; align-items: center; margin-bottom: 10px; }
+        .file-icon { font-size: 2em; margin-right: 10px; }
+        .file-info { flex: 1; }
+        .file-name { font-weight: bold; color: #333; margin-bottom: 5px; word-break: break-all; }
+        .file-meta { font-size: 0.9em; color: #6c757d; margin-bottom: 3px; }
+        .candidate-info { background-color: #f8f9fa; padding: 8px; border-radius: 4px; margin: 10px 0; }
+        .file-actions { margin-top: 10px; }
+        .btn { padding: 6px 12px; margin: 2px; text-decoration: none; border-radius: 4px; font-size: 0.9em; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .stats { background: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: center; }
+        .alert { padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .image-preview { max-width: 100px; max-height: 100px; border-radius: 4px; margin-top: 10px; }
+        .orphan-file { opacity: 0.6; border-left-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📁 Gestion des fichiers - Administration</h1>
+        <p>Visualisation et gestion de tous les documents et images uploadés par les candidats</p>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="stats">
+        <h3>📊 Statistiques</h3>
+        <p><strong th:text="${totalFiles}">0</strong> fichier(s) au total</p>
+    </div>
+
+    <div class="filter-tabs">
+        <a th:href="@{/admin/files?type=all}" 
+           th:classappend="${selectedType == 'all'} ? 'active' : ''"
+           class="filter-tab">📁 Tous les fichiers</a>
+        <a th:href="@{/admin/files?type=documents}" 
+           th:classappend="${selectedType == 'documents'} ? 'active' : ''"
+           class="filter-tab">📄 Documents</a>
+        <a th:href="@{/admin/files?type=images}" 
+           th:classappend="${selectedType == 'images'} ? 'active' : ''"
+           class="filter-tab">🖼️ Images</a>
+    </div>
+
+    <div class="files-grid" th:if="${files != null and !files.empty}">
+        <div th:each="file : ${files}" 
+             class="file-card" 
+             th:classappend="${file.fileType == 'image'} ? 'image' : ''"
+             th:classappend="${file.candidatNom == null} ? ' orphan-file' : ''">
+            
+            <div class="file-header">
+                <div class="file-icon" th:text="${file.fileType == 'image'} ? '🖼️' : '📄'"></div>
+                <div class="file-info">
+                    <div class="file-name" th:text="${file.fileName}">nom_fichier.pdf</div>
+                    <div class="file-meta">
+                        <span th:text="${file.formattedSize}">1.2 MB</span> • 
+                        <span th:text="${file.fileType == 'image'} ? 'Image' : 'Document'">Type</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations du candidat -->
+            <div th:if="${file.candidatNom != null}" class="candidate-info">
+                <strong>👤 Candidat :</strong> <span th:text="${file.candidatNom}">Nom Prénom</span><br/>
+                <span th:if="${file.annonceTitle != null and !file.annonceTitle.empty}">
+                    <strong>🎯 Annonce :</strong> <span th:text="${file.annonceTitle}">Titre annonce</span>
+                </span>
+            </div>
+
+            <!-- Fichier orphelin -->
+            <div th:if="${file.candidatNom == null}" class="candidate-info" style="background-color: #fff3cd; color: #856404;">
+                ⚠️ <strong>Fichier orphelin</strong><br/>
+                <small>Aucun candidat associé à ce fichier</small>
+            </div>
+
+            <!-- Aperçu des images -->
+            <div th:if="${file.fileType == 'image'}">
+                <img th:src="@{/api/files/download/image/{fileName}(fileName=${file.fileName})}" 
+                     class="image-preview" 
+                     th:alt="${file.fileName}"
+                     onerror="this.style.display='none'"/>
+            </div>
+
+            <!-- Actions -->
+            <div class="file-actions">
+                <a th:if="${file.fileType == 'image'}" 
+                   th:href="@{/api/files/download/image/{fileName}(fileName=${file.fileName})}" 
+                   class="btn btn-success" target="_blank">👁️ Voir</a>
+                
+                <a th:href="@{/api/files/download/{fileName}(fileName=${file.fileName})}" 
+                   class="btn btn-primary" target="_blank">📥 Télécharger</a>
+                
+                <a th:if="${file.candidatId != null}" 
+                   th:href="@{/candidats/{id}(id=${file.candidatId})}" 
+                   class="btn btn-info">👤 Voir candidat</a>
+
+                <a th:if="${file.candidatId != null}" 
+                   th:href="@{/admin/files/candidat/{id}(id=${file.candidatId})}" 
+                   class="btn btn-secondary">📂 Fichiers candidat</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${files == null or files.empty}" style="text-align: center; padding: 50px; color: #6c757d;">
+        <h3>📭 Aucun fichier trouvé</h3>
+        <p>Aucun document ou image n'a encore été uploadé.</p>
+    </div>
+
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+        <a href="/candidats" class="btn btn-secondary">← Retour aux candidats</a>
+        <a href="/admin/annonces" class="btn btn-secondary">🔧 Administration</a>
+    </div>
+</body>
+</html>

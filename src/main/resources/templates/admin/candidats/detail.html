@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Détail candidat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .info-section { margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; }
+        .info-row { margin-bottom: 10px; }
+        .label { font-weight: bold; color: #333; }
+        .value { margin-left: 10px; }
+        .btn { padding: 8px 15px; margin: 5px; text-decoration: none; color: white; border-radius: 3px; }
+        .btn-primary { background-color: #007bff; }
+        .btn-warning { background-color: #ffc107; color: black; }
+    </style>
+</head>
+<body>
+    <h2>Admin - Détail du candidat</h2>
+
+    <div class="info-section">
+        <h3>Informations personnelles</h3>
+        <div class="info-row">
+            <span class="label">ID :</span>
+            <span class="value" th:text="${candidat.id}"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Nom :</span>
+            <span class="value" th:text="${candidat.nom}"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Prénom :</span>
+            <span class="value" th:text="${candidat.prenom}"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Email :</span>
+            <span class="value" th:text="${candidat.email}"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Âge :</span>
+            <span class="value" th:text="${candidat.age} + ' ans'"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Genre :</span>
+            <span class="value" th:text="${candidat.genre == 1 ? 'Homme' : 'Femme'}"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Adresse :</span>
+            <span class="value" th:text="${candidat.adresse}"></span>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>Informations professionnelles</h3>
+        <div class="info-row">
+            <span class="label">Années d'expérience :</span>
+            <span class="value" th:text="${candidat.anneesExperience} + ' ans'"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">CV :</span>
+            <span class="value" th:text="${candidat.cv}"></span>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>Candidature</h3>
+        <div class="info-row">
+            <span class="label">Annonce :</span>
+            <span class="value" th:text="${candidat.annonce != null ? candidat.annonce.profil : ''}"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Date de candidature :</span>
+            <span class="value" th:text="${candidat.dateCandidature}"></span>
+        </div>
+        <div class="info-row">
+            <span class="label">Lettre de motivation :</span>
+            <div class="value" th:text="${candidat.lettreMotivation}" style="margin-top: 5px; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <p>
+        <a th:href="@{/admin/candidats}" class="btn btn-primary">← Retour à la liste</a>
+        <a th:href="@{/admin/candidats/edit/{id}(id=${candidat.id})}" class="btn btn-warning">Modifier</a>
+    </p>
+</body>
+</html>

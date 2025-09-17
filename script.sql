@@ -1,13 +1,14 @@
 create database gestion_rh;
 \c gestion_rh;
 create table annonce(
-    id INT,
+    id SERIAL PRIMARY KEY,
     profil varchar(40),
     description VARCHAR(120),
-    critere_rech INT,
-    date_publication DATE
+    critere_rech_id INT,
+    date_publication DATE DEFAULT CURRENT_DATE
 );
 create table critere_rech(
+    id SERIAL PRIMARY KEY,
     annees_experience INT,
     diplome INT,
     age INT,

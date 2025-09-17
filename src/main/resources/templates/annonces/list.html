@@ -9,9 +9,12 @@
     <li th:each="a : ${annonces}">
         <b th:text="${a.profil}">Profil</b> -
         <span th:text="${a.description}">Description</span>
-        <a th:href="@{/annonces/{id}(id=${a.id})}">Voir détail</a>
+        <a th:href="@{/annonces/{id}(id=${a.id})}">Voir détail</a> |
+        <a th:href="@{/candidats/postuler?annonceId={id}(id=${a.id})}">Postuler</a>
     </li>
 </ul>
+
+<p><a th:href="@{/candidats}">Voir tous les candidats</a></p>
 <p><a th:href="@{/admin/annonces}">Espace admin</a></p>
 </body>
 </html>

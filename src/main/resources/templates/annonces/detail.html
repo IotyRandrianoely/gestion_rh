@@ -14,6 +14,10 @@
 <p>Diplôme : <span th:text="${annonce.critereRech.diplome.nomDiplome}"></span></p>
 <p>Filière : <span th:text="${annonce.critereRech.filiere.nomFiliere}"></span></p>
 
-<p><a th:href="@{/annonces}">Retour</a></p>
+<p>
+    <a th:href="@{/candidats/postuler?annonceId={id}(id=${annonce.id})}" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 3px;">Postuler à cette annonce</a>
+</p>
+
+<p><a th:href="@{/annonces}">Retour</a> | <a th:href="@{/candidats?annonceId={id}(id=${annonce.id})}">Voir les candidats</a></p>
 </body>
 </html>

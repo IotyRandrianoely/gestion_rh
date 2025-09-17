@@ -18,8 +18,18 @@
         .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
         .selected-annonce { background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #007bff; }
         .eligibility-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .not-eligible { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         .criteria-info { background-color: #e1ecf4; color: #0c5460; border: 1px solid #bee5eb; padding: 10px; border-radius: 3px; margin-top: 10px; font-size: 0.9em; }
+        .file-upload { position: relative; }
+        .file-upload input[type="file"] { margin-bottom: 10px; }
+        .upload-progress { display: none; background-color: #e9ecef; border-radius: 3px; height: 20px; margin-top: 10px; }
+        .upload-progress-bar { background-color: #007bff; height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .file-info { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 3px; font-size: 0.9em; }
+        .current-cv { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 3px; margin-bottom: 10px; }
+        .file-type-tabs { display: flex; margin-bottom: 10px; }
+        .file-type-tab { padding: 8px 16px; background-color: #f8f9fa; border: 1px solid #ddd; cursor: pointer; margin-right: 2px; border-radius: 4px 4px 0 0; }
+        .file-type-tab.active { background-color: #007bff; color: white; }
+        .file-type-content { display: none; }
+        .file-type-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -38,7 +48,7 @@
         <p><strong>Description :</strong> <span th:text="${selectedAnnonce.description}"></span></p>
     </div>
 
-    <form th:action="@{/candidats/postuler}" method="post" th:object="${candidat}">
+    <form th:action="@{/candidats/postuler}" method="post" th:object="${candidat}" enctype="multipart/form-data">
         <input type="hidden" th:field="*{id}" />
 
         <!-- Si une annonce est pré-sélectionnée, on la cache et la pré-remplit -->
@@ -116,9 +126,64 @@
             <textarea th:field="*{lettreMotivation}" id="lettreMotivation" maxlength="300"></textarea>
         </div>
 
+        <!-- Section Upload CV/Document avec support des images -->
         <div class="form-group">
-            <label for="cv">CV (chemin fichier)</label>
-            <input type="text" th:field="*{cv}" id="cv" maxlength="60"/>
+            <label>CV ou Portfolio</label>
+            
+            <!-- Affichage du CV actuel si existe -->
+            <div th:if="${candidat.cv != null and not #strings.isEmpty(candidat.cv)}" class="current-cv">
+                📄 CV/Document actuel : <strong th:text="${candidat.cv}"></strong>
+                <br/>
+                <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" target="_blank">📥 Télécharger</a>
+                <br/>
+                <small>Sélectionnez un nouveau fichier pour remplacer le CV/document existant.</small>
+            </div>
+            
+            <!-- Onglets pour choisir le type de fichier -->
+            <div class="file-type-tabs">
+                <div class="file-type-tab active" onclick="switchFileType('document')">📄 Document (CV)</div>
+                <div class="file-type-tab" onclick="switchFileType('image')">🖼️ Image (Portfolio)</div>
+            </div>
+            
+            <!-- Upload de document -->
+            <div id="document-upload" class="file-type-content active">
+                <div class="file-upload">
+                    <input type="file" id="cvFile" name="cvFile" 
+                           accept=".pdf,.doc,.docx,.txt,.rtf" 
+                           onchange="handleFileSelect(this, 'document')"/>
+                    
+                    <div class="upload-progress" id="documentUploadProgress">
+                        <div class="upload-progress-bar" id="documentUploadProgressBar"></div>
+                    </div>
+                    
+                    <div class="file-info" id="documentFileInfo" style="display: none;">
+                        <span id="documentFileName"></span> - <span id="documentFileSize"></span>
+                    </div>
+                    
+                    <small>📄 Formats acceptés : PDF, DOC, DOCX, TXT, RTF. Taille maximum : 10MB</small>
+                </div>
+            </div>
+            
+            <!-- Upload d'image -->
+            <div id="image-upload" class="file-type-content">
+                <div class="file-upload">
+                    <input type="file" id="imageFile" name="cvFile" 
+                           accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" 
+                           onchange="handleFileSelect(this, 'image')"/>
+                    
+                    <div class="upload-progress" id="imageUploadProgress">
+                        <div class="upload-progress-bar" id="imageUploadProgressBar"></div>
+                    </div>
+                    
+                    <div class="file-info" id="imageFileInfo" style="display: none;">
+                        <span id="imageFileName"></span> - <span id="imageFileSize"></span>
+                        <br/>
+                        <img id="imagePreview" style="max-width: 200px; max-height: 200px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px;" />
+                    </div>
+                    
+                    <small>🖼️ Formats acceptés : JPG, JPEG, PNG, GIF, BMP, WEBP. Taille maximum : 5MB</small>
+                </div>
+            </div>
         </div>
 
         <button type="submit" class="btn btn-success" id="submit-btn">Enregistrer ma candidature</button>
@@ -131,6 +196,87 @@
     <script>
         // Variables globales pour les critères
         let currentCriteria = null;
+        let currentFileType = 'document';
+
+        // Gestion des onglets de type de fichier
+        function switchFileType(type) {
+            currentFileType = type;
+            
+            // Mettre à jour les onglets
+            document.querySelectorAll('.file-type-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.file-type-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(type + '-upload').classList.add('active');
+            
+            // Réinitialiser les champs de fichier
+            document.getElementById('cvFile').value = '';
+            document.getElementById('imageFile').value = '';
+            hideFileInfo('document');
+            hideFileInfo('image');
+        }
+
+        // Gestion de la sélection de fichier
+        function handleFileSelect(input, type) {
+            const file = input.files[0];
+            const fileInfo = document.getElementById(type + 'FileInfo');
+            const fileName = document.getElementById(type + 'FileName');
+            const fileSize = document.getElementById(type + 'FileSize');
+
+            if (file) {
+                // Vérifier la taille du fichier
+                const maxSize = type === 'image' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    const maxSizeText = type === 'image' ? '5MB' : '10MB';
+                    alert(`Fichier trop volumineux. Taille maximum : ${maxSizeText}`);
+                    input.value = '';
+                    fileInfo.style.display = 'none';
+                    return;
+                }
+
+                // Vérifier le type de fichier
+                const validTypes = type === 'image' 
+                    ? ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp']
+                    : ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/rtf'];
+
+                if (!validTypes.includes(file.type)) {
+                    const allowedText = type === 'image' ? 'JPG, JPEG, PNG, GIF, BMP, WEBP' : 'PDF, DOC, DOCX, TXT, RTF';
+                    alert(`Type de fichier non supporté. Utilisez : ${allowedText}`);
+                    input.value = '';
+                    fileInfo.style.display = 'none';
+                    return;
+                }
+
+                // Afficher les informations du fichier
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileInfo.style.display = 'block';
+
+                // Aperçu pour les images
+                if (type === 'image') {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('imagePreview').src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                fileInfo.style.display = 'none';
+            }
+        }
+
+        function hideFileInfo(type) {
+            document.getElementById(type + 'FileInfo').style.display = 'none';
+        }
+
+        // Formatage de la taille du fichier
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
         // Affichage des critères de l'annonce sélectionnée
         function showAnnonceCriteria() {
