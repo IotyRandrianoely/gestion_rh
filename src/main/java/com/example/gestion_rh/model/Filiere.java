@@ -14,3 +14,4 @@ public class Filiere {
     public String getNomFiliere() { return nomFiliere; }
     public void setNomFiliere(String nomFiliere) { this.nomFiliere = nomFiliere; }
 }
+

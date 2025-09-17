@@ -32,3 +32,4 @@ public class ClientController {
         return "annonces/detail"; // renvoie vers /WEB-INF/views/annonces/detail.jsp
     }
 }
+
