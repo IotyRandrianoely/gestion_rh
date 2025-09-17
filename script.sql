@@ -46,7 +46,7 @@ create table historique_annonce(
     date_historique DATE 
 );
 create table candidat(
-    id INT,
+    id SERIAL PRIMARY KEY,
     id_annonce INT,
     nom VARCHAR(40),
     prenom VARCHAR(40),
@@ -86,12 +86,11 @@ create table situation_matrimonial(
     situation VARCHAR(30);
 );
 create table poste(
-    id INT,
-    nom_poste varchar(30),
-    
+    id SERIAL PRIMARY KEY,
+    nom_poste varchar(30)
 );
 create table poste_employe(
-    id INT,
+    id SERIAL PRIMARY KEY,
     id_employee INT,
     id_poste INT,
     last_date DATE
@@ -135,20 +134,6 @@ create table organisme(
     id INT,
     nomOrganisme VARCHAR(30),
     detail VARCHAR(30)
-);
-
-create table contrat_essai (
-    id INT primary key auto_increment,
-    id_candidat INT,
-    id_poste INT,
-    date_debut DATE,
-    duree INT, -- en jours
-    date_fin DATE,
-    salaire DOUBLE,
-    conditions TEXT,
-    etat VARCHAR(20) default 'En attente',
-    foreign key (id_candidat) references candidat(id),
-    foreign key (id_poste) references poste(id)
 );
 
 create table historique_contrat_essai(

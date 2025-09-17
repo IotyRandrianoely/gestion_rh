@@ -3,6 +3,8 @@ package com.example.gestion_rh.lysaModel;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.example.gestion_rh.model.Annonce;
+
 @Entity
 @Table(name = "candidat")
 public class Candidat {

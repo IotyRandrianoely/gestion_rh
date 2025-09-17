@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Liste des candidats</title>
+</head>
+<body>
+<h1>Liste des candidats</h1>
+
+<form th:action="@{/candidats}" method="get">
+    <label for="annonceId">Filtrer par annonce :</label>
+    <select name="annonceId" id="annonceId">
+        <option value="">-- Toutes --</option>
+        <option th:each="a : ${annonces}"
+                th:value="${a.id}"
+                th:text="${a.profil}">Annonce</option>
+    </select>
+    <button type="submit">Filtrer</button>
+</form>
+
+<hr/>
+
+<table border="1" cellpadding="6">
+    <thead>
+    <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Annonce</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="c : ${candidats}">
+        <td th:text="${c.nom}">Nom</td>
+        <td th:text="${c.prenom}">Prénom</td>
+        <td th:text="${c.email}">Email</td>
+        <td th:text="${c.annonce != null ? c.annonce.profil : ''}">Annonce</td>
+        <td>
+            <a th:href="@{/contratEssai/contratEssai(candidateId=${c.id})}">Proposer Contrat d'essai</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

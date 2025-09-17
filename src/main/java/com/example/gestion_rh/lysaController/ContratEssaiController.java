@@ -1,44 +1,95 @@
 package com.example.gestion_rh.lysaController;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.gestion_rh.lysaModel.ContratEssai;
+import com.example.gestion_rh.lysaModel.Candidat;
+import com.example.gestion_rh.lysaModel.Poste;
 import com.example.gestion_rh.lysaService.ContratEssaiService;
+import com.example.gestion_rh.lysaRepository.PosteRepository;
+import com.example.gestion_rh.lysaRepository.CandidatRepository;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/contrats-essai")
+@Controller
+@RequestMapping("/contratEssai")
 public class ContratEssaiController {
 
     private final ContratEssaiService service;
+    private final PosteRepository posteRepo;
+    private final CandidatRepository candidatRepo;
 
-    public ContratEssaiController(ContratEssaiService service) {
+    public ContratEssaiController(ContratEssaiService service,
+                                  PosteRepository posteRepo,
+                                  CandidatRepository candidatRepo) {
         this.service = service;
+        this.posteRepo = posteRepo;
+        this.candidatRepo = candidatRepo;
     }
 
-    @PostMapping
-    public ContratEssai creerContrat(@RequestBody ContratEssai contrat) {
-        return service.creerContrat(contrat);
+    // Affiche le formulaire de création de contrat d'essai
+    // URL exemple: /contratEssai/contratEssai?candidateId=1
+    @GetMapping("/contratEssai")
+    public String showForm(@RequestParam(required = false) Long candidateId, Model model) {
+        model.addAttribute("postes", posteRepo.findAll());
+        if (candidateId != null) {
+            Optional<Candidat> cand = candidatRepo.findById(candidateId);
+            cand.ifPresent(c -> model.addAttribute("candidate", c));
+            model.addAttribute("candidateId", candidateId);
+        }
+        // le template attendu : src/main/resources/templates/contratEssai/contratEssai.html
+        return "contratEssai/contratEssai";
     }
 
-    @GetMapping
-    public List<ContratEssai> listerContrats() {
-        return service.listerContrats();
-    }
+    // Traite la soumission standard depuis le formulaire (en POST)
+    @PostMapping("/save")
+    public String saveFromForm(@RequestParam(required = false) Long candidateId,
+                               @RequestParam Long posteId,
+                               @RequestParam String dateDebut,
+                               @RequestParam Integer duree,
+                               @RequestParam Double salaire,
+                               @RequestParam(required = false) String conditions,
+                               RedirectAttributes redirectAttrs) {
 
-    @GetMapping("/{id}")
-    public ContratEssai getContrat(@PathVariable Long id) {
-        return service.getContrat(id);
-    }
+        ContratEssai contrat = new ContratEssai();
 
-    @PutMapping("/{id}")
-    public ContratEssai mettreAJour(@PathVariable Long id, @RequestBody ContratEssai contrat) {
-        return service.mettreAJourContrat(id, contrat);
-    }
+        // Associer candidat si fourni
+        if (candidateId != null) {
+            Optional<Candidat> cand = candidatRepo.findById(candidateId);
+            if (cand.isPresent()) {
+                contrat.setCandidat(cand.get());
+            } else {
+                redirectAttrs.addFlashAttribute("error", "Candidat introuvable");
+                return "redirect:/contratEssai/contratEssai";
+            }
+        }
 
-    @DeleteMapping("/{id}")
-    public void supprimer(@PathVariable Long id) {
-        service.supprimerContrat(id);
+        // Associer poste
+        Optional<Poste> p = posteRepo.findById(posteId);
+        if (p.isEmpty()) {
+            redirectAttrs.addFlashAttribute("error", "Poste introuvable");
+            return "redirect:/contratEssai/contratEssai" + (candidateId != null ? "?candidateId=" + candidateId : "");
+        }
+        contrat.setPoste(p.get());
+
+        // Champs date/durée/salaire/conditions
+        try {
+            contrat.setDateDebut(LocalDate.parse(dateDebut));
+        } catch (Exception ex) {
+            redirectAttrs.addFlashAttribute("error", "Date de début invalide");
+            return "redirect:/contratEssai/contratEssai" + (candidateId != null ? "?candidateId=" + candidateId : "");
+        }
+
+        contrat.setDuree(duree);
+        contrat.setSalaire(salaire);
+        contrat.setConditions(conditions);
+
+        service.creerContrat(contrat);
+        redirectAttrs.addFlashAttribute("success", "Contrat d'essai proposé");
+        return "redirect:/candidats";
     }
 }
