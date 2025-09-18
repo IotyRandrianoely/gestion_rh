@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body { font-family: DejaVu Sans, Arial, sans-serif; font-size:12px; color:#111; }
+        .header { text-align:center; margin-bottom:20px; }
+        .title { font-size:18px; font-weight:700; margin-bottom:10px; }
+        .section { margin-bottom:12px; }
+        .label { font-weight:700; width:200px; display:inline-block; vertical-align:top; }
+        .signature { margin-top:40px; display:flex; justify-content:space-between; }
+        .box { border:1px solid #ddd; padding:10px; border-radius:4px; }
+    </style>
+    <title>Contrat d'essai</title>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Contrat d'essai</div>
+        <div>Référence : <span th:text="${contrat.id}">#ID</span></div>
+    </div>
+
+    <div class="section">
+        <div><span class="label">Candidat :</span>
+            <span th:text="${contrat.candidat != null ? (contrat.candidat.nom + ' ' + contrat.candidat.prenom) : '-'}">Nom Prénom</span>
+        </div>
+        <div><span class="label">Poste :</span>
+            <span th:text="${contrat.poste != null ? contrat.poste.profil : '-'}">Poste</span>
+        </div>
+        <div><span class="label">Date de début :</span>
+            <span th:text="${contrat.dateDebut}">2025-09-01</span>
+        </div>
+        <div><span class="label">Durée :</span>
+            <span th:text="${contrat.duree}">30</span> jours
+        </div>
+        <div><span class="label">Date de fin :</span>
+            <span th:text="${contrat.dateFin}">2025-10-01</span>
+        </div>
+        <div><span class="label">Salaire :</span>
+            <span th:text="${contrat.salaire}">0.00</span> EUR
+        </div>
+        <div><span class="label">État :</span>
+            <span th:text="${contrat.etat}">En attente</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="label">Conditions :</div>
+        <div class="box" th:utext="${contrat.conditions != null ? contrat.conditions.replaceAll('\n','<br/>') : '-'}">
+            Conditions du contrat...
+        </div>
+    </div>
+
+    <div class="signature">
+        <div>
+            <div>Fait à __________________</div>
+            <div>Date : _______________</div>
+        </div>
+        <div>
+            <div>Signature employeur</div>
+            <div style="height:60px;"></div>
+            <div>Signature candidat</div>
+        </div>
+    </div>
+</body>
+</html>
