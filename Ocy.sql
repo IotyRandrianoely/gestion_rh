@@ -21,12 +21,6 @@ CREATE TABLE qualite (
     nom_qualite VARCHAR(30) NOT NULL
 );
 
--- Table mission
-CREATE TABLE mission (
-    id SERIAL PRIMARY KEY,
-    nom_mission VARCHAR(30) NOT NULL
-);
-
 -- Table critere_rech
 CREATE TABLE critere_rech (
     id SERIAL PRIMARY KEY,
@@ -40,10 +34,15 @@ CREATE TABLE critere_rech (
 -- Table annonce (plus de DEFAULT CURRENT_DATE)
 CREATE TABLE annonce (
     id SERIAL PRIMARY KEY,
-    profil VARCHAR(40) NOT NULL,
-    description VARCHAR(120) NOT NULL,
     critere_rech_id INT NOT NULL REFERENCES critere_rech(id),
-    date_publication DATE NOT NULL
+    date_publication DATE NOT NULL,
+    id_poste INT NOT NULL REFERENCES poste(id)
+);
+
+create table poste(
+    id SERIAL PRIMARY KEY,
+    profil VARCHAR(50),
+    description VARCHAR(120),
 );
 
 -- Table liaison critere_rech ↔ qualite
@@ -74,12 +73,6 @@ INSERT INTO filiere (nom_filiere) VALUES
 INSERT INTO qualite (nom_qualite) VALUES
  ('Ponctualité'), ('Créativité'), ('Travail en équipe'),
  ('Leadership'), ('Organisation');
-
--- Missions
-INSERT INTO mission (nom_mission) VALUES
- ('Gestion des stocks'), ('Accueil clients'),
- ('Préparation rapports'), ('Encadrement du personnel'),
- ('Organisation événements');
 
 -- Exemple de critère
 INSERT INTO critere_rech (annees_experience, diplome, age, genre, filiere)

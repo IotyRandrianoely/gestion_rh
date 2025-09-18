@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Calendrier des entretiens</title>
+    <link rel="stylesheet" th:href="@{/css/calendrier.css}" />
+</head>
+<body>
+<div class="container">
+    <header class="cal-header">
+        <h1 th:text="'Calendrier — ' + ${monthName} + ' ' + ${year}">Calendrier</h1>
+    </header>
+
+    <table class="calendar">
+        <thead>
+        <tr>
+            <th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th><th>Samedi</th><th>Dimanche</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="week : ${#numbers.sequence(0,5)}">
+            <td th:each="d : ${#lists.subList(calendarDays, week*7, week*7+7)}"
+                th:classappend="${d.monthValue} != ${currentMonth.monthValue} ? 'other-month'">
+                <div class="day-cell">
+                    <div class="day-number" th:text="${d.dayOfMonth}">1</div>
+
+                    <div th:if="${summaryMap[d]} != null" class="summary" th:text="${summaryMap[d]}"></div>
+
+                    <div th:if="${tooltipMap[d]} != null" class="tooltip" th:utext="${tooltipMap[d]}"></div>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p class="legend">Survolez un jour pour voir le détail des entretiens prévus.</p>
+</div>
+</body>
+</html>

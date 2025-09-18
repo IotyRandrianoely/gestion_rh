@@ -90,6 +90,6 @@ public class ContratEssaiController {
 
         service.creerContrat(contrat);
         redirectAttrs.addFlashAttribute("success", "Contrat d'essai proposé");
-        return "redirect:/candidats";
+        return "redirect:/candidats/candidats";
     }
 }
