@@ -125,6 +125,7 @@ create table historique_score(
     id_candidat INT,
     score double
 );
+io
 
 create table affiliation_organisme(
     id INT,

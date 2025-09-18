@@ -34,18 +34,29 @@ public class QcmQuestionService {
         questionRepository.deleteById(id);
     }
     public List<QcmQuestion> getQuestionEntretien(int filiere) {
-        // Récupérer d'abord toutes les questions de la filière spécifique
+        // Questions RH (id = 1)
+        List<QcmQuestion> questionsRH = questionRepository.findByEntityId(1);
+        // Questions de la filière spécifique
         List<QcmQuestion> questionsFiliere = questionRepository.findByEntityId(filiere);
         
-        // Si on a moins de 7 questions, on retourne toutes les questions disponibles
-        if (questionsFiliere.size() <= 7) {
-            return questionsFiliere;
-        }
-        
-        // Mélanger les questions
+        // Mélanger les deux listes
+        Collections.shuffle(questionsRH);
         Collections.shuffle(questionsFiliere);
         
-        // Prendre les 7 premières questions
-        return questionsFiliere.subList(0, 7);
+        // Créer la liste finale de 20 questions
+        List<QcmQuestion> questionsFinales = new ArrayList<>();
+        
+        // Ajouter 7 questions RH
+        int nbQuestionsRH = Math.min(7, questionsRH.size());
+        questionsFinales.addAll(questionsRH.subList(0, nbQuestionsRH));
+        
+        // Ajouter les questions de la filière (13 ou plus si pas assez de questions RH)
+        int nbQuestionsFiliere = Math.min(20 - nbQuestionsRH, questionsFiliere.size());
+        questionsFinales.addAll(questionsFiliere.subList(0, nbQuestionsFiliere));
+        
+        // Mélanger une dernière fois pour que les questions RH ne soient pas toutes au début
+        Collections.shuffle(questionsFinales);
+        
+        return questionsFinales;
     }
 }
