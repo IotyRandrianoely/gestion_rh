@@ -1,6 +1,7 @@
 package com.example.gestion_rh.lysaModel;
 
 import jakarta.persistence.*;
+import com.example.gestion_rh.model.Poste;
 import java.time.LocalDate;
 
 @Entity

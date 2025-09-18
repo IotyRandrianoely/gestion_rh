@@ -2,18 +2,130 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Détail annonce</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+
+        .job-header {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #2c3e50;
+            margin-top: 30px;
+        }
+
+        
+
+        .job-detail {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .job-detail p {
+            margin: 15px 0;
+            color: #34495e;
+        }
+
+        .job-detail b {
+            color: #2c3e50;
+            min-width: 120px;
+            display: inline-block;
+        }
+
+        .criteria-section {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .back-link:hover {
+            background: #2980b9;
+        }
+
+        .date {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+.apply-button {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #2ecc71;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+}
+
+.apply-button:hover {
+    background: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.button-group {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+}
+    </style>
 </head>
 <body>
-<h2>Détail annonce</h2>
-<p><b>Profil :</b> <span th:text="${annonce.profil}"></span></p>
-<p><b>Description :</b> <span th:text="${annonce.description}"></span></p>
-<p><b>Date :</b> <span th:text="${annonce.datePublication}"></span></p>
+    <div class="job-header">
+        <h2>Détail de l'offre d'emploi</h2>
+    </div>
 
-<h3>Critères</h3>
-<p>Expérience : <span th:text="${annonce.critereRech.anneesExperience}"></span> ans</p>
-<p>Diplôme : <span th:text="${annonce.critereRech.diplome.nomDiplome}"></span></p>
-<p>Filière : <span th:text="${annonce.critereRech.filiere.nomFiliere}"></span></p>
+    <div class="job-detail">
+        <p><b>Poste :</b> <span th:text="${annonce.poste.profil}"></span></p>
+        <p><b>Description :</b> <span th:text="${annonce.poste.description}"></span></p>
+        <p class="date"><b>Date de publication :</b> <span th:text="${#temporals.format(annonce.datePublication, 'dd/MM/yyyy')}"></span></p>
+    </div>
 
-<p><a th:href="@{/annonces}">Retour</a></p>
+    <div class="criteria-section">
+        <h3>Critères requis</h3>
+        <p><b>Expérience :</b> <span th:text="${annonce.critereRech.anneesExperience}"></span> ans</p>
+        <p><b>Diplôme :</b> <span th:text="${annonce.critereRech.diplome.nomDiplome}"></span></p>
+        <p><b>Filière :</b> <span th:text="${annonce.critereRech.filiere.nomFiliere}"></span></p>
+    </div>
+
+    <div class="button-group">
+        <a class="apply-button" th:href="@{/annonces/{id}/postuler(id=${annonce.id})}">Postuler maintenant</a>
+        <a class="back-link" th:href="@{/annonces}">← Retour aux annonces</a>
+    </div>
 </body>
+</html>
 </html>

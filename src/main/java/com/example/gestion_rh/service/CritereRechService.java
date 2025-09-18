@@ -15,9 +15,9 @@ public class CritereRechService {
         this.repo = repo;
     }
 
-    public List<CritereRech> getAll() { return repo.findAll(); }
-
     public CritereRech getById(Integer id) { return repo.findById(id).orElse(null); }
+
+    public List<CritereRech> getAll() { return repo.findAll(); }
 
     public CritereRech save(CritereRech c) { return repo.save(c); }
 
