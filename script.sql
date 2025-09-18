@@ -94,7 +94,7 @@ CREATE TABLE historique_annonce (
 -- TABLES CANDIDATS ET EMPLOYÉS
 -- ===============================
 
-CREATE TABLE candidat (
+CREATE TABLE candidat (²
     id SERIAL PRIMARY KEY,
     id_annonce INT REFERENCES annonce(id),
     nom VARCHAR(40),
@@ -194,6 +194,28 @@ CREATE TABLE historique_contrat_essai (
     duree INT,
     dateDebutContrat DATE
 );
+
+CREATE TABLE utilisateur (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL, -- mot de passe haché
+    role VARCHAR(20) CHECK (role IN ('admin', 'rh', 'client')) NOT NULL,
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Un admin
+INSERT INTO utilisateur (username, password, role) 
+VALUES ('admin1', 'hash_mdp_admin', 'admin');
+
+-- Un RH
+INSERT INTO utilisateur (username, password, role) 
+VALUES ('rh1', 'hash_mdp_rh', 'rh');
+
+-- Un client
+INSERT INTO utilisateur (username, password, role) 
+VALUES ('client1', '    ', 'client');
+
+
 
 -- ===============================
 -- INSERTIONS DE BASE

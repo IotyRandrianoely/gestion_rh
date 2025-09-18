@@ -102,7 +102,7 @@ public boolean isEligible(Candidat candidat) {
         }
 
         StringBuilder message = new StringBuilder();
-        message.append("Vous n'êtes pas éligible pour cette annonce. Raisons :\n");
+        message.append("Vous n'êtes pas éligible pour cette annonce.");
 
         // Vérifier les années d'expérience
         Integer experienceRequise = annonce.getCritereRech().getAnneesExperience();
