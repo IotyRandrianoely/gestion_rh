@@ -14,9 +14,20 @@ public class PosteService {
     public PosteService(PosteRepository repo) {
         this.repo = repo;
     }
-    public Poste getById(Long id) { return repo.findById(id).orElse(null); }
 
-    public List<Poste> getAll() { return repo.findAll(); }
-    public Poste save(Poste poste) { return repo.save(poste); }
-    public void delete(Long id) { repo.deleteById(id); }
+    public Poste getById(Long id) {
+        return repo.findById(id).orElse(null);
+    }
+
+    public List<Poste> getAll() {
+        return repo.findAll();
+    }
+
+    public Poste save(Poste poste) {
+        return repo.save(poste);
+    }
+
+    public void delete(Long id) {
+        repo.deleteById(id);
+    }
 }

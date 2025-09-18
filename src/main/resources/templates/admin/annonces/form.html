@@ -1,128 +1,171 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier annonce'}"></title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f5f7fa;
-        }
+  <title th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier annonce'}"></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --danger:#e74c3c; --danger-d:#c0392b;
+    }
 
-        h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-        }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); padding:22px; max-width:900px; margin:0 auto;
+    }
 
-        .form-container {
-            background: #fff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+    /* Header + stepper */
+    .header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+    }
+    h2{ font-size:22px; margin-bottom:8px }
+    .hint{ color:var(--sub); font-size:13px }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    .stepper{
+      display:flex; gap:18px; margin-top:14px; flex-wrap:wrap;
+    }
+    .step{
+      display:flex; align-items:center; gap:10px; color:var(--sub); font-weight:700; font-size:13px;
+    }
+    .dot{
+      width:26px; height:26px; border-radius:50%;
+      background:#eef6ff; color:#1d6fdc; display:grid; place-items:center; font-weight:800;
+      border:1px solid #d7e7ff;
+    }
+    .step.active .dot{ background:#3498db; border-color:#3498db; color:#fff }
+    .step.active{ color:#1d6fdc }
 
-        label {
-            display: block;
-            color: #2c3e50;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
+    /* Card form */
+    .form-card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
 
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            margin-top: 5px;
-        }
+    .grid-2{
+      display:grid; grid-template-columns:1fr 1fr; gap:18px;
+    }
+    @media(max-width:780px){ .grid-2{ grid-template-columns:1fr; } }
 
-        .button-group {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-        }
+    .form-group{ display:flex; flex-direction:column; gap:8px; }
+    label{ font-weight:700; color:#243447; font-size:14px; }
+    input[type="number"], select, textarea{
+      width:100%; padding:12px 12px; border:1px solid #d7dde5; border-radius:10px; font-size:14px; background:#fff;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    textarea{ min-height:110px; resize:vertical; }
 
-        .save-button {
-            padding: 10px 20px;
-            background: #2ecc71;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
+    input:focus, select:focus, textarea:focus{
+      border-color:#8ac4fb; box-shadow:0 0 0 4px rgba(52,152,219,.15); outline:none;
+    }
 
-        .save-button:hover {
-            background: #27ae60;
-            transform: translateY(-2px);
-        }
+    .help{ font-size:12px; color:#6f7f90; }
 
-        .cancel-button {
-            padding: 10px 20px;
-            background: #e74c3c;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
+    .actions{
+      margin-top:22px; display:flex; gap:12px; flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-block; padding:12px 18px; border-radius:10px;
+      font-weight:800; font-size:14px; text-decoration:none; border:1px solid transparent;
+      transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
+    }
+    .btn--save{ background:var(--accent); color:#fff; }
+    .btn--save:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2); }
+    .btn--cancel{ background:#fff; color:var(--danger); border-color:#ffd7d7; }
+    .btn--cancel:hover{ background:#fff5f5; border-color:#ffbcbc; }
 
-        .cancel-button:hover {
-            background: #c0392b;
-        }
-    </style>
+    /* Inputs inline pour selects */
+    select{ appearance:none; background-image:linear-gradient(45deg, transparent 50%, #8aa0b2 50%), linear-gradient(135deg, #8aa0b2 50%, transparent 50%);
+            background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+            background-size: 5px 5px, 5px 5px; background-repeat:no-repeat; }
+  </style>
 </head>
 <body>
-    <h2 th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier annonce'}"></h2>
 
-    <div class="form-container">
-        
+  <div class="header">
+    <h2 th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier l’annonce'}"></h2>
+    <div class="hint">Renseignez le poste et les critères requis. Les champs marqués sont obligatoires.</div>
+
+    <!-- Stepper purement décoratif (pas de JS) -->
+    <div class="stepper">
+      <div class="step active"><span class="dot">1</span> Poste</div>
+      <div class="step active"><span class="dot">2</span> Critères</div>
+      <div class="step"><span class="dot">3</span> Validation</div>
+    </div>
+  </div>
+
+  <div class="form-card">
     <form th:action="@{/admin/annonces}" method="post">
-    <input type="hidden" name="id" th:value="${annonce.id}" />
+      <input type="hidden" name="id" th:value="${annonce.id}" />
 
-    <div class="form-group">
-        <label for="poste">Poste</label>
-        <input type="hidden" name="poste.id" th:value="${annonce.poste?.id}" />
-        <input type="text" id="poste" name="poste.profil" th:value="${annonce.poste?.profil}" required />
-    </div>
+      <div class="grid-2">
+        <!-- Poste -->
+        <div class="form-group">
+          <label for="poste">Poste</label>
+          <select id="poste" name="poste.id" required>
+            <option th:each="p : ${postes}"
+                    th:value="${p.id}"
+                    th:text="${p.profil}"
+                    th:selected="${annonce.poste?.id == p.id}">
+            </option>
+          </select>
+          <div class="help">Ex : Développeur Java, Comptable, Guide touristique…</div>
+        </div>
 
-    <div class="form-group">
-        <label for="description">Description</label>
-        <textarea id="description" name="poste.description" rows="4" th:text="${annonce.poste?.description}" required></textarea>
-    </div>
+        <!-- Années d'expérience -->
+        <div class="form-group">
+          <label for="anneesExperience">Années d'expérience</label>
+          <input type="hidden" name="critereRech.id" th:value="${annonce.critereRech?.id}" />
+          <input type="number" id="anneesExperience" name="critereRech.anneesExperience"
+                 th:value="${annonce.critereRech?.anneesExperience}" required min="0" />
+          <div class="help">Nombre d’années minimum exigées (0 si débutant accepté).</div>
+        </div>
 
-    <div class="form-group">
-        <label for="anneesExperience">Années d'expérience</label>
-        <input type="hidden" name="critereRech.id" th:value="${annonce.critereRech?.id}" />
-        <input type="text" id="anneesExperience" name="critereRech.anneesExperience" th:value="${annonce.critereRech?.anneesExperience}" required />
-    </div>
+        <!-- Description (pleine largeur) -->
+        <div class="form-group" style="grid-column:1/-1;">
+          <label for="description">Description</label>
+          <textarea id="description" name="poste.description" rows="4"
+                    th:text="${annonce.poste?.description}" required></textarea>
+          <div class="help">Décrivez les missions, la stack, les responsabilités, le contexte…</div>
+        </div>
 
-    <div class="form-group">
-        <label for="diplome">Diplôme</label>
-        <input type="text" id="diplome" name="critereRech.diplome.nomDiplome" th:value="${annonce.critereRech?.diplome?.nomDiplome}" required />
-    </div>
+        <!-- Diplôme -->
+        <div class="form-group">
+          <label for="diplome">Diplôme</label>
+          <select id="diplome" name="critereRech.diplome.id" required>
+            <option th:each="d : ${diplomes}"
+                    th:value="${d.id}"
+                    th:text="${d.nomDiplome}"
+                    th:selected="${annonce.critereRech?.diplome?.id == d.id}">
+            </option>
+          </select>
+          <div class="help">Ex : Licence, Master, Doctorat…</div>
+        </div>
 
-    <div class="form-group">
-        <label for="filiere">Filière</label>
-        <input type="text" id="filiere" name="critereRech.filiere.nomFiliere" th:value="${annonce.critereRech?.filiere?.nomFiliere}" required />
-    </div>
+        <!-- Filière -->
+        <div class="form-group">
+          <label for="filiere">Filière</label>
+          <select id="filiere" name="critereRech.filiere.id" required>
+            <option th:each="f : ${filieres}"
+                    th:value="${f.id}"
+                    th:text="${f.nomFiliere}"
+                    th:selected="${annonce.critereRech?.filiere?.id == f.id}">
+            </option>
+          </select>
+          <div class="help">Ex : Informatique, Gestion, Droit, Santé, Tourisme…</div>
+        </div>
+      </div>
 
-    <div class="button-group">
-        <button type="submit" class="save-button">Enregistrer</button>
-        <a class="cancel-button" th:href="@{/admin/annonces}">Annuler</a>
-    </div>
-</form>
-    </div>
+      <div class="actions">
+        <button type="submit" class="btn btn--save">Enregistrer</button>
+        <a class="btn btn--cancel" th:href="@{/admin/annonces}">Annuler</a>
+      </div>
+    </form>
+  </div>
+
 </body>
 </html>
