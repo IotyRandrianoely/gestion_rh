@@ -59,7 +59,4 @@ public class PlaningEntretien {
     public void setDateFin(LocalDateTime dateFin) {
         this.dateFin = dateFin;
     }
-
-    
-
 }

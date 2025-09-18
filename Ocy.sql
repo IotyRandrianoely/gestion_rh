@@ -21,6 +21,12 @@ CREATE TABLE qualite (
     nom_qualite VARCHAR(30) NOT NULL
 );
 
+-- Table mission
+CREATE TABLE mission (
+    id SERIAL PRIMARY KEY,
+    nom_mission VARCHAR(30) NOT NULL
+);
+
 -- Table critere_rech
 CREATE TABLE critere_rech (
     id SERIAL PRIMARY KEY,
@@ -31,6 +37,12 @@ CREATE TABLE critere_rech (
     filiere INT NOT NULL REFERENCES filiere(id)
 );
 
+CREATE TABLE poste (
+    id SERIAL PRIMARY KEY,
+    profil VARCHAR(50),
+    description VARCHAR(120)
+);
+
 -- Table annonce (plus de DEFAULT CURRENT_DATE)
 CREATE TABLE annonce (
     id SERIAL PRIMARY KEY,
@@ -39,11 +51,6 @@ CREATE TABLE annonce (
     id_poste INT NOT NULL REFERENCES poste(id)
 );
 
-create table poste(
-    id SERIAL PRIMARY KEY,
-    profil VARCHAR(50),
-    description VARCHAR(120),
-);
 
 -- Table liaison critere_rech ↔ qualite
 CREATE TABLE critere_rech_qualite (
@@ -69,18 +76,26 @@ INSERT INTO filiere (nom_filiere) VALUES
  ('Informatique'), ('Gestion'), ('Santé'),
  ('Droit'), ('Tourisme');
 
+INSERT INTO poste(profil, description) VALUES 
+ ('Développeur Java', 'Développement et maintenance des applications'),('Comptable', 'Gestion des écritures comptables et bilans financiers'),('Guide touristique', 'Accompagner les visiteurs et expliquer les sites');
 -- Qualités
 INSERT INTO qualite (nom_qualite) VALUES
  ('Ponctualité'), ('Créativité'), ('Travail en équipe'),
  ('Leadership'), ('Organisation');
+
+-- Missions
+INSERT INTO mission (nom_mission) VALUES
+ ('Gestion des stocks'), ('Accueil clients'),
+ ('Préparation rapports'), ('Encadrement du personnel'),
+ ('Organisation événements');
 
 -- Exemple de critère
 INSERT INTO critere_rech (annees_experience, diplome, age, genre, filiere)
 VALUES (2, 4, 25, 1, 1);  -- Licence, 25 ans, Homme, Informatique
 
 -- Exemple d’annonce avec date posée
-INSERT INTO annonce (profil, description, critere_rech_id, date_publication)
+INSERT INTO annonce (critere_rech_id, date_publication, id_poste)
 VALUES 
- ('Développeur Java', 'Développement et maintenance des applications', 1, DATE '2025-01-15'),
- ('Comptable', 'Gestion des écritures comptables et bilans financiers', 1, DATE '2025-02-10'),
- ('Guide touristique', 'Accompagner les visiteurs et expliquer les sites', 1, DATE '2025-03-05');
+ (1, DATE '2025-01-15', 1),
+ (1, DATE '2025-02-10', 2),
+ (1, DATE '2025-03-05',3);

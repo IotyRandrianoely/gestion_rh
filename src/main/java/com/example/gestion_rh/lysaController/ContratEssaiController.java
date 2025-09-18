@@ -7,9 +7,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.gestion_rh.lysaModel.ContratEssai;
 import com.example.gestion_rh.lysaModel.Candidat;
-import com.example.gestion_rh.lysaModel.Poste;
+import com.example.gestion_rh.model.Poste;
 import com.example.gestion_rh.lysaService.ContratEssaiService;
-import com.example.gestion_rh.lysaRepository.PosteRepository;
+import com.example.gestion_rh.repository.PosteRepository;
 import com.example.gestion_rh.lysaRepository.CandidatRepository;
 
 import java.time.LocalDate;
@@ -64,7 +64,7 @@ public class ContratEssaiController {
                 contrat.setCandidat(cand.get());
             } else {
                 redirectAttrs.addFlashAttribute("error", "Candidat introuvable");
-                return "redirect:/contratEssai/contratEssai";
+                return "redirect:/contratEssai";
             }
         }
 
@@ -72,7 +72,7 @@ public class ContratEssaiController {
         Optional<Poste> p = posteRepo.findById(posteId);
         if (p.isEmpty()) {
             redirectAttrs.addFlashAttribute("error", "Poste introuvable");
-            return "redirect:/contratEssai/contratEssai" + (candidateId != null ? "?candidateId=" + candidateId : "");
+            return "redirect:/contratEssai" + (candidateId != null ? "?candidateId=" + candidateId : "");
         }
         contrat.setPoste(p.get());
 
@@ -81,7 +81,7 @@ public class ContratEssaiController {
             contrat.setDateDebut(LocalDate.parse(dateDebut));
         } catch (Exception ex) {
             redirectAttrs.addFlashAttribute("error", "Date de début invalide");
-            return "redirect:/contratEssai/contratEssai" + (candidateId != null ? "?candidateId=" + candidateId : "");
+            return "redirect:/contratEssai" + (candidateId != null ? "?candidateId=" + candidateId : "");
         }
 
         contrat.setDuree(duree);
@@ -90,6 +90,6 @@ public class ContratEssaiController {
 
         service.creerContrat(contrat);
         redirectAttrs.addFlashAttribute("success", "Contrat d'essai proposé");
-        return "redirect:/candidats/candidats";
+        return "redirect:/candidats";
     }
 }

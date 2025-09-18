@@ -1,13 +1,14 @@
 package com.example.gestion_rh.lysaController;
 
+import com.example.gestion_rh.lysaRepository.PlaningEntretienRepository;
+import com.example.gestion_rh.lysaModel.PlaningEntretien;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import com.example.gestion_rh.lysaRepository.PlaningEntretienRepository;
-import com.example.gestion_rh.lysaModel.PlaningEntretien;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -20,6 +21,7 @@ import java.util.stream.IntStream;
 public class CalendrierController {
 
     private final PlaningEntretienRepository repo;
+    private static final Logger log = LoggerFactory.getLogger(CalendrierController.class);
 
     public CalendrierController(PlaningEntretienRepository repo) {
         this.repo = repo;
@@ -36,27 +38,31 @@ public class CalendrierController {
 
         YearMonth ym = YearMonth.of(y, m);
         LocalDate firstOfMonth = ym.atDay(1);
-        LocalDate lastOfMonth = ym.atEndOfMonth();
 
-        LocalDate startCalendar = firstOfMonth.minusDays((firstOfMonth.getDayOfWeek().getValue() - 1)); // start Monday
-        // build 6 weeks grid (6*7=42)
+        // start Monday
+        LocalDate startCalendar = firstOfMonth.minusDays(firstOfMonth.getDayOfWeek().getValue() - 1);
+
+        // 42 jours (6 semaines)
         List<LocalDate> calendarDays = IntStream.range(0, 42)
                 .mapToObj(i -> startCalendar.plusDays(i))
                 .collect(Collectors.toList());
 
-        // fetch events for the month range
+        // 👉 transformer en semaines (liste de listes)
+        List<List<LocalDate>> weeks = IntStream.range(0, 6)
+                .mapToObj(i -> calendarDays.subList(i * 7, i * 7 + 7))
+                .collect(Collectors.toList());
+
+        // fetch events pour la période affichée
         LocalDateTime rangeStart = startCalendar.atStartOfDay();
         LocalDateTime rangeEnd = startCalendar.plusDays(42).atTime(23, 59, 59);
-
         List<PlaningEntretien> events = repo.findByDateDebutBetween(rangeStart, rangeEnd);
 
-        // group by date
+        // group by date (LocalDate)
         Map<LocalDate, List<PlaningEntretien>> grouped = events.stream()
                 .collect(Collectors.groupingBy(e -> e.getDateDebut().toLocalDate()));
 
         DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("H:mm");
 
-        // prepare summary and tooltip HTML for each date
         Map<LocalDate, String> summaryMap = new HashMap<>();
         Map<LocalDate, String> tooltipMap = new HashMap<>();
 
@@ -66,12 +72,10 @@ public class CalendrierController {
                     .sorted(Comparator.comparing(PlaningEntretien::getDateDebut))
                     .collect(Collectors.toList());
 
-            // summary: earliest debut time -> latest debut time
             String startStr = timeFmt.format(list.get(0).getDateDebut());
             String endStr = timeFmt.format(list.get(list.size() - 1).getDateDebut());
             summaryMap.put(date, "Entretiens prévus de " + startStr + " à " + endStr);
 
-            // tooltip: one line per entretien "HH:mm à HH:mm Nom Prenom Profil"
             String tooltipHtml = list.stream().map(ev -> {
                 String h1 = timeFmt.format(ev.getDateDebut());
                 String h2 = ev.getDateFin() != null ? timeFmt.format(ev.getDateFin()) : "";
@@ -81,19 +85,25 @@ public class CalendrierController {
                     if (ev.getCandidat() != null && ev.getCandidat().getAnnonce() != null) {
                         poste = ev.getCandidat().getAnnonce().getProfil();
                     }
-                } catch (Exception ex) { poste = "—"; }
+                } catch (Exception ex) {
+                    poste = "—";
+                }
                 return h1 + (h2.isEmpty() ? "" : " à " + h2) + " — " + nom + " — " + poste;
             }).collect(Collectors.joining("<br/>"));
             tooltipMap.put(date, tooltipHtml);
         }
 
+        // Ajout au modèle (⚠️ noms utilisés dans le template)
         model.addAttribute("year", y);
         model.addAttribute("month", m);
         model.addAttribute("monthName", ym.getMonth().getDisplayName(java.time.format.TextStyle.FULL, Locale.FRANCE));
-        model.addAttribute("calendarDays", calendarDays);
+        model.addAttribute("weeks", weeks);
         model.addAttribute("currentMonth", ym);
         model.addAttribute("summaryMap", summaryMap);
         model.addAttribute("tooltipMap", tooltipMap);
+
+        log.debug("Calendrier préparé : weeks={}, summaryMapSize={}, tooltipMapSize={}",
+                weeks.size(), summaryMap.size(), tooltipMap.size());
 
         return "calendrier/calendrier";
     }
