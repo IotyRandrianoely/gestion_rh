@@ -31,4 +31,12 @@ public class AnnonceService {
     public void delete(Integer id) {
         repo.deleteById(id);
     }
+
+    public Integer getFiliereIdByAnnonceId(Integer annonceId) {
+        Annonce annonce = getById(annonceId);
+        if (annonce != null && annonce.getCritereRech() != null && annonce.getCritereRech().getFiliere() != null) {
+            return annonce.getCritereRech().getFiliere().getId();
+        }
+        return null;
+    }
 }

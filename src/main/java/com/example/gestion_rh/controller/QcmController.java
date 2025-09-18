@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.gestion_rh.service.QcmOptionService;
 import com.example.gestion_rh.service.QcmQuestionService;
+import com.example.gestion_rh.service.HistoriqueScoreService;
+import com.example.gestion_rh.service.AnnonceService;
 import com.example.gestion_rh.model.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -24,6 +27,12 @@ public class QcmController {
     
     @Autowired
     private QcmQuestionService questionService;
+    
+    @Autowired
+    private HistoriqueScoreService historiqueScoreService;
+    
+    @Autowired
+    private AnnonceService annonceService;
 
     @GetMapping("/questions")
     public String listQuestions(Model model) {
@@ -31,10 +40,53 @@ public class QcmController {
         return "qcm/questions";
     }
 
+    @GetMapping("/start")
+    public String startQcm(
+            @RequestParam(defaultValue = "1") Integer candidatId,
+            @RequestParam(defaultValue = "1") Integer annonceId,
+            Model model) {
+        
+        // Récupérer l'ID de la filière à partir de l'annonce
+        Integer filiereId = annonceService.getFiliereIdByAnnonceId(annonceId);
+        if (filiereId == null) {
+            // Si pas de filière trouvée, rediriger vers une page d'erreur ou utiliser une valeur par défaut
+            filiereId = 1;
+        }
+        
+        model.addAttribute("candidatId", candidatId);
+        model.addAttribute("annonceId", annonceId);
+        return "qcm/start";
+    }
+
+    @PostMapping("/start-test")
+    public String startTest(
+            @RequestParam Integer candidatId,
+            @RequestParam Integer annonceId,
+            Model model) {
+        
+        // Récupérer l'ID de la filière à partir de l'annonce
+        Integer filiereId = annonceService.getFiliereIdByAnnonceId(annonceId);
+        if (filiereId == null) {
+            // Rediriger vers une page d'erreur si nécessaire
+            return "redirect:/error";
+        }
+        
+        return "redirect:/qcm/entretien/" + filiereId + "?candidatId=" + candidatId + "&annonceId=" + annonceId;
+    }
+
     @GetMapping("/entretien/{filiereId}")
-    public String getQuestionsEntretien(@PathVariable int filiereId,  Model model) {
+    public String getQuestionsEntretien(
+            @PathVariable int filiereId,
+            @RequestParam(defaultValue = "1") Integer candidatId,
+            @RequestParam(defaultValue = "1") Integer annonceId,
+            Model model) {
         List<QcmQuestion> allQuestions = questionService.getQuestionEntretien(filiereId);
         List<QcmQuestion> selectedQuestions = new ArrayList<>();
+        
+        // Stocker les IDs pour la soumission
+        model.addAttribute("candidatId", candidatId);
+        model.addAttribute("annonceId", annonceId);
+        model.addAttribute("filiereId", filiereId);
         
         // Ajouter un objet vide pour la soumission du formulaire
         model.addAttribute("qcmSubmission", new QcmSubmission());
@@ -62,7 +114,6 @@ public class QcmController {
             }
             
             // Prendre le reste des questions de la filière actuelle
-            int remainingCount = 10 - selectedQuestions.size();
             for (QcmQuestion question : allQuestions) {
                 if (selectedQuestions.size() >= 10) break;
                 List<QcmOption> options = optionService.getOptionsByQuestionId(question.getId());
@@ -72,7 +123,6 @@ public class QcmController {
         }
         
         model.addAttribute("questions", selectedQuestions);
-        model.addAttribute("filiereId", filiereId);
         return "qcm/entretien";
     }
 
@@ -87,7 +137,11 @@ public class QcmController {
     }
 
     @PostMapping("/submit-answers")
-    public String submitAnswers(@ModelAttribute("qcmSubmission") QcmSubmission submission, Model model) {
+    public String submitAnswers(
+            @ModelAttribute("qcmSubmission") QcmSubmission submission,
+            @RequestParam(defaultValue = "1") Integer candidatId,
+            @RequestParam(defaultValue = "1") Integer annonceId,
+            Model model) {
         List<UserAnswer> answers = submission != null ? submission.getAnswers() : new ArrayList<>();
         if (answers == null) {
             answers = new ArrayList<>();
@@ -147,6 +201,13 @@ public class QcmController {
         result.setScore(score);
         result.setPercentage((double) score / Math.max(1, answers.size()) * 100);
         
+        // Sauvegarder le score dans l'historique
+        HistoriqueScore historiqueScore = new HistoriqueScore();
+        historiqueScore.setIdCandidat(candidatId);
+        historiqueScore.setIdAnnonce(annonceId);
+        historiqueScore.setScore((double) result.getScore());
+        historiqueScoreService.saveScore(historiqueScore);
+
         model.addAttribute("result", result);
         model.addAttribute("answers", detailedResults);
         return "qcm/results";

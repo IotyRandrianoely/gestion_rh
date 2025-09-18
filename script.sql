@@ -8,6 +8,7 @@ create table annonce(
     date_publication DATE
 );
 create table critere_rech(
+    id SERIAL PRIMARY KEY,
     annees_experience INT,
     diplome INT,
     age INT,
@@ -159,3 +160,5 @@ create table historique_contrat_essai(
     duree INT,
     dateDebutContrat DATE
 );
+ALTER TABLE critere_rech
+ADD COLUMN id SERIAL PRIMARY KEY;
