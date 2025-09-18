@@ -82,4 +82,4 @@ public class CandidatController {
         planingEntretienService.creerPlaningEntretienPourCandidat(id);
         return "redirect:/candidats";
     }
-}
+}         
