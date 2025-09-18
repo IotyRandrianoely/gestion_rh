@@ -67,6 +67,18 @@
             </select>
         </div>
 
+        <!-- *** NOUVEAU CHAMP DIPLOME *** -->
+        <div class="form-group">
+            <label for="diplome">Diplôme <span class="required">*</span></label>
+            <select th:field="*{diplome.id}" id="diplome" required>
+                <option value="">-- Sélectionner un diplôme --</option>
+                <option th:each="d : ${diplomes}"
+                        th:value="${d.id}"
+                        th:text="${d.nomDiplome}">
+                </option>
+            </select>
+        </div>
+
         <div class="form-group">
             <label for="adresse">Adresse</label>
             <input type="text" th:field="*{adresse}" id="adresse" maxlength="60"/>
@@ -105,9 +117,10 @@
             const email = document.getElementById('email').value.trim();
             const age = document.getElementById('age').value;
             const genre = document.getElementById('genre').value;
+            const diplome = document.getElementById('diplome').value; // *** NOUVEAU ***
             const anneesExperience = document.getElementById('anneesExperience').value;
             
-            if (!annonce || !nom || !prenom || !email || !age || !genre || !anneesExperience) {
+            if (!annonce || !nom || !prenom || !email || !age || !genre || !diplome || !anneesExperience) {
                 e.preventDefault();
                 alert('Veuillez remplir tous les champs obligatoires');
                 return false;
@@ -119,9 +132,9 @@
                 return false;
             }
             
-            if (anneesExperience < 0 || anneesExperience > 50) {
+            if (anneesExperience < 0) {
                 e.preventDefault();
-                alert('Les années d\'expérience doivent être entre 0 et 50');
+                alert('Les années d\'expérience ne peuvent pas être négatives');
                 return false;
             }
         });

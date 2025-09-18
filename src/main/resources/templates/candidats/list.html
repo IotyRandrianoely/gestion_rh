@@ -39,29 +39,30 @@
     <table th:if="${candidats != null and not candidats.empty}">
         <thead>
             <tr>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Email</th>
-                <th>Age</th>
-                <th>Expérience</th>
-                <th>Annonce</th>
-                <th>Date candidature</th>
-                <th>Actions</th>
+               <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Age</th>
+        <th>Diplôme</th> 
+        <th>Expérience</th>
+        <th>Annonce</th>
+        <th>Date candidature</th>
+        <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="c : ${candidats}">
-                <td th:text="${c.nom}"></td>
-                <td th:text="${c.prenom}"></td>
-                <td th:text="${c.email}"></td>
-                <td th:text="${c.age}"></td>
-                <td th:text="${c.anneesExperience} + ' ans'"></td>
-                <td th:text="${c.annonce != null ? c.annonce.profil : ''}"></td>
-                <td th:text="${c.dateCandidature}"></td>
-                <td>
-                    <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn-primary">Voir détail</a>
-                    <a th:href="@{/admin/files/candidat/{id}(id=${c.id})}" class="btn btn-success">📁 Fichiers</a>
-                </td>
+                 <td th:text="${c.nom}"></td>
+        <td th:text="${c.prenom}"></td>
+        <td th:text="${c.email}"></td>
+        <td th:text="${c.age}"></td>
+        <td th:text="${c.diplome != null ? c.diplome.nomDiplome : 'N/A'}"></td> <!-- *** NOUVEAU *** -->
+        <td th:text="${c.anneesExperience} + ' ans'"></td>
+        <td th:text="${c.annonce != null ? c.annonce.profil : ''}"></td>
+        <td th:text="${c.dateCandidature}"></td>
+        <td>
+            <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn-primary">Voir détail</a>
+        </td>
             </tr>
         </tbody>
     </table>

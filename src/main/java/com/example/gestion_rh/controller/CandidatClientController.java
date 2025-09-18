@@ -15,6 +15,7 @@ import com.example.gestion_rh.model.Candidat;
 import com.example.gestion_rh.model.Annonce;
 import com.example.gestion_rh.service.AnnonceService;
 import com.example.gestion_rh.service.CandidatService;
+import com.example.gestion_rh.service.DiplomeService;
 import com.example.gestion_rh.service.FileStorageService;
 
 @Controller
@@ -23,12 +24,14 @@ public class CandidatClientController {
 
     private final CandidatService candidatService;
     private final AnnonceService annonceService;
+    private final DiplomeService diplomeService;
     private final FileStorageService fileStorageService;
 
-    public CandidatClientController(CandidatService candidatService, AnnonceService annonceService,
-            FileStorageService fileStorageService) {
+    public CandidatClientController(CandidatService candidatService, AnnonceService annonceService, 
+                                   DiplomeService diplomeService, FileStorageService fileStorageService) {
         this.candidatService = candidatService;
         this.annonceService = annonceService;
+        this.diplomeService = diplomeService;
         this.fileStorageService = fileStorageService;
     }
 
@@ -57,16 +60,8 @@ public class CandidatClientController {
             Candidat candidat = new Candidat();
             model.addAttribute("candidat", candidat);
             model.addAttribute("annonces", annonceService.getAll());
+            model.addAttribute("diplomes", diplomeService.getAll()); // *** NOUVEAU ***
             model.addAttribute("selectedAnnonceId", annonceId);
-
-            // Si un annonceId est fourni, récupérer l'annonce complète
-            if (annonceId != null) {
-                Annonce selectedAnnonce = annonceService.getById(annonceId);
-                if (selectedAnnonce != null) {
-                    model.addAttribute("selectedAnnonce", selectedAnnonce);
-                    System.out.println("Annonce pré-sélectionnée: " + selectedAnnonce.getProfil());
-                }
-            }
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Erreur lors du chargement du formulaire: " + e.getMessage());
@@ -76,21 +71,11 @@ public class CandidatClientController {
 
     // Sauvegarde candidature avec upload de CV
     @PostMapping("/postuler")
-    public String save(@ModelAttribute Candidat candidat,
-            @RequestParam(value = "cvFile", required = false) MultipartFile cvFile,
-            RedirectAttributes redirectAttributes) {
+    public String save(@ModelAttribute Candidat candidat, 
+                      @RequestParam(value = "cvFile", required = false) MultipartFile cvFile,
+                      RedirectAttributes redirectAttributes) {
         try {
-            System.out.println("=== DEBUG CANDIDAT ===");
-            System.out.println("Nom: " + candidat.getNom());
-            System.out.println("Prenom: " + candidat.getPrenom());
-            System.out.println("Email: " + candidat.getEmail());
-            System.out.println("Age: " + candidat.getAge());
-            System.out.println("Genre: " + candidat.getGenre());
-            System.out
-                    .println("Annonce ID: " + (candidat.getAnnonce() != null ? candidat.getAnnonce().getId() : "null"));
-            System.out.println("Années expérience: " + candidat.getAnneesExperience());
-
-            // Validation des données obligatoires
+            // Validation des données obligatoires existantes...
             if (candidat.getNom() == null || candidat.getNom().trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Le nom est obligatoire");
                 return "redirect:/candidats/postuler";
@@ -126,6 +111,12 @@ public class CandidatClientController {
                 return "redirect:/candidats/postuler";
             }
 
+            // *** VALIDATION DU DIPLOME ***
+            if (candidat.getDiplome() == null || candidat.getDiplome().getId() == null) {
+                redirectAttributes.addFlashAttribute("error", "Veuillez sélectionner un diplôme");
+                return "redirect:/candidats/postuler";
+            }
+
             // Gestion de l'upload du CV
             if (cvFile != null && !cvFile.isEmpty()) {
                 try {
@@ -137,7 +128,7 @@ public class CandidatClientController {
                 }
             }
 
-            // *** NOUVELLE VÉRIFICATION D'ÉLIGIBILITÉ ***
+            // Vérification d'éligibilité
             if (!candidatService.isEligible(candidat)) {
                 String ineligibilityMessage = candidatService.getIneligibilityMessage(candidat);
                 redirectAttributes.addFlashAttribute("error", ineligibilityMessage);
@@ -147,12 +138,9 @@ public class CandidatClientController {
 
             // Sauvegarde si éligible
             Candidat savedCandidat = candidatService.save(candidat);
-            System.out.println(
-                    "Candidat sauvegardé avec ID: " + (savedCandidat != null ? savedCandidat.getId() : "null"));
 
             if (savedCandidat != null && savedCandidat.getId() != null) {
-                redirectAttributes.addFlashAttribute("success",
-                        "Candidature enregistrée avec succès ! Vous êtes éligible pour cette annonce.");
+                redirectAttributes.addFlashAttribute("success", "Candidature enregistrée avec succès ! Vous êtes éligible pour cette annonce.");
                 return "redirect:/candidats?annonceId=" + candidat.getAnnonce().getId();
             } else {
                 redirectAttributes.addFlashAttribute("error", "Erreur lors de l'enregistrement");
@@ -160,7 +148,6 @@ public class CandidatClientController {
             }
 
         } catch (Exception e) {
-            System.err.println("Erreur lors de la sauvegarde: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Erreur technique: " + e.getMessage());
             return "redirect:/candidats/postuler";

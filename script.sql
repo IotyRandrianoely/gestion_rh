@@ -1,160 +1,240 @@
-create database gestion_rh;
+-- Création de la base
+CREATE DATABASE gestion_rh;
 \c gestion_rh;
-create table annonce(
+
+-- ===============================
+-- TABLES DE RÉFÉRENCE
+-- ===============================
+
+CREATE TABLE genre (
     id SERIAL PRIMARY KEY,
-    profil varchar(40),
-    description VARCHAR(120),
-    critere_rech_id INT,
-    date_publication DATE DEFAULT CURRENT_DATE
-);
-create table critere_rech(
-    id SERIAL PRIMARY KEY,
-    annees_experience INT,
-    diplome INT,
-    age INT,
-    genre INT,
-    filiere INT
-);
-create table qualite(
-    id INT,
-    nom_qualite VARCHAR(30)
-);
-create table mission(
-    id INT,
-    nom_mission VARCHAR(30)
-);
-create table diplome(
-    id INT,
-    nom_diplome VARCHAR(30)
-);
-create table filiere(
-    id INT,
-    nom_filiere VARCHAR(30)
-);
-create table critere_rech_qualite(
-    id_annonce INT,
-    id_qualite INT
-);
-create table critere_rech_mission(
-    id_annonce INT,
-    id_mission INT
+    genre VARCHAR(20)
 );
 
-create table historique_annonce(
-    id INT,
-    id_annonce INT,
-    etat INT ,
-    date_historique DATE 
+CREATE TABLE diplome (
+    id SERIAL PRIMARY KEY,
+    nom_diplome VARCHAR(30)
 );
-create table candidat(
-    id INT,
-    id_annonce INT,
+
+CREATE TABLE filiere (
+    id SERIAL PRIMARY KEY,
+    nom_filiere VARCHAR(30)
+);
+
+CREATE TABLE situation_matrimonial (
+    id SERIAL PRIMARY KEY,
+    situation VARCHAR(30)
+);
+
+CREATE TABLE poste (
+    id SERIAL PRIMARY KEY,
+    nom_poste VARCHAR(30)
+);
+
+CREATE TABLE departement (
+    id SERIAL PRIMARY KEY,
+    nomDept VARCHAR(30)
+);
+
+CREATE TABLE organisme (
+    id SERIAL PRIMARY KEY,
+    nomOrganisme VARCHAR(30),
+    detail VARCHAR(30)
+);
+
+-- ===============================
+-- TABLES ANNONCE ET CRITÈRES
+-- ===============================
+
+CREATE TABLE critere_rech (
+    id SERIAL PRIMARY KEY,
+    annees_experience INT,
+    diplome INT REFERENCES diplome(id),
+    age INT,
+    genre INT REFERENCES genre(id),
+    filiere INT REFERENCES filiere(id)
+);
+
+CREATE TABLE annonce (
+    id SERIAL PRIMARY KEY,
+    profil VARCHAR(40),
+    description VARCHAR(120),
+    critere_rech_id INT REFERENCES critere_rech(id),
+    date_publication DATE DEFAULT CURRENT_DATE
+);
+
+CREATE TABLE qualite (
+    id SERIAL PRIMARY KEY,
+    nom_qualite VARCHAR(30)
+);
+
+CREATE TABLE mission (
+    id SERIAL PRIMARY KEY,
+    nom_mission VARCHAR(30)
+);
+
+CREATE TABLE critere_rech_qualite (
+    id_annonce INT REFERENCES annonce(id),
+    id_qualite INT REFERENCES qualite(id)
+);
+
+CREATE TABLE critere_rech_mission (
+    id_annonce INT REFERENCES annonce(id),
+    id_mission INT REFERENCES mission(id)
+);
+
+CREATE TABLE historique_annonce (
+    id SERIAL PRIMARY KEY,
+    id_annonce INT REFERENCES annonce(id),
+    etat INT,
+    date_historique DATE
+);
+
+-- ===============================
+-- TABLES CANDIDATS ET EMPLOYÉS
+-- ===============================
+
+CREATE TABLE candidat (
+    id SERIAL PRIMARY KEY,
+    id_annonce INT REFERENCES annonce(id),
     nom VARCHAR(40),
     prenom VARCHAR(40),
     age INT,
-    genre INT,
+    genre INT REFERENCES genre(id),
     adresse VARCHAR(60),
     email VARCHAR(40),
     annees_experience INT,
-    lettre_motivation varchar(300),
+    lettre_motivation VARCHAR(300),
     cv VARCHAR(60),
-    date_candidature DATE
+    date_candidature DATE DEFAULT CURRENT_DATE,
+    id_diplome INT REFERENCES diplome(id)
 );
-create table genre(
-    id INT,
-    genre VARCHAR(20)
-);
-create table employee(
-    id INT,
-    info_pressonel INT
-);
-create table info_perssonelle(
-    id INT,
+
+CREATE TABLE info_perssonelle (
+    id SERIAL PRIMARY KEY,
     nom VARCHAR(50),
     prenom VARCHAR(50),
     date_naissance DATE,
     lieu_naissance VARCHAR(50),
     adresse VARCHAR(50),
-    situation_matrimonial INT,
-    employee INT,
-    situation_matrimonial VARCHAR,
+    situation_matrimonial INT REFERENCES situation_matrimonial(id)
 );
-create table info_professionelle(
 
+CREATE TABLE employee (
+    id SERIAL PRIMARY KEY,
+    info_perssonel INT REFERENCES info_perssonelle(id)
 );
-create table situation_matrimonial(
-    id int,
-    situation VARCHAR(30);
-);
-create table poste(
-    id INT,
-    nom_poste varchar(30),
-    
-);
-create table poste_employe(
-    id INT,
-    id_employee INT,
-    id_poste INT,
+
+CREATE TABLE poste_employe (
+    id SERIAL PRIMARY KEY,
+    id_employee INT REFERENCES employee(id),
+    id_poste INT REFERENCES poste(id),
     last_date DATE
 );
-create table departement(
-    id INT,
-    nomDept varchar(30)
-);
-create table qcm_questions(
-    id INT,
-    question VARCHAR(30)
-);
-create table qcm_reponses(
-    id INT,
-    id_questions INT,
-    reponse VARCHAR(40)
-);
-create table bareme_notation(
-    id INT,
-    id_question INT,
-    valeur_question double
-);
-create table bareme_entretien(
-    id INT,
-    id_annonce INT,
-    bareme double
-);
-create table historique_score(
-    id INT,
-    id_annonce INT,
-    id_candidat INT,
-    score double
+
+CREATE TABLE affiliation_organisme (
+    id SERIAL PRIMARY KEY,
+    idEmploye INT REFERENCES employee(id),
+    idOrganisme INT REFERENCES organisme(id)
 );
 
-create table affiliation_organisme(
-    id INT,
-    idEmploye INT,
-    idOrganisme INT
-);
-create table organisme(
-    id INT,
-    nomOrganisme VARCHAR(30),
-    detail VARCHAR(30)
+-- ===============================
+-- TABLES QCM ET ÉVALUATION
+-- ===============================
+
+CREATE TABLE qcm_questions (
+    id SERIAL PRIMARY KEY,
+    question VARCHAR(100)
 );
 
-create table contrat_essai (
-    id INT primary key auto_increment,
-    id_candidat INT,
-    id_poste INT,
+CREATE TABLE qcm_reponses (
+    id SERIAL PRIMARY KEY,
+    id_questions INT REFERENCES qcm_questions(id),
+    reponse VARCHAR(100)
+);
+
+CREATE TABLE bareme_notation (
+    id SERIAL PRIMARY KEY,
+    id_question INT REFERENCES qcm_questions(id),
+    valeur_question DOUBLE PRECISION
+);
+
+CREATE TABLE bareme_entretien (
+    id SERIAL PRIMARY KEY,
+    id_annonce INT REFERENCES annonce(id),
+    bareme DOUBLE PRECISION
+);
+
+CREATE TABLE historique_score (
+    id SERIAL PRIMARY KEY,
+    id_annonce INT REFERENCES annonce(id),
+    id_candidat INT REFERENCES candidat(id),
+    score DOUBLE PRECISION
+);
+
+-- ===============================
+-- TABLES CONTRATS
+-- ===============================
+
+CREATE TABLE contrat_essai (
+    id SERIAL PRIMARY KEY,
+    id_candidat INT REFERENCES candidat(id),
+    id_poste INT REFERENCES poste(id),
     date_debut DATE,
     duree INT, -- en jours
     date_fin DATE,
-    salaire DOUBLE,
+    salaire DOUBLE PRECISION,
     conditions TEXT,
-    etat VARCHAR(20) default 'En attente',
-    foreign key (id_candidat) references candidat(id),
-    foreign key (id_poste) references poste(id)
+    etat VARCHAR(20) DEFAULT 'En attente'
 );
 
-create table historique_contrat_essai(
-    id INT,
-    id_candidat INT,
+CREATE TABLE historique_contrat_essai (
+    id SERIAL PRIMARY KEY,
+    id_candidat INT REFERENCES candidat(id),
     duree INT,
     dateDebutContrat DATE
 );
+
+-- ===============================
+-- INSERTIONS DE BASE
+-- ===============================
+
+-- Genres
+INSERT INTO genre (genre) VALUES
+('Homme'),
+('Femme');
+
+-- Diplômes
+INSERT INTO diplome (nom_diplome) VALUES
+('Bepc'),
+('Baccalauréat'),
+('Licence'),
+('Master'),
+('Doctorat');
+
+-- Filières
+INSERT INTO filiere (nom_filiere) VALUES
+('Informatique'),
+('Gestion'),
+('Commerce'),
+('Droit'),
+('Médecine');
+
+-- Situations matrimoniales
+INSERT INTO situation_matrimonial (situation) VALUES
+('Célibataire'),
+('Marié(e)'),
+('Divorcé(e)'),
+('Veuf/Veuve');
+
+-- Exemples de candidats
+INSERT INTO candidat (id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome)
+VALUES
+(1, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
+ 'Motivé pour évoluer dans votre entreprise', 'cv_jean.pdf', 2),
+
+(1, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
+ 'Expérimentée et dynamique', 'cv_marie.pdf', 3),
+
+(2, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
+ 'Prêt à relever des défis', 'cv_paul.pdf', 4);

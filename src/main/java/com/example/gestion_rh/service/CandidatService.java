@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.gestion_rh.model.Candidat;
+import com.example.gestion_rh.model.Diplome;
 import com.example.gestion_rh.model.Annonce;
 import com.example.gestion_rh.repository.CandidatRepository;
 import com.example.gestion_rh.repository.AnnonceRepository;
@@ -41,34 +42,52 @@ public class CandidatService {
         return repo.findById(id).orElse(null);
     }
 
-    /**
-     * Vérifie si le candidat est éligible pour l'annonce sélectionnée
-     */
-    public boolean isEligible(Candidat candidat) {
-        if (candidat.getAnnonce() == null || candidat.getAnnonce().getId() == null) {
-            return false;
-        }
+    // Dans la méthode isEligible, ajouter :
 
-        Annonce annonce = annonceRepo.findById(candidat.getAnnonce().getId()).orElse(null);
-        if (annonce == null || annonce.getCritereRech() == null) {
-            return false;
-        }
-
-        // Vérifier les années d'expérience
-        Integer experienceRequise = annonce.getCritereRech().getAnneesExperience();
-        Integer experienceCandidat = candidat.getAnneesExperience();
-
-        if (experienceRequise != null && experienceCandidat != null) {
-            if (experienceCandidat < experienceRequise) {
-                return false; // Pas éligible
-            }
-        }
-
-        // Vous pouvez ajouter d'autres critères ici (âge, diplôme, etc.)
-
-        return true; // Éligible
+public boolean isEligible(Candidat candidat) {
+    if (candidat.getAnnonce() == null || candidat.getAnnonce().getId() == null) {
+        return false;
     }
 
+    Annonce annonce = annonceRepo.findById(candidat.getAnnonce().getId()).orElse(null);
+    if (annonce == null || annonce.getCritereRech() == null) {
+        return false;
+    }
+
+    // Vérifier les années d'expérience
+    Integer experienceRequise = annonce.getCritereRech().getAnneesExperience();
+    Integer experienceCandidat = candidat.getAnneesExperience();
+
+    if (experienceRequise != null && experienceCandidat != null) {
+        if (experienceCandidat < experienceRequise) {
+            return false;
+        }
+    }
+
+    // Vérifier l'âge
+    Integer ageRequis = annonce.getCritereRech().getAge();
+    Integer ageCandidat = candidat.getAge();
+    
+    if (ageRequis != null && ageCandidat != null) {
+        if (ageCandidat > ageRequis) {
+            return false;
+        }
+    }
+
+    // *** NOUVEAU : Vérifier le diplôme ***
+    Diplome diplomeRequis = annonce.getCritereRech().getDiplome();
+    Diplome diplomeCandidat = candidat.getDiplome();
+    
+    if (diplomeRequis != null && diplomeCandidat != null) {
+        // Assumons que les diplômes ont un ordre hiérarchique par ID
+        // (1=BEPC, 2=BAC, 3=Licence, 4=Master, 5=Doctorat)
+        if (diplomeCandidat.getId() < diplomeRequis.getId()) {
+            return false;
+        }
+    }
+    
+    return true;
+}
     /**
      * Obtient le message d'inéligibilité détaillé
      */

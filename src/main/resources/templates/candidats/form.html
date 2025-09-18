@@ -19,17 +19,14 @@
         .selected-annonce { background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #007bff; }
         .eligibility-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
         .criteria-info { background-color: #e1ecf4; color: #0c5460; border: 1px solid #bee5eb; padding: 10px; border-radius: 3px; margin-top: 10px; font-size: 0.9em; }
-        .file-upload { position: relative; }
-        .file-upload input[type="file"] { margin-bottom: 10px; }
-        .upload-progress { display: none; background-color: #e9ecef; border-radius: 3px; height: 20px; margin-top: 10px; }
-        .upload-progress-bar { background-color: #007bff; height: 100%; border-radius: 3px; transition: width 0.3s; }
-        .file-info { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 3px; font-size: 0.9em; }
-        .current-cv { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 3px; margin-bottom: 10px; }
         .file-type-tabs { display: flex; margin-bottom: 10px; }
         .file-type-tab { padding: 8px 16px; background-color: #f8f9fa; border: 1px solid #ddd; cursor: pointer; margin-right: 2px; border-radius: 4px 4px 0 0; }
         .file-type-tab.active { background-color: #007bff; color: white; }
         .file-type-content { display: none; }
         .file-type-content.active { display: block; }
+        .file-upload input[type="file"] { margin-bottom: 10px; }
+        .file-info { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 3px; font-size: 0.9em; }
+        .current-cv { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 3px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -106,6 +103,18 @@
             </select>
         </div>
 
+        <!-- *** NOUVEAU CHAMP DIPLOME *** -->
+        <div class="form-group">
+            <label for="diplome">Diplôme <span class="required">*</span></label>
+            <select th:field="*{diplome.id}" id="diplome" required>
+                <option value="">-- Sélectionner un diplôme --</option>
+                <option th:each="d : ${diplomes}"
+                        th:value="${d.id}"
+                        th:text="${d.nomDiplome}">
+                </option>
+            </select>
+        </div>
+
         <div class="form-group">
             <label for="adresse">Adresse</label>
             <input type="text" th:field="*{adresse}" id="adresse" maxlength="60"/>
@@ -152,10 +161,6 @@
                            accept=".pdf,.doc,.docx,.txt,.rtf" 
                            onchange="handleFileSelect(this, 'document')"/>
                     
-                    <div class="upload-progress" id="documentUploadProgress">
-                        <div class="upload-progress-bar" id="documentUploadProgressBar"></div>
-                    </div>
-                    
                     <div class="file-info" id="documentFileInfo" style="display: none;">
                         <span id="documentFileName"></span> - <span id="documentFileSize"></span>
                     </div>
@@ -170,10 +175,6 @@
                     <input type="file" id="imageFile" name="cvFile" 
                            accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" 
                            onchange="handleFileSelect(this, 'image')"/>
-                    
-                    <div class="upload-progress" id="imageUploadProgress">
-                        <div class="upload-progress-bar" id="imageUploadProgressBar"></div>
-                    </div>
                     
                     <div class="file-info" id="imageFileInfo" style="display: none;">
                         <span id="imageFileName"></span> - <span id="imageFileSize"></span>
@@ -278,7 +279,7 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Affichage des critères de l'annonce sélectionnée
+        // Fonctions existantes pour les critères...
         function showAnnonceCriteria() {
             const annonceSelect = document.getElementById('annonce');
             const selectedOption = annonceSelect.options[annonceSelect.selectedIndex];
@@ -291,7 +292,6 @@
                 const diplome = selectedOption.dataset.diplome;
                 const filiere = selectedOption.dataset.filiere;
 
-                // Stocker les critères pour vérification
                 currentCriteria = {
                     experience: experience ? parseInt(experience) : null,
                     age: age ? parseInt(age) : null,
@@ -322,7 +322,6 @@
             }
         }
 
-        // Vérification de l'éligibilité en temps réel
         function checkEligibility() {
             if (!currentCriteria) return;
 
@@ -334,7 +333,6 @@
 
             let warnings = [];
 
-            // Vérifier l'expérience
             if (currentCriteria.experience && experienceInput.value) {
                 const candidatExperience = parseInt(experienceInput.value);
                 if (candidatExperience < currentCriteria.experience) {
@@ -342,7 +340,6 @@
                 }
             }
 
-            // Vérifier l'âge
             if (currentCriteria.age && ageInput.value) {
                 const candidatAge = parseInt(ageInput.value);
                 if (candidatAge > currentCriteria.age) {
@@ -371,10 +368,8 @@
 
         // Initialisation au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
-            // Focus automatique sur le premier champ
             document.getElementById('nom').focus();
             
-            // Si une annonce est pré-sélectionnée, afficher ses critères
             const annonceSelect = document.getElementById('annonce');
             if (annonceSelect && annonceSelect.value) {
                 showAnnonceCriteria();

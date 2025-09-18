@@ -5,12 +5,13 @@ import java.time.LocalDate;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.FetchType;
 
 @Entity
 @Table(name = "candidat")
@@ -20,7 +21,7 @@ public class Candidat {
     @SequenceGenerator(name = "candidat_seq", sequenceName = "candidat_id_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_annonce")
     private Annonce annonce;
 
@@ -54,12 +55,17 @@ public class Candidat {
     @Column(name = "date_candidature")
     private LocalDate dateCandidature;
 
+    // *** NOUVELLE RELATION AVEC DIPLOME ***
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_diplome")
+    private Diplome diplome;
+
     // Constructeur par défaut
     public Candidat() {
         this.dateCandidature = LocalDate.now();
     }
 
-    // Getters et setters...
+    // Getters et setters existants...
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     
@@ -95,4 +101,8 @@ public class Candidat {
     
     public LocalDate getDateCandidature() { return dateCandidature; }
     public void setDateCandidature(LocalDate dateCandidature) { this.dateCandidature = dateCandidature; }
+
+    // *** NOUVEAU GETTER/SETTER POUR DIPLOME ***
+    public Diplome getDiplome() { return diplome; }
+    public void setDiplome(Diplome diplome) { this.diplome = diplome; }
 }
