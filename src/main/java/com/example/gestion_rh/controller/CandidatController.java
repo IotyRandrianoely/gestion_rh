@@ -8,11 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.gestion_rh.service.CandidatService;
 import com.example.gestion_rh.service.ContratEssaiService;
+import com.example.gestion_rh.service.PlaningEntretienService;
+
 
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.List;
 import com.example.gestion_rh.model.ContratEssai;
+import com.example.gestion_rh.model.PlaningEntretien;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,22 +28,23 @@ import java.net.URLConnection;
 @RequestMapping("/candidats")
 public class CandidatController {
 
-
     private final CandidatService candidatService;
     private final ContratEssaiService contratEssaiService;
+    private final PlaningEntretienService planingEntretienService;
 
-    public CandidatController(CandidatService candidatService, ContratEssaiService contratEssaiService) {
+    public CandidatController(CandidatService candidatService, ContratEssaiService contratEssaiService, PlaningEntretienService planingEntretienService) {
         this.candidatService = candidatService;
         this.contratEssaiService = contratEssaiService;
+        this.planingEntretienService = planingEntretienService;
     }
 
     // Liste des candidats
     @GetMapping
     public String list(Model model) {
         model.addAttribute("candidats", candidatService.getAll());
-        List<ContratEssai> contrats = contratEssaiService.listerContrats();
-        // Construire une map <idCandidat, ContratEssai> (garde le premier contrat si plusieurs)
-        Map<Long, ContratEssai> contratsMap = contrats.stream()
+        List<PlaningEntretien> contrats = planingEntretienService.listerPLaningEntretien();
+        // Construire une map <idCandidat, PlaningEntretien> (garde le premier contrat si plusieurs)
+        Map<Long, PlaningEntretien> contratsMap = contrats.stream()
             .filter(ce -> ce.getCandidat() != null && ce.getCandidat().getId() != null)
             .collect(Collectors.toMap(ce -> ce.getCandidat().getId(), ce -> ce, (a, b) -> a));
         model.addAttribute("contratsEssai", contrats);
@@ -75,7 +79,7 @@ public class CandidatController {
 
     @GetMapping("planifier_entretien/{id}")
     public String planifierEntretien(@PathVariable Long id) {
-        contratEssaiService.creerContratPourCandidat(id);
+        planingEntretienService.creerPlaningEntretienPourCandidat(id);
         return "redirect:/candidats";
     }
 }

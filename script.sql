@@ -136,13 +136,18 @@ create table organisme(
     nomOrganisme VARCHAR(30),
     detail VARCHAR(30)
 );
-
+create table planing_entretien (
+    id INT primary key auto_increment,
+    id_candidat INT,
+    date_debut DATETIME,
+    date_fin DATETIME
+);
 create table contrat_essai (
     id INT primary key auto_increment,
     id_candidat INT,
     id_poste INT,
     date_debut DATE,
-    duree INT, -- en jours
+    duree INT,
     date_fin DATE,
     salaire DOUBLE,
     conditions TEXT,

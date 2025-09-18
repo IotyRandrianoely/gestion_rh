@@ -53,8 +53,11 @@ public class ContratEssaiService {
             contrat.setCandidat(candidat);
             Poste poste = posteRepository.findAll().stream().findFirst().orElse(null);
             contrat.setPoste(poste);
-            contrat.setDateDebut(LocalDateTime.now());
-            contrat.setDateFin(contrat.getDateDebut().plusDays(30));
+            int i = 0;
+            ContratEssai c = this.listerContrats().get(this.listerContrats().size()-1);
+            LocalDateTime d = c.getDateFin();
+            contrat.setDateDebut(d.plusHours(2));
+            contrat.setDateFin(contrat.getDateDebut().plusHours(1));
             contrat.setDuree(30);
             contrat.setEtat("En attente");
             repository.save(contrat);
