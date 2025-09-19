@@ -22,7 +22,9 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+
 
 @Controller
 @RequestMapping("/contratEssai")
@@ -62,7 +64,7 @@ public class ContratEssaiController {
                                                @RequestParam String dateDebut,
                                                @RequestParam Integer duree,
                                                @RequestParam Double salaire,
-                                               @RequestParam(required = false) String conditions,
+                                            //    @RequestParam(required = false) String conditions,
                                                RedirectAttributes redirectAttrs) {
 
         ContratEssai contrat = new ContratEssai();
@@ -93,7 +95,7 @@ public class ContratEssaiController {
 
         contrat.setDuree(duree);
         contrat.setSalaire(salaire);
-        contrat.setConditions(conditions);
+        // contrat.setConditions(conditions);
 
         // Sauvegarde dans la base
         ContratEssai saved = service.creerContrat(contrat);
@@ -101,6 +103,9 @@ public class ContratEssaiController {
         // Préparer le HTML via Thymeleaf
         Context ctx = new Context();
         ctx.setVariable("contrat", saved);
+        // ajouter la date du jour formatée pour le PDF (évite l'utilisation complexe de #dates dans le template)
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        ctx.setVariable("dateNow", LocalDate.now().format(dtf));
         String html = templateEngine.process("contratEssai/contratEssai-pdf", ctx);
 
         // Générer le PDF

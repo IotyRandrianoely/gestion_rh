@@ -2,64 +2,126 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <style>
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size:12px; color:#111; }
-        .header { text-align:center; margin-bottom:20px; }
-        .title { font-size:18px; font-weight:700; margin-bottom:10px; }
-        .section { margin-bottom:12px; }
-        .label { font-weight:700; width:200px; display:inline-block; vertical-align:top; }
-        .signature { margin-top:40px; display:flex; justify-content:space-between; }
-        .box { border:1px solid #ddd; padding:10px; border-radius:4px; }
-    </style>
+    <!-- <link rel="stylesheet" th:href="@{/css/contratEssaiPdf.css}" /> -->
+     <link rel="stylesheet" type="text/css" href="/css/contratEssaiPdf.css"/>
+    <!-- <style>
+        
+    </style> -->
     <title>Contrat d'essai</title>
 </head>
 <body>
+<div class="container">
     <div class="header">
-        <div class="title">Contrat d'essai</div>
-        <div>Référence : <span th:text="${contrat.id}">#ID</span></div>
+        <div class="company">SOCIÉTÉ X</div>
+        <div class="company-details">
+            Siège social: Antananarivo, Madagascar<br/>
+            SIRET: 123 456 789 00012 - Code APE: 6202A
+        </div>
+        <h1>Contrat d'essai</h1>
+        <div class="reference">Référence contrat: CE-<span th:text="${contrat.id}">001</span>/2024</div>
     </div>
 
-    <div class="section">
-        <div><span class="label">Candidat :</span>
-            <span th:text="${contrat.candidat != null ? (contrat.candidat.nom + ' ' + contrat.candidat.prenom) : '-'}">Nom Prénom</span>
+    <div class="parties">
+        <p><strong>ENTRE LES SOUSSIGNÉS :</strong></p>
+        
+        <div class="partie-box">
+            <p><span class="bold">SOCIÉTÉ X</span>, société anonyme au capital de 50 000 000 Ariary, 
+            immatriculée au Registre du Commerce sous le numéro XXX XXX XXX, 
+            représentée par <span class="bold">Monsieur Y</span>, en qualité de Directeur Général, 
+            dûment habilité aux fins des présentes,</p>
+            <p style="text-align: center; margin-top: 8px;"><em>ci-après dénommée <strong>"L'EMPLOYEUR"</strong></em></p>
         </div>
-        <div><span class="label">Poste :</span>
-            <span th:text="${contrat.poste != null ? contrat.poste.profil : '-'}">Poste</span>
-        </div>
-        <div><span class="label">Date de début :</span>
-            <span th:text="${contrat.dateDebut}">2025-09-01</span>
-        </div>
-        <div><span class="label">Durée :</span>
-            <span th:text="${contrat.duree}">30</span> jours
-        </div>
-        <div><span class="label">Date de fin :</span>
-            <span th:text="${contrat.dateFin}">2025-10-01</span>
-        </div>
-        <div><span class="label">Salaire :</span>
-            <span th:text="${contrat.salaire}">0.00</span> EUR
-        </div>
-        <div><span class="label">État :</span>
-            <span th:text="${contrat.etat}">En attente</span>
-        </div>
-    </div>
 
-    <div class="section">
-        <div class="label">Conditions :</div>
-        <div class="box" th:utext="${contrat.conditions != null ? contrat.conditions.replaceAll('\n','<br/>') : '-'}">
-            Conditions du contrat...
+        <p style="text-align: center; margin: 12px 0;"><strong>ET</strong></p>
+
+        <div class="partie-box">
+            <p><span th:text="${contrat.candidat != null ? 'Madame/Monsieur ' + contrat.candidat.nom + ' ' + contrat.candidat.prenom : 'Madame/Monsieur [NOM PRÉNOM]'}" class="bold">Madame/Monsieur NOM PRÉNOM</span><span th:if="${contrat.candidat != null and contrat.candidat.adresse != null}">, 
+            domicilié(e) <span th:text="${contrat.candidat.adresse}">à [ADRESSE]</span></span>, 
+            de nationalité malgache,</p>
+            <p style="text-align: center; margin-top: 8px;"><em>ci-après dénommé(e) <strong>"LE SALARIÉ"</strong></em></p>
         </div>
     </div>
 
-    <div class="signature">
-        <div>
-            <div>Fait à __________________</div>
-            <div>Date : _______________</div>
-        </div>
-        <div>
-            <div>Signature employeur</div>
-            <div style="height:60px;"></div>
-            <div>Signature candidat</div>
+    <p style="text-align: center; font-weight: bold; margin: 15px 0;">IL A ÉTÉ CONVENU ET ARRÊTÉ CE QUI SUIT :</p>
+
+    <div class="article">
+        <h2>ARTICLE 1 - OBJET DU CONTRAT</h2>
+        <div class="article-content">
+            <p>Le salarié est engagé en qualité de <span th:text="${contrat.poste != null ? contrat.poste.profil : '[POSTE]'}" class="highlight">[POSTE]</span> 
+            à compter du <span th:text="${#temporals.format(contrat.dateDebut, 'dd/MM/yyyy')}" class="highlight">[DATE DÉBUT]</span>.</p>
+            <p>Il s'engage à exercer ses fonctions avec diligence et loyauté, conformément aux instructions qui lui seront données.</p>
         </div>
     </div>
+
+    <div class="article">
+        <h2>ARTICLE 2 - PÉRIODE D'ESSAI</h2>
+        <div class="article-content">
+            <div class="info-grid">
+                <div class="info-item">
+                    <p><strong>Durée:</strong> <span th:text="${contrat.duree != null ? contrat.duree + ' jours' : '60 jours'}" class="highlight">60 jours</span></p>
+                </div>
+                <div class="info-item">
+                    <p><strong>Date de fin:</strong> <span th:text="${#temporals.format(contrat.dateFin, 'dd/MM/yyyy')}" class="highlight">[DATE FIN]</span></p>
+                </div>
+            </div>
+            <p>Cette période peut être renouvelée une fois pour une durée identique, dans le respect des dispositions légales en vigueur.</p>
+        </div>
+    </div>
+
+    <div class="article">
+        <h2>ARTICLE 3 - RÉMUNÉRATION</h2>
+        <div class="article-content">
+            <div class="important">
+                <p>La rémunération brute mensuelle est fixée à <span th:text="${contrat.salaire != null ? #numbers.formatDecimal(contrat.salaire, 0, 'COMMA', 0, 'POINT') + ' Ariary' : 'XXX XXX Ariary'}" class="bold">XXX XXX Ariary</span>, 
+                payable à terme échu le dernier jour ouvrable de chaque mois.</p>
+            </div>
+            <p>Cette rémunération s'entend brute, avant déduction des cotisations sociales obligatoires et impôts.</p>
+        </div>
+    </div>
+
+    <div class="article">
+        <h2>ARTICLE 4 - HORAIRES ET CONDITIONS DE TRAVAIL</h2>
+        <div class="article-content">
+            <p>La durée du travail est fixée à <strong>40 heures par semaine</strong>, répartie du lundi au vendredi selon les horaires définis par le règlement intérieur.</p>
+            <p>Le salarié bénéficie des congés payés et jours fériés prévus par la législation malgache.</p>
+        </div>
+    </div>
+
+    <div class="article">
+        <h2>ARTICLE 5 - RUPTURE PENDANT LA PÉRIODE D'ESSAI</h2>
+        <div class="article-content">
+            <p>Pendant la période d'essai, chacune des parties peut mettre fin au contrat à tout moment, sans indemnité ni préavis, sous réserve d'un délai de prévenance de <strong>48 heures</strong>.</p>
+        </div>
+    </div>
+
+    <div class="date-lieu">
+        <p>Fait à Antananarivo, le <span th:text="${dateNow}">[DATE]</span></p>
+        <p>En double exemplaire, dont un remis à chaque partie.</p>
+    </div>
+
+    <div class="signatures">
+        <div class="sign-block">
+            <div class="sign-title">L'EMPLOYEUR</div>
+            <div class="sign-line">
+                SOCIÉTÉ X<br/>
+                Le Directeur Général<br/>
+                (Signature et cachet)
+            </div>
+        </div>
+
+        <div class="sign-block">
+            <div class="sign-title">LE SALARIÉ</div>
+            <div class="sign-line">
+                <span th:text="${contrat.candidat != null ? contrat.candidat.nom + ' ' + contrat.candidat.prenom : 'NOM Prénom'}">NOM Prénom</span><br/>
+                Lu et approuvé<br/>
+                (Signature précédée de la mention)
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Ce contrat est soumis au droit du travail malgache. Tout litige relèvera de la compétence des juridictions d'Antananarivo.</p>
+    </div>
+</div>
 </body>
 </html>

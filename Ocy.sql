@@ -21,12 +21,6 @@ CREATE TABLE qualite (
     nom_qualite VARCHAR(30) NOT NULL
 );
 
--- Table mission
-CREATE TABLE mission (
-    id SERIAL PRIMARY KEY,
-    nom_mission VARCHAR(30) NOT NULL
-);
-
 -- Table critere_rech
 CREATE TABLE critere_rech (
     id SERIAL PRIMARY KEY,
@@ -50,7 +44,6 @@ CREATE TABLE annonce (
     date_publication DATE NOT NULL,
     id_poste INT NOT NULL REFERENCES poste(id)
 );
-
 
 -- Table liaison critere_rech ↔ qualite
 CREATE TABLE critere_rech_qualite (
