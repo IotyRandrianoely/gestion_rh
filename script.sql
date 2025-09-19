@@ -6,72 +6,72 @@ CREATE DATABASE gestion_rh;
 -- TABLES DE RÉFÉRENCE
 -- ===============================
 
-CREATE TABLE genre (
-    id SERIAL PRIMARY KEY,
-    genre VARCHAR(20)
-);
+-- CREATE TABLE genre (
+--     id SERIAL PRIMARY KEY,
+--     genre VARCHAR(20)
+-- );
 
-CREATE TABLE diplome (
-    id SERIAL PRIMARY KEY,
-    nom_diplome VARCHAR(30)
-);
+-- CREATE TABLE diplome (
+--     id SERIAL PRIMARY KEY,
+--     nom_diplome VARCHAR(30)
+-- );
 
-CREATE TABLE filiere (
-    id SERIAL PRIMARY KEY,
-    nom_filiere VARCHAR(30)
-);
+-- CREATE TABLE filiere (
+--     id SERIAL PRIMARY KEY,
+--     nom_filiere VARCHAR(30)
+-- );
 
-CREATE TABLE situation_matrimonial (
-    id SERIAL PRIMARY KEY,
-    situation VARCHAR(30)
-);
+-- CREATE TABLE situation_matrimonial (
+--     id SERIAL PRIMARY KEY,
+--     situation VARCHAR(30)
+-- );
 
-CREATE TABLE poste (
-    id SERIAL PRIMARY KEY,
-    nom_poste VARCHAR(30)
-);
+-- CREATE TABLE poste (
+--     id SERIAL PRIMARY KEY,
+--     nom_poste VARCHAR(30)
+-- );
 
 CREATE TABLE departement (
     id SERIAL PRIMARY KEY,
     nomDept VARCHAR(30)
 );
 
-CREATE TABLE organisme (
-    id SERIAL PRIMARY KEY,
-    nomOrganisme VARCHAR(30),
-    detail VARCHAR(30)
-);
+-- CREATE TABLE organisme (
+--     id SERIAL PRIMARY KEY,
+--     nomOrganisme VARCHAR(30),
+--     detail VARCHAR(30)
+-- );
 
 -- ===============================
 -- TABLES ANNONCE ET CRITÈRES
 -- ===============================
 
-CREATE TABLE critere_rech (
-    id SERIAL PRIMARY KEY,
-    annees_experience INT,
-    diplome INT REFERENCES diplome(id),
-    age INT,
-    genre INT REFERENCES genre(id),
-    filiere INT REFERENCES filiere(id)
-);
+-- CREATE TABLE critere_rech (
+--     id SERIAL PRIMARY KEY,
+--     annees_experience INT,
+--     diplome INT REFERENCES diplome(id),
+--     age INT,
+--     genre INT REFERENCES genre(id),
+--     filiere INT REFERENCES filiere(id)
+-- );
 
-CREATE TABLE annonce (
-    id SERIAL PRIMARY KEY,
-    profil VARCHAR(40),
-    description VARCHAR(120),
-    critere_rech_id INT REFERENCES critere_rech(id),
-    date_publication DATE DEFAULT CURRENT_DATE
-);
+-- CREATE TABLE annonce (
+--     id SERIAL PRIMARY KEY,
+--     profil VARCHAR(40),
+--     description VARCHAR(120),
+--     critere_rech_id INT REFERENCES critere_rech(id),
+--     date_publication DATE DEFAULT CURRENT_DATE
+-- );
 
-CREATE TABLE qualite (
-    id SERIAL PRIMARY KEY,
-    nom_qualite VARCHAR(30)
-);
+-- CREATE TABLE qualite (
+--     id SERIAL PRIMARY KEY,
+--     nom_qualite VARCHAR(30)
+-- );
 
-CREATE TABLE mission (
-    id SERIAL PRIMARY KEY,
-    nom_mission VARCHAR(30)
-);
+-- CREATE TABLE mission (
+--     id SERIAL PRIMARY KEY,
+--     nom_mission VARCHAR(30)
+-- );
 
 CREATE TABLE critere_rech_qualite (
     id_annonce INT REFERENCES annonce(id),
