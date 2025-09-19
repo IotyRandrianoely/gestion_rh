@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Détail candidat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background-color: #007bff; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .info-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .cv-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .info-row { margin-bottom: 15px; }
+        .label { font-weight: bold; color: #333; display: inline-block; width: 180px; }
+        .value { color: #666; }
+        .btn { padding: 10px 20px; margin: 5px; text-decoration: none; color: white; border-radius: 4px; display: inline-block; }
+        .btn-primary { background-color: #007bff; }
+        .btn-success { background-color: #28a745; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-info { background-color: #17a2b8; }
+        .cv-viewer { width: 100%; min-height: 600px; border: 1px solid #ddd; border-radius: 4px; }
+        .cv-image { width: 100%; max-width: 100%; height: auto; border-radius: 4px; }
+        .no-cv { text-align: center; padding: 50px; color: #6c757d; background-color: #f8f9fa; border-radius: 4px; }
+        .cv-controls { margin-bottom: 15px; text-align: center; }
+        .cv-info { background-color: #e7f3ff; padding: 10px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #007bff; }
+        @media (max-width: 768px) {
+            .content { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👤 Détail du candidat</h1>
+            <p th:text="'Candidature de ' + ${candidat.nom} + ' ' + ${candidat.prenom}"></p>
+        </div>
+
+        <div class="content">
+            <!-- Informations du candidat -->
+            <div>
+                <div class="info-section">
+                    <h3>📋 Informations personnelles</h3>
+                    <div class="info-row">
+                        <span class="label">Nom complet :</span>
+                        <span class="value" th:text="${candidat.nom} + ' ' + ${candidat.prenom}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Email :</span>
+                        <span class="value" th:text="${candidat.email}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Âge :</span>
+                        <span class="value" th:text="${candidat.age} + ' ans'"></span>
+                    </div>
+                    <!-- Dans la section informations professionnelles, ajouter : -->
+<div class="info-row">
+    <span class="label">Diplôme :</span>
+    <span class="value" th:text="${candidat.diplome != null ? candidat.diplome.nomDiplome : 'Non renseigné'}"></span>
+</div>
+                    <div class="info-row">
+                        <span class="label">Genre :</span>
+                        <span class="value" th:text="${candidat.genre == 1 ? 'Homme' : 'Femme'}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Adresse :</span>
+                        <span class="value" th:text="${candidat.adresse ?: 'Non renseignée'}"></span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>💼 Informations professionnelles</h3>
+                    <div class="info-row">
+                        <span class="label">Années d'expérience :</span>
+                        <span class="value" th:text="${candidat.anneesExperience} + ' ans'"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Date de candidature :</span>
+                        <span class="value" th:text="${#dates.format(candidat.dateCandidature, 'dd/MM/yyyy')}"></span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>🎯 Candidature</h3>
+                    <div class="info-row">
+                        <span class="label">Annonce :</span>
+                        <span class="value" th:text="${candidat.annonce != null ? candidat.annonce.profil : 'Non spécifiée'}"></span>
+                    </div>
+                    <div class="info-row" th:if="${candidat.annonce != null}">
+                        <span class="label">Description :</span>
+                        <span class="value" th:text="${candidat.annonce.description}"></span>
+                    </div>
+                    <div class="info-row" th:if="${candidat.lettreMotivation != null and not #strings.isEmpty(candidat.lettreMotivation)}">
+                        <span class="label">Lettre de motivation :</span>
+                        <div class="value" style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 4px; white-space: pre-wrap;" th:text="${candidat.lettreMotivation}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualisation du CV -->
+            <div class="cv-section">
+                <h3>📄 CV / Portfolio</h3>
+                
+                <div th:if="${candidat.cv != null and not #strings.isEmpty(candidat.cv)}">
+                    <div class="cv-info">
+                        <strong>� Fichier :</strong> <span th:text="${candidat.cv}"></span><br/>
+                        <strong>📊 Type :</strong> <span id="fileType">Détection en cours...</span>
+                    </div>
+                    
+                    <div class="cv-controls">
+                        <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
+                           class="btn btn-primary" target="_blank">📥 Télécharger</a>
+                        <button onclick="toggleFullscreen()" class="btn btn-info">🔍 Plein écran</button>
+                    </div>
+
+                    <!-- Détection automatique du type de fichier et affichage approprié -->
+                    <div id="cvContainer">
+                        <!-- Les images seront affichées directement -->
+                        <img th:if="${#strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpg') or 
+                                     #strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpeg') or 
+                                     #strings.endsWith(#strings.toLowerCase(candidat.cv), '.png') or 
+                                     #strings.endsWith(#strings.toLowerCase(candidat.cv), '.gif') or 
+                                     #strings.endsWith(#strings.toLowerCase(candidat.cv), '.bmp') or 
+                                     #strings.endsWith(#strings.toLowerCase(candidat.cv), '.webp')}"
+                             th:src="@{/api/files/download/image/{fileName}(fileName=${candidat.cv})}" 
+                             class="cv-image" 
+                             th:alt="${candidat.cv}"
+                             onerror="handleImageError(this)"
+                             onload="setFileType('Image')"/>
+
+                        <!-- Les PDFs seront affichés dans un iframe -->
+                        <iframe th:if="${#strings.endsWith(#strings.toLowerCase(candidat.cv), '.pdf')}"
+                                th:src="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
+                                class="cv-viewer"
+                                onload="setFileType('PDF')"
+                                onerror="handlePdfError(this)">
+                            Votre navigateur ne supporte pas l'affichage des PDFs.
+                        </iframe>
+
+                        <!-- Pour les autres types de documents -->
+                        <div th:if="${not (#strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpg') or 
+                                          #strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpeg') or 
+                                          #strings.endsWith(#strings.toLowerCase(candidat.cv), '.png') or 
+                                          #strings.endsWith(#strings.toLowerCase(candidat.cv), '.gif') or 
+                                          #strings.endsWith(#strings.toLowerCase(candidat.cv), '.bmp') or 
+                                          #strings.endsWith(#strings.toLowerCase(candidat.cv), '.webp') or 
+                                          #strings.endsWith(#strings.toLowerCase(candidat.cv), '.pdf'))}"
+                             class="no-cv" onload="setFileType('Document')">
+                            <h4>📄 Document disponible</h4>
+                            <p th:text="'Fichier: ' + ${candidat.cv}"></p>
+                            <p>Ce type de document ne peut pas être affiché directement.<br/>
+                               Utilisez le bouton "Télécharger" pour l'ouvrir.</p>
+                            <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
+                               class="btn btn-success" target="_blank">📥 Télécharger et ouvrir</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${candidat.cv == null or #strings.isEmpty(candidat.cv)}" class="no-cv">
+                    <h4>📭 Aucun CV fourni</h4>
+                    <p>Ce candidat n'a pas encore uploadé de CV ou de document.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #dee2e6; text-align: center;">
+            <a th:href="@{/candidats}" class="btn btn-secondary">← Retour à la liste</a>
+            <a th:if="${candidat.annonce != null}" 
+               th:href="@{/candidats?annonceId={id}(id=${candidat.annonce.id})}" 
+               class="btn btn-info">📋 Autres candidats de cette annonce</a>
+        </div>
+    </div>
+
+    <script>
+        // Détection et affichage du type de fichier
+        function setFileType(type) {
+            document.getElementById('fileType').textContent = type;
+        }
+
+        // Gestion d'erreur pour les images
+        function handleImageError(img) {
+            img.style.display = 'none';
+            const container = img.parentElement;
+            container.innerHTML = `
+                <div class="no-cv">
+                    <h4>⚠️ Erreur d'affichage</h4>
+                    <p>Impossible d'afficher cette image.</p>
+                    <a href="${img.src}" class="btn btn-primary" target="_blank">📥 Télécharger le fichier</a>
+                </div>
+            `;
+            setFileType('Image (erreur)');
+        }
+
+        // Gestion d'erreur pour les PDFs
+        function handlePdfError(iframe) {
+            iframe.style.display = 'none';
+            const container = iframe.parentElement;
+            container.innerHTML = `
+                <div class="no-cv">
+                    <h4>⚠️ Erreur d'affichage PDF</h4>
+                    <p>Votre navigateur ne peut pas afficher ce PDF directement.</p>
+                    <a href="${iframe.src}" class="btn btn-primary" target="_blank">📥 Télécharger le PDF</a>
+                </div>
+            `;
+            setFileType('PDF (erreur)');
+        }
+
+        // Mode plein écran
+        function toggleFullscreen() {
+            const container = document.getElementById('cvContainer');
+            const firstChild = container.firstElementChild;
+            
+            if (firstChild) {
+                if (firstChild.requestFullscreen) {
+                    firstChild.requestFullscreen();
+                } else if (firstChild.webkitRequestFullscreen) {
+                    firstChild.webkitRequestFullscreen();
+                } else if (firstChild.msRequestFullscreen) {
+                    firstChild.msRequestFullscreen();
+                }
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Détection automatique du type de fichier basée sur l'extension
+            const fileName = document.querySelector('.cv-info span').textContent;
+            if (fileName) {
+                const extension = fileName.split('.').pop().toLowerCase();
+                const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+                const docExtensions = ['doc', 'docx', 'txt', 'rtf'];
+                
+                if (imageExtensions.includes(extension)) {
+                    setFileType('Image (' + extension.toUpperCase() + ')');
+                } else if (extension === 'pdf') {
+                    setFileType('PDF');
+                } else if (docExtensions.includes(extension)) {
+                    setFileType('Document (' + extension.toUpperCase() + ')');
+                } else {
+                    setFileType('Fichier (' + extension.toUpperCase() + ')');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

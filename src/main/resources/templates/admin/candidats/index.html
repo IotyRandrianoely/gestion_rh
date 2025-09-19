@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Candidats</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn { padding: 5px 10px; margin: 2px; text-decoration: none; color: white; border-radius: 3px; }
+        .btn-success { background-color: #28a745; }
+        .btn-primary { background-color: #007bff; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; }
+        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+    <h2>Admin – Candidats</h2>
+    
+    <!-- Messages d'erreur et de succès -->
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    
+    <p><a th:href="@{/admin/candidats/new}" class="btn btn-success">+ Nouveau candidat</a></p>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Annonce</th>
+            <th>Date candidature</th>
+            <th>Actions</th>
+        </tr>
+        <tr th:each="c : ${candidats}">
+            <td th:text="${c.id}"></td>
+            <td th:text="${c.nom}"></td>
+            <td th:text="${c.prenom}"></td>
+            <td th:text="${c.email}"></td>
+            <td th:text="${c.annonce != null ? c.annonce.profil : ''}"></td>
+            <td th:text="${c.dateCandidature}"></td>
+            <td>
+                <a th:href="@{/admin/candidats/{id}(id=${c.id})}" class="btn btn-primary">Voir</a>
+                <a th:href="@{/admin/candidats/edit/{id}(id=${c.id})}" class="btn btn-warning">Modifier</a>
+                <a th:href="@{/admin/files/candidat/{id}(id=${c.id})}" class="btn btn-success">📁</a>
+                <a th:href="@{/admin/candidats/delete/{id}(id=${c.id})}"
+                   onclick="return confirm('Supprimer ce candidat ?');" class="btn btn-danger">Supprimer</a>
+            </td>
+        </tr>
+    </table>
+
+    <p><a th:href="@{/candidats}">⬅ Revenir au site</a></p>
+</body>
+</html>

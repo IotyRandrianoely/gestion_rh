@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard Admin - Gestion RH</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f8f9fa; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin-top: 0; color: #333; }
+        .btn { padding: 10px 20px; margin: 5px; text-decoration: none; color: white; border: none; border-radius: 4px; cursor: pointer; display: inline-block; transition: all 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background-color: #007bff; }
+        .btn-success { background-color: #28a745; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-info { background-color: #17a2b8; }
+        .user-info { background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
+        .stat-box { text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 5px; }
+        .stat-number { font-size: 2em; font-weight: bold; }
+        .quick-actions { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🔧 Dashboard Administrateur</h1>
+            <div class="user-info">
+                👤 Connecté en tant que : <strong th:text="${user.username}"></strong> 
+                | 🎯 Rôle : <strong th:text="${user.role}"></strong>
+                | 📅 <span th:text="${#temporals.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}"></span>
+                | <a th:href="@{/logout}" style="color: white;">🚪 Déconnexion</a>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">🎯</div>
+                    <div>Gestion complète</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">👥</div>
+                    <div>Tous les candidats</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">📢</div>
+                    <div>Toutes les annonces</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Actions rapides -->
+        <div class="quick-actions">
+            <h3>⚡ Actions Rapides</h3>
+            <a th:href="@{/admin/annonces/new}" class="btn btn-success">📝 Nouvelle annonce</a>
+            <a th:href="@{/admin/candidats/new}" class="btn btn-info">👤 Nouveau candidat</a>
+            <a th:href="@{/admin/files}" class="btn btn-warning">📁 Voir tous les fichiers</a>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Gestion des Annonces -->
+            <div class="card">
+                <h3>📢 Gestion des Annonces</h3>
+                <p>Créer, modifier et gérer les offres d'emploi de l'entreprise</p>
+                <a th:href="@{/admin/annonces}" class="btn btn-primary">📋 Voir les annonces</a>
+                <a th:href="@{/admin/annonces/new}" class="btn btn-success">➕ Nouvelle annonce</a>
+                <br/>
+                <a th:href="@{/annonces}" class="btn btn-info" target="_blank">🌐 Vue publique</a>
+            </div>
+
+            <!-- Gestion des Candidats -->
+            <div class="card">
+                <h3>👥 Gestion des Candidats</h3>
+                <p>Consulter et gérer toutes les candidatures reçues</p>
+                <a th:href="@{/admin/candidats}" class="btn btn-primary">👤 Admin candidats</a>
+                <a th:href="@{/candidats}" class="btn btn-success">📊 Vue candidats</a>
+                <br/>
+                <a th:href="@{/candidats/postuler}" class="btn btn-info">📝 Nouvelle candidature</a>
+            </div>
+
+            <!-- Gestion des Fichiers -->
+            <div class="card">
+                <h3>📁 Gestion des Fichiers</h3>
+                <p>Gérer tous les CV et documents uploadés par les candidats</p>
+                <a th:href="@{/admin/files}" class="btn btn-primary">📄 Tous les fichiers</a>
+                <a th:href="@{/admin/files/list}" class="btn btn-success">📂 Vue détaillée</a>
+            </div>
+
+            <!-- Données de Référence -->
+            <div class="card">
+                <h3>🎯 Données de Référence</h3>
+                <p>Gérer les diplômes, filières et autres données de base</p>
+                <a href="#" class="btn btn-warning">🎓 Diplômes</a>
+                <a href="#" class="btn btn-warning">📚 Filières</a>
+                <br/>
+                <a href="#" class="btn btn-info">⚙️ Paramètres</a>
+            </div>
+
+            <!-- QCM et Évaluation -->
+            <div class="card">
+                <h3>📝 QCM et Évaluation</h3>
+                <p>Gérer les questions et les évaluations des candidats</p>
+                <a href="/qcm/admin" class="btn btn-primary">❓ Questions QCM</a>
+                <a href="/evaluation/admin" class="btn btn-success">📊 Résultats</a>
+            </div>
+
+            <!-- Rapports et Statistiques -->
+            <div class="card">
+                <h3>📈 Rapports et Statistiques</h3>
+                <p>Analyser les données de recrutement et générer des rapports</p>
+                <a href="#" class="btn btn-info">📊 Dashboard stats</a>
+                <a href="#" class="btn btn-primary">📄 Rapports PDF</a>
+            </div>
+
+            <!-- Accès rapide -->
+            <div class="card">
+                <h3>🔗 Accès Rapide</h3>
+                <p>Liens vers les fonctionnalités principales du système</p>
+                <a th:href="@{/annonces}" class="btn btn-success" target="_blank">🌐 Site public</a>
+                <a href="http://localhost:8070" class="btn btn-primary" target="_blank">🔗 Nouvelle fenêtre</a>
+                <br/>
+                <a th:href="@{/candidats/session-info}" class="btn btn-info">🔒 Info session</a>
+            </div>
+
+            <!-- Utilisateurs -->
+            <div class="card">
+                <h3>👨‍💼 Gestion Utilisateurs</h3>
+                <p>Gérer les comptes utilisateurs et les droits d'accès</p>
+                <a href="#" class="btn btn-warning">👤 Utilisateurs</a>
+                <a href="#" class="btn btn-danger">🔐 Sécurité</a>
+            </div>
+        </div>
+
+        <!-- Informations système -->
+        <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 8px; text-align: center;">
+            <h4>ℹ️ Informations Système</h4>
+            <p>Serveur : <strong>http://localhost:8070</strong> | Version : <strong>1.0.0</strong> | Environnement : <strong>Développement</strong></p>
+            <p>Dernière connexion : <span th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+        </div>
+    </div>
+
+    <script>
+        console.log('=== DASHBOARD ADMIN CHARGÉ ===');
+        console.log('Utilisateur:', '[[${user.username}]]');
+        console.log('Rôle:', '[[${user.role}]]');
+        
+        // Animation des cartes
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Liste des candidats</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .filter-form { margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; }
+        .btn { padding: 8px 15px; margin: 5px; text-decoration: none; color: white; border-radius: 3px; }
+        .btn-primary { background-color: #007bff; }
+        .btn-success { background-color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>Liste des candidats</h1>
+
+    <div class="filter-form">
+        <form method="get" action="/candidats">
+            <label for="annonceId">Filtrer par annonce :</label>
+            <select name="annonceId" id="annonceId">
+                <option value="">-- Toutes les annonces --</option>
+                <option th:each="a : ${annonces}"
+                        th:value="${a.id}"
+                        th:selected="${selectedAnnonce != null and selectedAnnonce == a.id}"
+                        th:text="${a.profil}">
+                </option>
+            </select>
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+        </form>
+        <a th:href="@{/candidats/postuler}" class="btn btn-success">Nouvelle candidature</a>
+    </div>
+
+    <div th:if="${candidats == null or candidats.empty}">
+        <p>Aucun candidat disponible pour ce filtre.</p>
+    </div>
+
+    <table th:if="${candidats != null and not candidats.empty}">
+        <thead>
+            <tr>
+               <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Age</th>
+        <th>Diplôme</th> 
+        <th>Expérience</th>
+        <th>Annonce</th>
+        <th>Date candidature</th>
+        <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="c : ${candidats}">
+                 <td th:text="${c.nom}"></td>
+        <td th:text="${c.prenom}"></td>
+        <td th:text="${c.email}"></td>
+        <td th:text="${c.age}"></td>
+        <td th:text="${c.diplome != null ? c.diplome.nomDiplome : 'N/A'}"></td> <!-- *** NOUVEAU *** -->
+        <td th:text="${c.anneesExperience} + ' ans'"></td>
+        <td th:text="${c.annonce != null ? c.annonce.profil : ''}"></td>
+        <td th:text="${c.dateCandidature}"></td>
+        <td>
+            <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn-primary">Voir détail</a>
+        </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p><a th:href="@{/annonces}">← Retour aux annonces</a></p>
+</body>
+</html>
