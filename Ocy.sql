@@ -1,7 +1,7 @@
 -- Base de données
-DROP DATABASE IF EXISTS gestion_rh;
-CREATE DATABASE gestion_rh;
-\c gestion_rh;
+DROP DATABASE IF EXISTS gestion_rh_vrai;
+CREATE DATABASE gestion_rh_vrai;
+\c gestion_rh_vrai;
 
 -- Table diplome
 CREATE TABLE diplome (
