@@ -1,239 +1,173 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${candidat.id == null ? 'Nouvelle candidature' : 'Modifier candidature'}"></title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        textarea { height: 100px; resize: vertical; }
-        .btn { padding: 10px 20px; margin: 5px; text-decoration: none; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-success { background-color: #28a745; }
-        .btn-secondary { background-color: #6c757d; }
-        .required { color: red; }
-        .alert { padding: 15px; margin: 15px 0; border-radius: 4px; }
-        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
-        .selected-annonce { background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #007bff; }
-        .eligibility-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .not-eligible { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .criteria-info { background-color: #e1ecf4; color: #0c5460; border: 1px solid #bee5eb; padding: 10px; border-radius: 3px; margin-top: 10px; font-size: 0.9em; }
-    </style>
+
+  <title th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier annonce'}"></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --danger:#e74c3c; --danger-d:#c0392b;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); padding:22px; max-width:900px; margin:0 auto;
+    }
+
+    /* Header + stepper */
+    .header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+    }
+    h2{ font-size:22px; margin-bottom:8px }
+    .hint{ color:var(--sub); font-size:13px }
+
+    .stepper{
+      display:flex; gap:18px; margin-top:14px; flex-wrap:wrap;
+    }
+    .step{
+      display:flex; align-items:center; gap:10px; color:var(--sub); font-weight:700; font-size:13px;
+    }
+    .dot{
+      width:26px; height:26px; border-radius:50%;
+      background:#eef6ff; color:#1d6fdc; display:grid; place-items:center; font-weight:800;
+      border:1px solid #d7e7ff;
+    }
+    .step.active .dot{ background:#3498db; border-color:#3498db; color:#fff }
+    .step.active{ color:#1d6fdc }
+
+    /* Card form */
+    .form-card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+
+    .grid-2{
+      display:grid; grid-template-columns:1fr 1fr; gap:18px;
+    }
+    @media(max-width:780px){ .grid-2{ grid-template-columns:1fr; } }
+
+    .form-group{ display:flex; flex-direction:column; gap:8px; }
+    label{ font-weight:700; color:#243447; font-size:14px; }
+    input[type="number"], select, textarea{
+      width:100%; padding:12px 12px; border:1px solid #d7dde5; border-radius:10px; font-size:14px; background:#fff;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    textarea{ min-height:110px; resize:vertical; }
+
+    input:focus, select:focus, textarea:focus{
+      border-color:#8ac4fb; box-shadow:0 0 0 4px rgba(52,152,219,.15); outline:none;
+    }
+
+    .help{ font-size:12px; color:#6f7f90; }
+
+    .actions{
+      margin-top:22px; display:flex; gap:12px; flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-block; padding:12px 18px; border-radius:10px;
+      font-weight:800; font-size:14px; text-decoration:none; border:1px solid transparent;
+      transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
+    }
+    .btn--save{ background:var(--accent); color:#fff; }
+    .btn--save:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2); }
+    .btn--cancel{ background:#fff; color:var(--danger); border-color:#ffd7d7; }
+    .btn--cancel:hover{ background:#fff5f5; border-color:#ffbcbc; }
+
+    /* Inputs inline pour selects */
+    select{ appearance:none; background-image:linear-gradient(45deg, transparent 50%, #8aa0b2 50%), linear-gradient(135deg, #8aa0b2 50%, transparent 50%);
+            background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+            background-size: 5px 5px, 5px 5px; background-repeat:no-repeat; }
+  </style>
 </head>
 <body>
-    <h2 th:text="${candidat.id == null ? 'Nouvelle candidature' : 'Modifier candidature'}"></h2>
 
-    <!-- Messages d'erreur et de succès -->
-    <div th:if="${error}" class="alert" 
-         th:classappend="${notEligible} ? 'alert-warning' : 'alert-error'" 
-         th:utext="${error}"></div>
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div class="header">
+    <h2 th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier l’annonce'}"></h2>
+    <div class="hint">Renseignez le poste et les critères requis. Les champs marqués sont obligatoires.</div>
 
-    <!-- Affichage de l'annonce sélectionnée -->
-    <div th:if="${selectedAnnonce}" class="selected-annonce">
-        <h3>🎯 Candidature pour l'annonce :</h3>
-        <p><strong>Profil :</strong> <span th:text="${selectedAnnonce.profil}"></span></p>
-        <p><strong>Description :</strong> <span th:text="${selectedAnnonce.description}"></span></p>
+    <!-- Stepper purement décoratif (pas de JS) -->
+    <div class="stepper">
+      <div class="step active"><span class="dot">1</span> Poste</div>
+      <div class="step active"><span class="dot">2</span> Critères</div>
+      <div class="step"><span class="dot">3</span> Validation</div>
     </div>
+  </div>
 
-    <form th:action="@{/candidats/postuler}" method="post" th:object="${candidat}">
-        <input type="hidden" th:field="*{id}" />
+  <div class="form-card">
+    <form th:action="@{/admin/annonces}" method="post">
+      <input type="hidden" name="id" th:value="${annonce.id}" />
 
-        <!-- Si une annonce est pré-sélectionnée, on la cache et la pré-remplit -->
-        <div class="form-group" th:if="${selectedAnnonce == null}">
-            <label for="annonce">Annonce <span class="required">*</span></label>
-            <select name="annonce.id" id="annonce" required onchange="showAnnonceCriteria()">
-                <option value="">-- Sélectionner une annonce --</option>
-                <option th:each="a : ${annonces}"
-                        th:value="${a.id}"
-                        th:selected="${selectedAnnonceId != null and selectedAnnonceId == a.id}"
-                        th:text="${a.profil + ' - ' + a.description}"
-                        th:data-experience="${a.critereRech != null ? a.critereRech.anneesExperience : ''}"
-                        th:data-age="${a.critereRech != null ? a.critereRech.age : ''}"
-                        th:data-diplome="${a.critereRech != null and a.critereRech.diplome != null ? a.critereRech.diplome.nomDiplome : ''}"
-                        th:data-filiere="${a.critereRech != null and a.critereRech.filiere != null ? a.critereRech.filiere.nomFiliere : ''}">
-                </option>
-            </select>
-            
-            <!-- Affichage des critères de l'annonce sélectionnée -->
-            <div id="criteria-info" class="criteria-info" style="display: none;">
-                <strong>📋 Critères requis pour cette annonce :</strong>
-                <ul id="criteria-list"></ul>
-            </div>
-        </div>
-
-        <!-- Champ caché pour l'annonce pré-sélectionnée -->
-        <input type="hidden" name="annonce.id" th:value="${selectedAnnonce != null ? selectedAnnonce.id : selectedAnnonceId}" th:if="${selectedAnnonce != null or selectedAnnonceId != null}"/>
-
+      <div class="grid-2">
+        <!-- Poste -->
         <div class="form-group">
-            <label for="nom">Nom <span class="required">*</span></label>
-            <input type="text" th:field="*{nom}" id="nom" required maxlength="40"/>
+          <label for="poste">Poste</label>
+          <select id="poste" name="poste.id" required>
+            <option th:each="p : ${postes}"
+                    th:value="${p.id}"
+                    th:text="${p.profil}"
+                    th:selected="${annonce.poste?.id == p.id}">
+            </option>
+          </select>
+          <div class="help">Ex : Développeur Java, Comptable, Guide touristique…</div>
         </div>
 
+        <!-- Années d'expérience -->
         <div class="form-group">
-            <label for="prenom">Prénom <span class="required">*</span></label>
-            <input type="text" th:field="*{prenom}" id="prenom" required maxlength="40"/>
+          <label for="anneesExperience">Années d'expérience</label>
+          <input type="hidden" name="critereRech.id" th:value="${annonce.critereRech?.id}" />
+          <input type="number" id="anneesExperience" name="critereRech.anneesExperience"
+                 th:value="${annonce.critereRech?.anneesExperience}" required min="0" />
+          <div class="help">Nombre d’années minimum exigées (0 si débutant accepté).</div>
         </div>
 
+        <!-- Description (pleine largeur) -->
+        <div class="form-group" style="grid-column:1/-1;">
+          <label for="description">Description</label>
+          <textarea id="description" name="poste.description" rows="4"
+                    th:text="${annonce.poste?.description}" required></textarea>
+          <div class="help">Décrivez les missions, la stack, les responsabilités, le contexte…</div>
+        </div>
+
+        <!-- Diplôme -->
         <div class="form-group">
-            <label for="email">Email <span class="required">*</span></label>
-            <input type="email" th:field="*{email}" id="email" required maxlength="40"/>
+          <label for="diplome">Diplôme</label>
+          <select id="diplome" name="critereRech.diplome.id" required>
+            <option th:each="d : ${diplomes}"
+                    th:value="${d.id}"
+                    th:text="${d.nomDiplome}"
+                    th:selected="${annonce.critereRech?.diplome?.id == d.id}">
+            </option>
+          </select>
+          <div class="help">Ex : Licence, Master, Doctorat…</div>
         </div>
 
+        <!-- Filière -->
         <div class="form-group">
-            <label for="age">Âge <span class="required">*</span></label>
-            <input type="number" th:field="*{age}" id="age" required min="16" max="70" onchange="checkEligibility()"/>
+          <label for="filiere">Filière</label>
+          <select id="filiere" name="critereRech.filiere.id" required>
+            <option th:each="f : ${filieres}"
+                    th:value="${f.id}"
+                    th:text="${f.nomFiliere}"
+                    th:selected="${annonce.critereRech?.filiere?.id == f.id}">
+            </option>
+          </select>
+          <div class="help">Ex : Informatique, Gestion, Droit, Santé, Tourisme…</div>
         </div>
+      </div>
 
-        <div class="form-group">
-            <label for="genre">Genre <span class="required">*</span></label>
-            <select th:field="*{genre}" id="genre" required>
-                <option value="">-- Sélectionner --</option>
-                <option value="1">Homme</option>
-                <option value="2">Femme</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="adresse">Adresse</label>
-            <input type="text" th:field="*{adresse}" id="adresse" maxlength="60"/>
-        </div>
-
-        <div class="form-group">
-            <label for="anneesExperience">Années d'expérience <span class="required">*</span></label>
-            <input type="number" th:field="*{anneesExperience}" id="anneesExperience" required min="0" max="50" onchange="checkEligibility()"/>
-        </div>
-
-        <!-- Zone d'alerte d'éligibilité en temps réel -->
-        <div id="eligibility-warning" class="eligibility-warning" style="display: none;">
-            <strong>⚠️ Attention :</strong> <span id="eligibility-message"></span>
-        </div>
-
-        <div class="form-group">
-            <label for="lettreMotivation">Lettre de motivation</label>
-            <textarea th:field="*{lettreMotivation}" id="lettreMotivation" maxlength="300"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="cv">CV (chemin fichier)</label>
-            <input type="text" th:field="*{cv}" id="cv" maxlength="60"/>
-        </div>
-
-        <button type="submit" class="btn btn-success" id="submit-btn">Enregistrer ma candidature</button>
-        <a th:href="@{/annonces}" class="btn btn-secondary">Retour aux annonces</a>
-        
-        <!-- Si on vient d'une annonce spécifique, proposer un lien de retour -->
-        <a th:if="${selectedAnnonce != null}" th:href="@{/annonces/{id}(id=${selectedAnnonce.id})}" class="btn btn-secondary">Retour à l'annonce</a>
+      <div class="actions">
+        <button type="submit" class="btn btn--save">Enregistrer</button>
+        <a class="btn btn--cancel" th:href="@{/admin/annonces}">Annuler</a>
+      </div>
     </form>
+  </div>
 
-    <script>
-        // Variables globales pour les critères
-        let currentCriteria = null;
 
-        // Affichage des critères de l'annonce sélectionnée
-        function showAnnonceCriteria() {
-            const annonceSelect = document.getElementById('annonce');
-            const selectedOption = annonceSelect.options[annonceSelect.selectedIndex];
-            const criteriaInfo = document.getElementById('criteria-info');
-            const criteriaList = document.getElementById('criteria-list');
-
-            if (selectedOption.value && selectedOption.value !== '') {
-                const experience = selectedOption.dataset.experience;
-                const age = selectedOption.dataset.age;
-                const diplome = selectedOption.dataset.diplome;
-                const filiere = selectedOption.dataset.filiere;
-
-                // Stocker les critères pour vérification
-                currentCriteria = {
-                    experience: experience ? parseInt(experience) : null,
-                    age: age ? parseInt(age) : null,
-                    diplome: diplome || null,
-                    filiere: filiere || null
-                };
-
-                criteriaList.innerHTML = '';
-                if (experience) {
-                    criteriaList.innerHTML += `<li>Expérience minimum : <strong>${experience} ans</strong></li>`;
-                }
-                if (age) {
-                    criteriaList.innerHTML += `<li>Âge maximum : <strong>${age} ans</strong></li>`;
-                }
-                if (diplome) {
-                    criteriaList.innerHTML += `<li>Diplôme : <strong>${diplome}</strong></li>`;
-                }
-                if (filiere) {
-                    criteriaList.innerHTML += `<li>Filière : <strong>${filiere}</strong></li>`;
-                }
-
-                criteriaInfo.style.display = 'block';
-                checkEligibility();
-            } else {
-                criteriaInfo.style.display = 'none';
-                currentCriteria = null;
-                hideEligibilityWarning();
-            }
-        }
-
-        // Vérification de l'éligibilité en temps réel
-        function checkEligibility() {
-            if (!currentCriteria) return;
-
-            const experienceInput = document.getElementById('anneesExperience');
-            const ageInput = document.getElementById('age');
-            const warningDiv = document.getElementById('eligibility-warning');
-            const messageSpan = document.getElementById('eligibility-message');
-            const submitBtn = document.getElementById('submit-btn');
-
-            let warnings = [];
-
-            // Vérifier l'expérience
-            if (currentCriteria.experience && experienceInput.value) {
-                const candidatExperience = parseInt(experienceInput.value);
-                if (candidatExperience < currentCriteria.experience) {
-                    warnings.push(`Expérience insuffisante (${candidatExperience} ans < ${currentCriteria.experience} ans requis)`);
-                }
-            }
-
-            // Vérifier l'âge
-            if (currentCriteria.age && ageInput.value) {
-                const candidatAge = parseInt(ageInput.value);
-                if (candidatAge > currentCriteria.age) {
-                    warnings.push(`Âge non conforme (${candidatAge} ans > ${currentCriteria.age} ans maximum)`);
-                }
-            }
-
-            if (warnings.length > 0) {
-                messageSpan.innerHTML = 'Vous ne semblez pas répondre aux critères : ' + warnings.join(', ');
-                warningDiv.style.display = 'block';
-                submitBtn.style.backgroundColor = '#dc3545';
-                submitBtn.textContent = 'Postuler quand même (non éligible)';
-            } else {
-                hideEligibilityWarning();
-            }
-        }
-
-        function hideEligibilityWarning() {
-            const warningDiv = document.getElementById('eligibility-warning');
-            const submitBtn = document.getElementById('submit-btn');
-            
-            warningDiv.style.display = 'none';
-            submitBtn.style.backgroundColor = '#28a745';
-            submitBtn.textContent = 'Enregistrer ma candidature';
-        }
-
-        // Initialisation au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Focus automatique sur le premier champ
-            document.getElementById('nom').focus();
-            
-            // Si une annonce est pré-sélectionnée, afficher ses critères
-            const annonceSelect = document.getElementById('annonce');
-            if (annonceSelect && annonceSelect.value) {
-                showAnnonceCriteria();
-            }
-        });
-    </script>
 </body>
 </html>

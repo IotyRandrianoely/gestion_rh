@@ -15,11 +15,20 @@ public class CritereRechService {
         this.repo = repo;
     }
 
-    public List<CritereRech> getAll() { return repo.findAll(); }
+    public CritereRech getById(Integer id) {
+        return repo.findById(id).orElse(null);
+    }
 
-    public CritereRech getById(Integer id) { return repo.findById(id).orElse(null); }
+    public List<CritereRech> getAll() {
+        return repo.findAll();
+    }
 
-    public CritereRech save(CritereRech c) { return repo.save(c); }
+    public CritereRech save(CritereRech critereRech) {
+        return repo.save(critereRech);
+    }
 
-    public void delete(Integer id) { repo.deleteById(id); }
+    public void delete(Integer id) {
+        repo.deleteById(id);
+    }
 }
+

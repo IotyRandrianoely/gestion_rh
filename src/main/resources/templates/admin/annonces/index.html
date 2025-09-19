@@ -1,30 +1,165 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin - Annonces</title>
+  <title>Admin - Annonces</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --danger:#e74c3c; --danger-d:#c0392b;
+      --muted:#8aa0b2;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); padding:22px; max-width:1200px; margin:0 auto;
+    }
+
+    /* Header / toolbar */
+    .page-header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+    }
+    .page-title{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .page-title h2{ font-size:22px; letter-spacing:.2px; }
+    .subtitle{ color:var(--sub); font-size:13px }
+    .stats{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .pill{
+      background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff;
+      padding:6px 12px; border-radius:999px; font-weight:700; font-size:12px;
+    }
+    .toolbar{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .btn{
+      text-decoration:none; display:inline-block; padding:10px 14px; border-radius:10px; font-weight:700; font-size:14px;
+      border:1px solid transparent; transition:background .2s, border-color .2s, transform .2s, box-shadow .2s;
+    }
+    .btn--primary{ background:var(--accent); color:#fff; border-color:rgba(0,0,0,0); }
+    .btn--primary:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2); }
+    .btn--ghost{ background:#fff; color:var(--primary); border-color:#cfe2f7; }
+    .btn--ghost:hover{ background:#f3f8ff; border-color:#b7d5f6; }
+
+    /* Table */
+    .table-wrap{ background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; }
+    th, td{ padding:14px 14px; border-bottom:1px solid var(--line); }
+    thead th{
+      background:#1f2b38; color:#ecf0f1; text-align:left; position:sticky; top:0; z-index:1;
+      font-weight:700; letter-spacing:.3px;
+    }
+    tbody tr:hover{ background:#f8fbff; }
+    tbody tr:nth-child(even){ background:#fcfeff; }
+    .col-id{ width:80px; color:var(--muted) }
+    .col-actions a{ margin:0 6px; text-decoration:none; font-weight:700; }
+    .link{ color:var(--primary); }
+    .link:hover{ color:var(--primary-d); }
+    .link--danger{ color:var(--danger) }
+    .link--danger:hover{ color:var(--danger-d) }
+
+    /* Empty state */
+    .empty{
+      text-align:center; padding:36px; color:var(--sub);
+    }
+    .empty b{ color:var(--text) }
+
+    /* Responsive table -> cartes */
+    @media (max-width: 780px){
+      thead{ display:none; }
+      table, tbody, tr, td{ display:block; width:100%; }
+      tr{ background:#fff; margin:12px 0; border:1px solid var(--line); border-radius:12px; }
+      td{ border:0; border-bottom:1px dashed var(--line); }
+      td:last-child{ border-bottom:0; }
+      td[data-label]::before{
+        content:attr(data-label) " : ";
+        font-weight:700; color:var(--sub); display:block; margin-bottom:4px;
+      }
+      .col-actions{ padding-top:4px; }
+    }
+
+    /* Pagination muette (facultative – liens #) */
+    .pagination{ display:flex; justify-content:center; gap:8px; margin-top:18px; }
+    .page-link{
+      background:#fff; border:1px solid var(--line); color:var(--text);
+      padding:8px 12px; border-radius:8px; text-decoration:none; font-size:14px;
+    }
+    .page-link:hover{ background:#3498db; color:#fff; border-color:#3498db; }
+    .page-link.active{ background:#3498db; color:#fff; border-color:#3498db; }
+  </style>
 </head>
 <body>
-<h2>Admin – Annonces</h2>
-<p><a th:href="@{/admin/annonces/new}">+ Nouvelle annonce</a></p>
 
-<table border="1" cellpadding="6">
-    <tr><th>ID</th><th>Profil</th><th>Description</th><th>Actions</th></tr>
-    <tr th:each="a : ${annonces}">
-        <td th:text="${a.id}"></td>
-        <td th:text="${a.profil}"></td>
-        <td th:text="${a.description}"></td>
-        <td>
-            <a th:href="@{/annonces/{id}(id=${a.id})}" target="_blank">Voir</a> |
-            <a th:href="@{/admin/annonces/edit/{id}(id=${a.id})}">Modifier</a> |
-            <a th:href="@{/admin/annonces/delete/{id}(id=${a.id})}"
-               onclick="return confirm('Supprimer ?');">Supprimer</a> |
-            <a th:href="@{/candidats?annonceId={id}(id=${a.id})}">Candidats</a>
-        </td>
-    </tr>
-</table>
 
-<p><a th:href="@{/admin/candidats}">Gestion des candidats</a></p>
+  <div class="page-header">
+    <div class="page-title">
+      <h2>Administration des Annonces</h2>
+      <div class="subtitle">Gérez vos offres : création, édition, suppression — avec aperçu rapide.</div>
+    </div>
 
-<p><a th:href="@{/annonces}">⬅ Revenir au site</a></p>
+    <div class="stats">
+      <span class="pill">Total&nbsp;: <span th:text="${#lists.size(annonces)}">0</span></span>
+    </div>
+
+    <div class="toolbar">
+      <a class="btn btn--primary" th:href="@{/admin/annonces/new}">+ Nouvelle annonce</a>
+      <a class="btn btn--ghost" href="#">Actualiser</a>
+      <a class="btn btn--ghost" href="#">Exporter (CSV)</a>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="annonces-table">
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          <th>Poste</th>
+          <th>Description</th>
+          <th>Date</th>
+          <th style="width:220px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:if="${#lists.isEmpty(annonces)}">
+          <td colspan="5" class="empty">
+            <b>Aucune annonce</b> pour le moment. Cliquez sur “Nouvelle annonce” pour en créer une.
+          </td>
+        </tr>
+
+        <tr th:each="a : ${annonces}">
+          <td class="col-id" th:text="${a.id}" th:attr="data-label='ID'">1</td>
+          <td th:text="${a.poste.profil}" th:attr="data-label='Poste'">Profil</td>
+          <td th:text="${a.poste.description}" th:attr="data-label='Description'">Description</td>
+          <td th:text="${a.datePublication}" th:attr="data-label='Date'">2025-01-01</td>
+          <td class="col-actions" th:attr="data-label='Actions'">
+            <a class="link" th:href="@{/annonces/{id}(id=${a.id})}" target="_blank">Voir</a>
+            <a class="link" th:href="@{/admin/annonces/edit/{id}(id=${a.id})}">Modifier</a>
+            <a class="link link--danger"
+               th:href="@{/admin/annonces/delete/{id}(id=${a.id})}"
+               onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?');">Supprimer</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination muette (tu brancheras plus tard si tu veux) -->
+  <div class="pagination">
+    <a href="#" class="page-link">← Précédent</a>
+    <a href="#" class="page-link active">1</a>
+    <a href="#" class="page-link">2</a>
+    <a href="#" class="page-link">3</a>
+    <a href="#" class="page-link">Suivant →</a>
+  </div>
+
+
 </body>
 </html>

@@ -15,9 +15,19 @@ public class Annonce {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String profil;
-    private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "id_poste")
+    private Poste poste;
+
+    public Poste getPoste() {
+        return poste;
+    }
+
+public void setPoste(Poste poste) {
+    this.poste = poste;
+}
+   
     @ManyToOne
     @JoinColumn(name="critere_rech_id")
     private CritereRech critereRech;
@@ -27,10 +37,13 @@ public class Annonce {
     // getters/setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-    public String getProfil() { return profil; }
-    public void setProfil(String profil) { this.profil = profil; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getProfil() { 
+        return poste != null ? poste.getProfil() : null; 
+    }
+    
+    public String getDescription() { 
+        return poste != null ? poste.getDescription() : null; 
+    }
     public CritereRech getCritereRech() { return critereRech; }
     public void setCritereRech(CritereRech critereRech) { this.critereRech = critereRech; }
     public LocalDate getDatePublication() { return datePublication; }

@@ -1,20 +1,206 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Liste des annonces</title>
+  <title>Offres d’emploi – Recrutement RH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      line-height: 1.6;
+      background: #f5f7fa;
+      color: #2c3e50;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      width: 100%;
+      height: 320px;
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+                  url('/images/banner.jpg') center/cover no-repeat;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; color: #fff;
+      text-shadow: 0 3px 12px rgba(0,0,0,.45);
+    }
+    .hero h1 { font-size: 40px; font-weight: 700; }
+    .hero p  { margin-top: 10px; font-size: 16px; opacity: .95; }
+
+    /* ===== NAV ===== */
+    nav {
+      background: #1f2b38;
+      display: flex; justify-content: center; gap: 36px;
+      padding: 14px 16px;
+    }
+    nav a {
+      color: #ecf0f1; text-decoration: none; font-weight: 500;
+      padding: 6px 8px; border-radius: 6px; transition: background .25s, color .25s;
+    }
+    nav a:hover { background: #2b3b4f; color: #1abc9c; }
+
+    /* ===== TITRE + RECHERCHE ===== */
+    .container { max-width: 1200px; margin: 36px auto; padding: 0 20px; }
+    .title { text-align: center; margin-bottom: 18px; }
+    .title h2 {
+      display: inline-block; padding-bottom: 6px;
+      border-bottom: 2px solid #3498db;
+      font-size: 28px;
+    }
+
+    .search-bar {
+      margin: 18px auto 28px; display: flex; justify-content: center;
+    }
+    .search-bar form { display: flex; width: 100%; max-width: 720px; }
+    .search-bar input {
+      flex: 1; padding: 12px 16px; border: 1px solid #dce2e8;
+      border-right: 0; border-radius: 10px 0 0 10px; outline: none; font-size: 15px;
+    }
+    .search-bar button {
+      padding: 12px 18px; border: 0; cursor: pointer;
+      background: #3498db; color: #fff; font-weight: 600;
+      border-radius: 0 10px 10px 0; transition: background .25s;
+    }
+    .search-bar button:hover { background: #2980b9; }
+
+    /* ===== GRID 3 COL ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+    @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 720px)  { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+      padding: 20px; display: flex; flex-direction: column;
+      transition: transform .25s, box-shadow .25s;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 12px 22px rgba(0,0,0,.12); }
+
+    .card__title { font-weight: 700; font-size: 18px; margin-bottom: 10px; color: #243447; }
+    .card__desc  { color: #4b5a6a; font-size: 14px; flex-grow: 1; }
+
+    .meta { margin: 12px 0; color: #6c7a89; font-size: 13px; }
+    .badge { background: #eef6ff; color: #1d6fdc; padding: 4px 10px; border-radius: 20px; font-weight: 600; margin-right: 6px; }
+    .badge.green { background: #eaf9f0; color: #1c9d57; }
+
+    .btn {
+      display: inline-block; text-decoration: none; font-weight: 700; font-size: 14px;
+      padding: 10px 14px; border-radius: 8px; transition: background .2s;
+      background: #3498db; color: #fff; text-align: center;
+    }
+    .btn:hover { background: #2980b9; }
+
+    /* ===== PAGINATION ===== */
+    .pagination {
+      display: flex; justify-content: center; gap: 10px; margin-top: 30px;
+    }
+    .page-link {
+      padding: 8px 14px; border-radius: 6px;
+      background: #fff; border: 1px solid #dce2e8;
+      text-decoration: none; color: #2c3e50; font-size: 14px;
+      transition: background .2s, color .2s;
+    }
+    .page-link:hover { background: #3498db; color: #fff; }
+    .page-link.active { background: #3498db; color: #fff; border-color: #3498db; }
+
+    /* ===== ABOUT / CONTACT / FOOTER ===== */
+    section.block { margin-top: 64px; text-align: center; }
+    section.block p { max-width: 900px; margin: auto; color: #4b5a6a; }
+
+    #contact { background: #1f2b38; color: #e1e7ee; padding: 48px 20px; margin-top: 60px; }
+    #contact h3 { font-size: 24px; margin-bottom: 20px; }
+    .contact-grid {
+      max-width: 1000px; margin: auto; display: grid; gap: 20px; grid-template-columns: repeat(3, 1fr);
+    }
+    @media(max-width: 900px){ .contact-grid { grid-template-columns: 1fr; } }
+    .contact-card {
+      background: #263545; border-radius: 12px; padding: 16px; text-align: center;
+    }
+    .contact-card b { display: block; color: #fff; margin-bottom: 8px; }
+    .contact-card span { color: #cfe0f5; }
+
+    footer { text-align: center; padding: 18px; color: #7f8c8d; background: #f0f3f6; margin-top: 40px; }
+  </style>
 </head>
 <body>
-<h2>Liste des annonces</h2>
-<ul>
-    <li th:each="a : ${annonces}">
-        <b th:text="${a.profil}">Profil</b> -
-        <span th:text="${a.description}">Description</span>
-        <a th:href="@{/annonces/{id}(id=${a.id})}">Voir détail</a> |
-        <a th:href="@{/candidats/postuler?annonceId={id}(id=${a.id})}">Postuler</a>
-    </li>
-</ul>
 
-<p><a th:href="@{/candidats}">Voir tous les candidats</a></p>
-<p><a th:href="@{/admin/annonces}">Espace admin</a></p>
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1>Bienvenue dans notre entreprise de recrutement RH</h1>
+      <p>Connectons les meilleurs talents aux meilleures opportunités.</p>
+    </div>
+  </section>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#annonces">Annonces</a>
+    <a href="#apropos">À propos</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <!-- CONTENU -->
+  <div class="container">
+    <div id="annonces" class="title"><h2>Offres d’emploi disponibles</h2></div>
+
+    <!-- Barre de recherche -->
+    <div class="search-bar">
+      <form th:action="@{/annonces}" method="get">
+        <input type="text" name="search" placeholder="Rechercher un poste…" th:value="${param.search}">
+        <button type="submit">Rechercher</button>
+      </form>
+    </div>
+
+    <!-- Grille -->
+    <div class="grid">
+      <div class="card" th:each="a : ${annonces}">
+        <div class="card__title" th:text="${a.poste != null ? a.poste.profil : 'Poste non défini'}">Profil</div>
+        <p class="card__desc" th:text="${a.poste != null ? a.poste.description : 'Description non disponible'}">Description</p>
+        <div class="meta">
+          <span class="badge" th:text="${a.critereRech != null ? a.critereRech.diplome?.nomDiplome : 'Diplôme'}">Diplôme</span>
+          <span class="badge green" th:text="${a.critereRech != null ? a.critereRech.anneesExperience + ' ans exp.' : '0 an'}">2 ans exp.</span>
+          <span th:text="${#temporals.format(a.datePublication, 'dd/MM/yyyy')}">01/01/2025</span>
+        </div>
+        <a class="btn" th:href="@{/annonces/{id}(id=${a.id})}">Voir l’annonce</a>
+      </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <a href="#" class="page-link">← Précédent</a>
+      <a href="#" class="page-link active">1</a>
+      <a href="#" class="page-link">2</a>
+      <a href="#" class="page-link">3</a>
+      <a href="#" class="page-link">Suivant →</a>
+    </div>
+
+    <!-- À propos -->
+    <section id="apropos" class="block">
+      <h2>À propos</h2>
+      <p>
+        Notre plateforme simplifie le recrutement pour les candidats comme pour les entreprises.  
+        Transparence, rapidité et pertinence : nous sommes là pour vous accompagner.
+        Nous plaçons l’humain au centre de nos priorités.
+Pour chaque candidat, nous mettons en avant ses compétences, son parcours et son potentiel, afin de lui offrir des opportunités concrètes et durables.
+Nous proposons également des conseils personnalisés pour optimiser les candidatures et réussir les entretiens.
+      </p>
+    </section>
+  </div>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <h3>Contact</h3>
+    <div class="contact-grid">
+      <div class="contact-card"><b>📧 Email</b><span>contact@entreprise-rh.com</span></div>
+      <div class="contact-card"><b>☎️ Téléphone</b><span>+261 34 00 000 00</span></div>
+      <div class="contact-card"><b>📍 Adresse</b><span>Antananarivo, Madagascar</span></div>
+    </div>
+  </section>
+
+  <footer>© 2025 Entreprise de Recrutement RH — Tous droits réservés.</footer>
+
 </body>
 </html>

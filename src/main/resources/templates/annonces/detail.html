@@ -1,23 +1,129 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Détail annonce</title>
+  <title>Détail annonce</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background: #f5f7fa; color: #2c3e50; }
+
+    /* Bandeau fin pour cohérence visuelle */
+    .hero-mini {
+      height: 180px;
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+                  url('/images/banner.jpg') center/cover no-repeat;
+      display: flex; align-items: center; justify-content: center; color: #fff; text-shadow: 0 3px 12px rgba(0,0,0,.45);
+    }
+    .hero-mini h1 { font-size: 28px; font-weight: 700; }
+
+    .wrapper { max-width: 1100px; margin: 28px auto; padding: 0 20px; }
+
+    .header-card {
+      background: #fff; padding: 22px; border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08); margin-bottom: 18px;
+    }
+    .header-card h2 { font-size: 24px; }
+    .sub { color: #6c7a89; margin-top: 6px; }
+
+    /* Layout 2 colonnes */
+    .content {
+      display: grid; grid-template-columns: 2fr 1fr; gap: 22px;
+    }
+    @media (max-width: 900px){ .content { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: #fff; padding: 22px; border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    }
+    .panel + .panel { margin-top: 16px; }
+
+    h3 { font-size: 18px; margin-bottom: 10px; }
+    .row { margin: 12px 0; color: #34495e; }
+    .row b { color: #243447; display: inline-block; min-width: 140px; }
+
+    /* Colonne droite (visuel + CTA) */
+    .side {
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .side .visual {
+      height: 220px; border-radius: 12px; overflow: hidden;
+      background: url('/images/banner.jpg') center/cover no-repeat;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    }
+
+    .cta {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px;
+    }
+    .btn {
+      display: inline-block; padding: 12px 18px; border-radius: 10px;
+      text-decoration: none; font-weight: 700; transition: transform .2s, box-shadow .2s, background .2s;
+    }
+    .btn--apply { background: #2ecc71; color: #fff; }
+    .btn--apply:hover { background: #27ae60; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(39,174,96,.25); }
+    .btn--back  { background: #3498db; color: #fff; }
+    .btn--back:hover  { background: #2980b9; transform: translateY(-2px); box-shadow: 0 6px 14px rgba(41,128,185,.25); }
+
+    .muted { color: #7f8c8d; font-style: italic; }
+
+    /* Badges */
+    .badge { background: #eef6ff; color: #1d6fdc; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; display: inline-block; }
+    .badge + .badge { margin-left: 8px; }
+  </style>
 </head>
 <body>
-<h2>Détail annonce</h2>
-<p><b>Profil :</b> <span th:text="${annonce.profil}"></span></p>
-<p><b>Description :</b> <span th:text="${annonce.description}"></span></p>
-<p><b>Date :</b> <span th:text="${annonce.datePublication}"></span></p>
 
-<h3>Critères</h3>
-<p>Expérience : <span th:text="${annonce.critereRech.anneesExperience}"></span> ans</p>
-<p>Diplôme : <span th:text="${annonce.critereRech.diplome.nomDiplome}"></span></p>
-<p>Filière : <span th:text="${annonce.critereRech.filiere.nomFiliere}"></span></p>
+  <div class="hero-mini">
+    <h1>Détail de l’offre</h1>
+  </div>
 
-<p>
-    <a th:href="@{/candidats/postuler?annonceId={id}(id=${annonce.id})}" style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 3px;">Postuler à cette annonce</a>
-</p>
+  <div class="wrapper">
+    <!-- En-tête -->
+    <div class="header-card">
+      <h2 th:text="${annonce.poste.profil}">Intitulé du poste</h2>
+      <div class="sub">
+        <span class="badge" th:text="${annonce.critereRech.diplome.nomDiplome}">Diplôme</span>
+        <span class="badge" th:text="${annonce.critereRech.anneesExperience + ' ans exp.'}">2 ans exp.</span>
+        <span class="muted" style="margin-left:10px;"
+              th:text="${#temporals.format(annonce.datePublication, 'dd/MM/yyyy')}">01/01/2025</span>
+      </div>
+    </div>
 
-<p><a th:href="@{/annonces}">Retour</a> | <a th:href="@{/candidats?annonceId={id}(id=${annonce.id})}">Voir les candidats</a></p>
+    <div class="content">
+      <!-- Colonne gauche -->
+      <div>
+        <div class="panel">
+          <h3>Description du poste</h3>
+          <div class="row" th:text="${annonce.poste.description}">
+            Participer au développement et à la maintenance d’applications… 
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Critères requis</h3>
+          <div class="row"><b>Expérience :</b> <span th:text="${annonce.critereRech.anneesExperience}">2</span> ans</div>
+          <div class="row"><b>Diplôme :</b> <span th:text="${annonce.critereRech.diplome.nomDiplome}">Licence</span></div>
+          <div class="row"><b>Filière :</b> <span th:text="${annonce.critereRech.filiere.nomFiliere}">Informatique</span></div>
+        </div>
+
+        <div class="cta">
+          <a class="btn btn--apply" th:href="@{/annonces/{id}/postuler(id=${annonce.id})}">Postuler maintenant</a>
+          <a class="btn btn--back"  th:href="@{/annonces}">← Retour aux annonces</a>
+        </div>
+      </div>
+
+      <!-- Colonne droite -->
+      <aside class="side">
+        <div class="visual"></div>
+        <div class="panel">
+          <h3>Pourquoi nous rejoindre ?</h3>
+          <div class="row">• Projets stimulants et stack moderne</div>
+          <div class="row">• Culture d’équipe bienveillante et apprentissage continu</div>
+          <div class="row">• Package attractif et perspectives d’évolution</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+
 </body>
 </html>
