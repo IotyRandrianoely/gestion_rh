@@ -543,6 +543,11 @@
                                     <i class="fas fa-calendar-plus"></i>
                                     Planifier entretien
                                 </a>
+                                <!-- Nouveau bouton manuel -->
+                                <a th:href="@{'/candidats/planifier_entretien_manual/' + ${c.id}}" class="btn btn-info" style="background:linear-gradient(135deg,#98c1d9,#3d5a80); color:white;">
+                                    <i class="fas fa-clock"></i>
+                                    Planifier entretien manuel
+                                </a>
                             </div>
                             <div th:if="${c.estPropose != null and c.estPropose}" class="status-badge status-proposed">
                                 <i class="fas fa-check-circle"></i>

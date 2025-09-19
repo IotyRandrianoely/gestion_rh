@@ -53,4 +53,4 @@ insert into poste(id, nom_poste) values
 (2, 'Analyste RH'),
 (3, 'Chef de projet');
 insert into candidat(id, id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, date_candidature) values
-(3, 1, 'iohwef', 'liyawf', 26, 1, '123 rue A', 'jean.dupont@mail.com', 3, 'Motivé et passionné.', 'cv_jean.pdf', '2025-09-10');
+(4, 1, 'ibuoyaeFV', 'onicew', 26, 1, '123 rue A', 'jean.dupont@mail.com', 3, 'Motivé et passionné.', 'cv_jean.pdf', '2025-09-10');

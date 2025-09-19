@@ -10,12 +10,12 @@ import com.example.gestion_rh.service.CandidatService;
 import com.example.gestion_rh.service.ContratEssaiService;
 import com.example.gestion_rh.service.PlaningEntretienService;
 
-
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.List;
 import com.example.gestion_rh.model.ContratEssai;
 import com.example.gestion_rh.model.PlaningEntretien;
+import com.example.gestion_rh.model.Candidat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +23,13 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import java.io.IOException;
 import java.net.URLConnection;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @Controller
 @RequestMapping("/candidats")
@@ -82,4 +89,36 @@ public class CandidatController {
         planingEntretienService.creerPlaningEntretienPourCandidat(id);
         return "redirect:/candidats";
     }
-}         
+
+    // --- NOUVEAU : Planification manuelle ---
+    @GetMapping("planifier_entretien_manual/{id}")
+    public String planifierEntretienManual(@PathVariable Long id, Model model) {
+        model.addAttribute("candidat", candidatService.getById(id));
+        return "candidats/planifier_entretien_manual";
+    }
+
+    @PostMapping("planifier_entretien_manual")
+    public String enregistrerPlaningManuel(@RequestParam Long candidatId,
+                                           @RequestParam String date,
+                                           @RequestParam String time) {
+        Candidat candidat = candidatService.getById(candidatId);
+        if (candidat == null) {
+            return "redirect:/candidats";
+        }
+        LocalDate d = LocalDate.parse(date);      // format yyyy-MM-dd
+        LocalTime t = LocalTime.parse(time);      // format HH:mm
+        LocalDateTime debut = LocalDateTime.of(d, t);
+
+        PlaningEntretien plan = new PlaningEntretien();
+        plan.setCandidat(candidat);
+        plan.setDateDebut(debut);
+        plan.setDateFin(debut.plusHours(1)); // par défaut 1h
+
+        planingEntretienService.creerPlaningEntretien(plan);
+
+        candidat.setEstPropose(true);
+        candidatService.save(candidat);
+
+        return "redirect:/candidats";
+    }
+}

@@ -45,6 +45,9 @@
         <a th:href="@{/candidats/planifier_entretien/{id}(id=${candidat.id})}" class="btn btn-success">
             Planifier entretien
         </a>
+        <a th:href="@{/candidats/planifier_entretien_manual/{id}(id=${candidat.id})}" class="btn btn-success" style="background:#2a9d8f; margin-left:8px;">
+            Planifier entretien manuel
+        </a>
     </div>
 
     <!-- Sinon afficher la date de fin du contrat si elle est fournie via contratsMap dans le modèle -->
