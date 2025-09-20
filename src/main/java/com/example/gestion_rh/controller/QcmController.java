@@ -17,6 +17,7 @@ import com.example.gestion_rh.service.AnnonceService;
 import com.example.gestion_rh.model.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 @Controller
 @RequestMapping("/qcm")
@@ -77,52 +78,79 @@ public class QcmController {
     @GetMapping("/entretien/{filiereId}")
     public String getQuestionsEntretien(
             @PathVariable int filiereId,
-            @RequestParam(defaultValue = "1") Integer candidatId,
+            @RequestParam(defaultValue = "7") Integer candidatId,
             @RequestParam(defaultValue = "1") Integer annonceId,
             Model model) {
-        List<QcmQuestion> allQuestions = questionService.getQuestionEntretien(filiereId);
+        
         List<QcmQuestion> selectedQuestions = new ArrayList<>();
         
-        // Stocker les IDs pour la soumission
-        model.addAttribute("candidatId", candidatId);
-        model.addAttribute("annonceId", annonceId);
-        model.addAttribute("filiereId", filiereId);
-        
-        // Ajouter un objet vide pour la soumission du formulaire
-        model.addAttribute("qcmSubmission", new QcmSubmission());
-        
-        // Si c'est l'ID 1, on prend 10 questions
         if (filiereId == 1) {
-            int count = 0;
-            for (QcmQuestion question : allQuestions) {
-                if (count >= 10) break;
+            // Pour ID 1, prendre toutes les questions de la filière 1
+            List<QcmQuestion> filiereQuestions = questionService.getQuestionEntretien(filiereId);
+            for (QcmQuestion question : filiereQuestions) {
                 List<QcmOption> options = optionService.getOptionsByQuestionId(question.getId());
-                question.setOptions(options);
-                selectedQuestions.add(question);
-                count++;
+                if (options != null && !options.isEmpty()) {  // Vérifier si la question a des options
+                    question.setOptions(options);
+                    selectedQuestions.add(question);
+                    if (selectedQuestions.size() >= 10) break; // Limiter à 10 questions
+                }
             }
         } else {
-            // Pour les autres IDs, on prend 3 questions de l'ID 1 et le reste d'autres filières
-            List<QcmQuestion> filiereOneQuestions = questionService.getQuestionEntretien(1);
+            // Pour les autres filières : 70% filière spécifique, 30% RH (ID 1)
+            List<QcmQuestion> filiereQuestions = questionService.getQuestionEntretien(filiereId);
+            List<QcmQuestion> rhQuestions = questionService.getQuestionEntretien(1);
             
-            // Prendre 3 questions de l'ID 1
-            for (int i = 0; i < 3 && i < filiereOneQuestions.size(); i++) {
-                QcmQuestion question = filiereOneQuestions.get(i);
+            // Calculer le nombre de questions pour chaque catégorie
+            int totalQuestions = 10;
+            int rhQuestionsCount = (int) Math.ceil(totalQuestions * 0.3); // 30% questions RH
+            int filiereQuestionsCount = totalQuestions - rhQuestionsCount; // 70% questions filière
+            
+            // Ajouter les questions RH (30%)
+            for (QcmQuestion question : rhQuestions) {
                 List<QcmOption> options = optionService.getOptionsByQuestionId(question.getId());
-                question.setOptions(options);
-                selectedQuestions.add(question);
+                if (options != null && !options.isEmpty()) {
+                    question.setOptions(options);
+                    selectedQuestions.add(question);
+                    if (selectedQuestions.size() >= rhQuestionsCount) break;
+                }
             }
             
-            // Prendre le reste des questions de la filière actuelle
-            for (QcmQuestion question : allQuestions) {
-                if (selectedQuestions.size() >= 10) break;
+            // Ajouter les questions de la filière spécifique (70%)
+            for (QcmQuestion question : filiereQuestions) {
                 List<QcmOption> options = optionService.getOptionsByQuestionId(question.getId());
-                question.setOptions(options);
-                selectedQuestions.add(question);
+                if (options != null && !options.isEmpty()) {
+                    question.setOptions(options);
+                    selectedQuestions.add(question);
+                    if (selectedQuestions.size() >= totalQuestions) break;
+                }
             }
         }
         
+        // Si on n'a pas assez de questions valides, compléter avec des questions RH
+        if (selectedQuestions.size() < 10) {
+            List<QcmQuestion> rhQuestions = questionService.getQuestionEntretien(1);
+            for (QcmQuestion question : rhQuestions) {
+                if (!selectedQuestions.contains(question)) {
+                    List<QcmOption> options = optionService.getOptionsByQuestionId(question.getId());
+                    if (options != null && !options.isEmpty()) {
+                        question.setOptions(options);
+                        selectedQuestions.add(question);
+                        if (selectedQuestions.size() >= 10) break;
+                    }
+                }
+            }
+        }
+        
+        // Mélanger les questions pour plus d'aléatoire
+        Collections.shuffle(selectedQuestions);
+        
+        // Ajouter les attributs au modèle
+        model.addAttribute("candidatId", candidatId);
+        model.addAttribute("annonceId", annonceId);
+        model.addAttribute("filiereId", filiereId);
+        model.addAttribute("qcmSubmission", new QcmSubmission());
         model.addAttribute("questions", selectedQuestions);
+        
         return "qcm/entretien";
     }
 
@@ -139,7 +167,7 @@ public class QcmController {
     @PostMapping("/submit-answers")
     public String submitAnswers(
             @ModelAttribute("qcmSubmission") QcmSubmission submission,
-            @RequestParam(defaultValue = "1") Integer candidatId,
+            @RequestParam(defaultValue = "7") Integer candidatId,
             @RequestParam(defaultValue = "1") Integer annonceId,
             Model model) {
         List<UserAnswer> answers = submission != null ? submission.getAnswers() : new ArrayList<>();
