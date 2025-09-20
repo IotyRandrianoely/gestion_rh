@@ -73,9 +73,9 @@ CREATE TABLE critere_rech_mission (
 );
 
 -- Diplômes
-INSERT INTO diplome (nom_diplome) VALUES
- ('CEPE'), ('BEPC'), ('Baccalauréat'),
- ('Licence'), ('Master'), ('Doctorat');
+-- INSERT INTO diplome (nom_diplome) VALUES
+--  ('CEPE'), ('BEPC'), ('Baccalauréat'),
+--  ('Licence'), ('Master'), ('Doctorat');
 
 -- Filières
 INSERT INTO filiere (nom_filiere) VALUES
