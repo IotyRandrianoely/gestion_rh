@@ -107,10 +107,10 @@ public class ClientController {
             System.out.println("Diplome ID: " + (candidat.getDiplome() != null ? candidat.getDiplome().getId() : "null"));
 
             Candidat savedCandidat = candidatService.save(candidat);
-            System.out.println("Candidat sauvegardé avec ID: " + (savedCandidat != null ? savedCandidat.getId() : "null"));
-
             if (savedCandidat != null && savedCandidat.getId() != null) {
                 redirectAttributes.addFlashAttribute("success", "Candidat sauvegardé avec succès !");
+                // Passer les IDs comme paramètres dans l'URL
+                return "redirect:/qcm/start?candidatId=" + savedCandidat.getId() + "&annonceId=" + annonceId;
             } else {
                 redirectAttributes.addFlashAttribute("error", "Erreur lors de la sauvegarde");
             }
@@ -121,6 +121,6 @@ public class ClientController {
             redirectAttributes.addFlashAttribute("error", "Erreur technique: " + e.getMessage());
         }
         
-        return "redirect:/admin/candidats";
+        return "redirect:/annonces";  // En cas d'erreur, retour à la liste des annonces
     }
 }
