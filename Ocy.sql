@@ -37,14 +37,20 @@ CREATE TABLE critere_rech (
     filiere INT NOT NULL REFERENCES filiere(id)
 );
 
+CREATE TABLE poste (
+    id SERIAL PRIMARY KEY,
+    profil VARCHAR(50),
+    description VARCHAR(120)
+);
+
 -- Table annonce (plus de DEFAULT CURRENT_DATE)
 CREATE TABLE annonce (
     id SERIAL PRIMARY KEY,
-    profil VARCHAR(40) NOT NULL,
-    description VARCHAR(120) NOT NULL,
     critere_rech_id INT NOT NULL REFERENCES critere_rech(id),
-    date_publication DATE NOT NULL
+    date_publication DATE NOT NULL,
+    id_poste INT NOT NULL REFERENCES poste(id)
 );
+
 
 -- Table liaison critere_rech ↔ qualite
 CREATE TABLE critere_rech_qualite (
@@ -70,6 +76,8 @@ INSERT INTO filiere (nom_filiere) VALUES
  ('Informatique'), ('Gestion'), ('Santé'),
  ('Droit'), ('Tourisme');
 
+INSERT INTO poste(profil, description) VALUES 
+ ('Développeur Java', 'Développement et maintenance des applications'),('Comptable', 'Gestion des écritures comptables et bilans financiers'),('Guide touristique', 'Accompagner les visiteurs et expliquer les sites');
 -- Qualités
 INSERT INTO qualite (nom_qualite) VALUES
  ('Ponctualité'), ('Créativité'), ('Travail en équipe'),
@@ -86,8 +94,18 @@ INSERT INTO critere_rech (annees_experience, diplome, age, genre, filiere)
 VALUES (2, 4, 25, 1, 1);  -- Licence, 25 ans, Homme, Informatique
 
 -- Exemple d’annonce avec date posée
-INSERT INTO annonce (profil, description, critere_rech_id, date_publication)
+INSERT INTO annonce (critere_rech_id, date_publication, id_poste)
 VALUES 
- ('Développeur Java', 'Développement et maintenance des applications', 1, DATE '2025-01-15'),
- ('Comptable', 'Gestion des écritures comptables et bilans financiers', 1, DATE '2025-02-10'),
- ('Guide touristique', 'Accompagner les visiteurs et expliquer les sites', 1, DATE '2025-03-05');
+ (1, DATE '2025-01-15', 1),
+ (1, DATE '2025-02-10', 2),
+ (1, DATE '2025-03-05',3);
+ INSERT INTO candidat (id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome)
+VALUES
+(1, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
+ 'Motivé pour évoluer dans votre entreprise', 'cv_jean.pdf', 2),
+
+(1, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
+ 'Expérimentée et dynamique', 'cv_marie.pdf', 3),
+
+(2, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
+ 'Prêt à relever des défis', 'cv_paul.pdf', 4);
