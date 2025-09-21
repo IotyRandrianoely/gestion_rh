@@ -105,4 +105,22 @@ public class Candidat {
     // *** NOUVEAU GETTER/SETTER POUR DIPLOME ***
     public Diplome getDiplome() { return diplome; }
     public void setDiplome(Diplome diplome) { this.diplome = diplome; }
+
+    public Integer getAnneesExperience() {
+        return anneesExperience;
+    }
+
+    public void setAnneesExperience(Integer anneesExperience) {
+        this.anneesExperience = anneesExperience;
+    }
+
+   
+   
+    public Boolean getEstPropose() {
+        return estPropose;
+    }
+
+    public void setEstPropose(Boolean estPropose) {
+        this.estPropose = estPropose;
+    }
 }

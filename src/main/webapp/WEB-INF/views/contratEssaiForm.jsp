@@ -1,5 +1,5 @@
 <%@ page import="java.util.List" %>
-<%@ page import="com.example.gestion_rh.lysaModel.Poste" %>
+<%@ page import="com.example.gestion_rh.model.Poste" %>
 <%
     String candidateId = request.getParameter("candidateId");
     String annonceId = request.getParameter("annonceId");

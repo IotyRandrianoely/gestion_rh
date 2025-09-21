@@ -1,10 +1,6 @@
 package com.example.gestion_rh.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "poste")
@@ -13,10 +9,9 @@ public class Poste {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String profil;
-    private String description;
+    private String nomPoste;
 
-    // Getters and setters
+    // Getters et setters
     public Long getId() {
         return id;
     }
@@ -25,19 +20,11 @@ public class Poste {
         this.id = id;
     }
 
-    public String getProfil() {
-        return profil;
+    public String getNomPoste() {
+        return nomPoste;
     }
 
-    public void setProfil(String profil) {
-        this.profil = profil;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setNomPoste(String nomPoste) {
+        this.nomPoste = nomPoste;
     }
 }
