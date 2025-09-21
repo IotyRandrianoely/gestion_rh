@@ -1,8 +1,8 @@
-package com.example.gestion_rh.lysaService;
+package com.example.gestion_rh.service;
 
-import com.example.gestion_rh.lysaModel.PlaningEntretien;
-import com.example.gestion_rh.lysaRepository.PlaningEntretienRepository;
-import com.example.gestion_rh.lysaDto.EntretienDTO;
+import com.example.gestion_rh.dto.EntretienDTO;
+import com.example.gestion_rh.model.PlaningEntretien;
+import com.example.gestion_rh.repository.PlaningEntretienRepository;
 
 import org.springframework.stereotype.Service;
 

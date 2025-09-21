@@ -1,4 +1,4 @@
-package com.example.gestion_rh.lysaDto;
+package com.example.gestion_rh.dto;
 
 import java.time.LocalDateTime;
 
