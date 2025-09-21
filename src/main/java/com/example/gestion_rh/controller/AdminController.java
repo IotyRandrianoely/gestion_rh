@@ -93,4 +93,6 @@ public class AdminController {
         annonceService.delete(id);
         return "redirect:/admin/annonces";
     }
+
+    
 }

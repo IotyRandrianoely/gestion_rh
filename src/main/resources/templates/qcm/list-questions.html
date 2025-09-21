@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Liste des Questions QCM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .filiere-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filiere-header {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .question-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .question-content {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .options-list {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .option-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .correct-option {
+            border-left: 4px solid #28a745;
+            background-color: #f0fff0;
+        }
+        .no-questions {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .option-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .option-text {
+            flex-grow: 1;
+        }
+        .btn-action {
+            padding: 4px 8px;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Liste des Questions QCM par Filière</h1>
+        
+        <div th:each="filiere : ${filieres}" class="filiere-section">
+            <div class="filiere-header">
+                <h2 th:text="${filiere.nomFiliere}">Nom de la filière</h2>
+            </div>
+            
+            <div th:if="${not #lists.isEmpty(questionsByFiliere.get(filiere.id))}">
+                <div th:each="question : ${questionsByFiliere.get(filiere.id)}" class="question-card">
+                    <div class="question-content">
+                        <span th:text="${question.text}">Question content</span>
+                    </div>
+                    
+                    <div class="options-list">
+                        <div th:each="option : ${question.options}" 
+                             th:class="${'option-item' + (option.correct ? ' correct-option' : '')}">
+                            <span class="option-text" th:text="${option.text}">Option content</span>
+                            <div class="option-actions">
+                                <a th:href="@{/qcm/options/edit/{id}(id=${option.id})}" 
+                                   class="btn btn-warning btn-action">
+                                    <i class="bi bi-pencil"></i> Modifier
+                                </a>
+                                <a th:href="@{/qcm/options/delete/{id}(id=${option.id})}" 
+                                   class="btn btn-danger btn-action"
+                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette option ?')">
+                                    <i class="bi bi-trash"></i> Supprimer
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Bouton pour ajouter une nouvelle option -->
+                        <div class="mt-3">
+                            <a th:href="@{/qcm/options/add/{id}(id=${question.id})}" 
+                               class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i> Ajouter une option
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(questionsByFiliere.get(filiere.id))}" class="no-questions">
+                Aucune question n'est disponible pour cette filière.
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="/admin/dashboard" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Ajout des icônes Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</body>
+</html>

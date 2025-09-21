@@ -18,7 +18,9 @@ import com.example.gestion_rh.model.*;
 import java.util.List;
 import java.util.Collections;
 import java.util.ArrayList;
-
+import java.util.Map;
+import java.util.stream.Collectors;
+import com.example.gestion_rh.service.FiliereService;
 @Controller
 @RequestMapping("/qcm")
 public class QcmController {
@@ -34,6 +36,9 @@ public class QcmController {
     
     @Autowired
     private AnnonceService annonceService;
+
+    @Autowired
+    private FiliereService filiereService;
 
     @GetMapping("/questions")
     public String listQuestions(Model model) {
@@ -242,5 +247,63 @@ public class QcmController {
         model.addAttribute("result", result);
         model.addAttribute("answers", detailedResults);
         return "qcm/results";
+    }
+    @GetMapping("/list-questions")
+    public String quest(Model model) {
+    List<QcmQuestion> allQuestions = questionService.getAllQuestions();
+        
+        // Pour chaque question, charger ses options
+        for (QcmQuestion question : allQuestions) {
+            List<QcmOption> options = optionService.getOptionsByQuestionId(question.getId());
+            question.setOptions(options);
+        }
+        
+        // Regrouper les questions par filière
+        Map<Integer, List<QcmQuestion>> questionsByFiliere = allQuestions.stream()
+            .collect(Collectors.groupingBy(q -> q.getEntity().getId()));
+        
+        model.addAttribute("questionsByFiliere", questionsByFiliere);
+        // Utiliser getAll() au lieu de getAllFilieres()
+        model.addAttribute("filieres", filiereService.getAll());
+        
+        return "qcm/list-questions";
+    }
+    @GetMapping("/options/add/{questionId}")
+    public String showAddOptionForm(@PathVariable Integer questionId, Model model) {
+        QcmQuestion question = questionService.getQuestionById(questionId).orElse(null);
+        if (question == null) {
+            return "redirect:/error";
+        }
+        
+        QcmOption option = new QcmOption();
+        option.setQuestion(question);
+        
+        model.addAttribute("option", option);
+        model.addAttribute("question", question);
+        return "qcm/option-form";
+    }
+
+    @PostMapping("/options/save")
+    public String saveOption(@ModelAttribute QcmOption option) {
+        optionService.saveOption(option);
+        return "redirect:/qcm/list-questions";
+    }
+
+    @GetMapping("/options/edit/{id}")
+    public String showEditOptionForm(@PathVariable Integer id, Model model) {
+        QcmOption option = optionService.getOptionById(id).orElse(null);
+        if (option == null) {
+            return "redirect:/error";
+        }
+        
+        model.addAttribute("option", option);
+        model.addAttribute("question", option.getQuestion());
+        return "qcm/option-form";
+    }
+
+    @GetMapping("/options/delete/{id}")
+    public String deleteOption(@PathVariable Integer id) {
+        optionService.deleteOption(id);
+        return "redirect:/qcm/list-questions";
     }
 }
