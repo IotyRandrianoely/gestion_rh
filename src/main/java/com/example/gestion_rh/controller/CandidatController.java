@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.example.gestion_rh.service.CandidatService;
 import com.example.gestion_rh.service.ContratEssaiService;
 import com.example.gestion_rh.service.PlaningEntretienService;
+import com.example.gestion_rh.service.HistoriqueScoreService;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,9 +28,13 @@ import java.net.URLConnection;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+// <-- Ajoute ces imports ----------
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
+// ----------------------------------
+import java.util.stream.Collectors;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/candidats")
@@ -38,25 +43,134 @@ public class CandidatController {
     private final CandidatService candidatService;
     private final ContratEssaiService contratEssaiService;
     private final PlaningEntretienService planingEntretienService;
+    private final HistoriqueScoreService historiqueScoreService; // <--- NEW
 
-    public CandidatController(CandidatService candidatService, ContratEssaiService contratEssaiService, PlaningEntretienService planingEntretienService) {
+    public CandidatController(CandidatService candidatService,
+                              ContratEssaiService contratEssaiService,
+                              PlaningEntretienService planingEntretienService,
+                              HistoriqueScoreService historiqueScoreService) { // <--- NEW param
         this.candidatService = candidatService;
         this.contratEssaiService = contratEssaiService;
         this.planingEntretienService = planingEntretienService;
+        this.historiqueScoreService = historiqueScoreService; // <--- assign
     }
 
-    // Liste des candidats
+    // Liste des candidats (avec filtres)
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("candidats", candidatService.getAll());
+    public String list(Model model,
+                       @RequestParam(required = false) String name,
+                       @RequestParam(required = false) Double minScore,
+                       @RequestParam(required = false) String profil,
+                       @RequestParam(required = false) String propose) {
+
+        List<Candidat> allCandidats = candidatService.getAll();
+        if (allCandidats == null) allCandidats = List.of();
+
+        // Construire scoresMap pour tous les candidats
+        Map<Long, Double> scoresMap = new java.util.HashMap<>();
+        for (Candidat c : allCandidats) {
+            try {
+                Integer annonceId = c.getAnnonce() != null ? c.getAnnonce().getId() : null;
+                Double score = (annonceId != null) ? historiqueScoreService.getLatestScoreFor(c.getId(), annonceId) : null;
+                scoresMap.put(c.getId(), score);
+            } catch (Exception ex) {
+                scoresMap.put(c.getId(), null);
+            }
+        }
+
+        // Construire contratsMap
         List<PlaningEntretien> contrats = planingEntretienService.listerPLaningEntretien();
-        // Construire une map <idCandidat, PlaningEntretien> (garde le premier contrat si plusieurs)
-        Map<Long, PlaningEntretien> contratsMap = contrats.stream()
-            .filter(ce -> ce.getCandidat() != null && ce.getCandidat().getId() != null)
-            .collect(Collectors.toMap(ce -> ce.getCandidat().getId(), ce -> ce, (a, b) -> a));
-        model.addAttribute("contratsEssai", contrats);
+        Map<Long, PlaningEntretien> contratsMap = new java.util.HashMap<>();
+        if (contrats != null) {
+            for (PlaningEntretien pe : contrats) {
+                if (pe != null && pe.getCandidat() != null && pe.getCandidat().getId() != null) {
+                    Long cid = pe.getCandidat().getId();
+                    if (!contratsMap.containsKey(cid)) contratsMap.put(cid, pe);
+                }
+            }
+        }
+
+        // Liste distincte des profils pour le select
+        Set<String> profils = allCandidats.stream()
+                .map(c -> c.getAnnonce() != null ? c.getAnnonce().getProfil() : null)
+                .filter(p -> p != null && !p.isBlank())
+                .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
+
+        // Appliquer filtres
+        List<Candidat> filtered = allCandidats.stream().filter(c -> {
+            // filter by name (contains nom or prenom)
+            if (name != null && !name.isBlank()) {
+                String low = name.trim().toLowerCase();
+                String nom = c.getNom() != null ? c.getNom().toLowerCase() : "";
+                String prenom = c.getPrenom() != null ? c.getPrenom().toLowerCase() : "";
+                if (!nom.contains(low) && !prenom.contains(low)) return false;
+            }
+            // filter by profil
+            if (profil != null && !profil.isBlank()) {
+                if (c.getAnnonce() == null || c.getAnnonce().getProfil() == null) return false;
+                if (!profil.equals(c.getAnnonce().getProfil())) return false;
+            }
+            // filter by propose status
+            if ("yes".equalsIgnoreCase(propose)) {
+                if (!Boolean.TRUE.equals(c.getEstPropose())) return false;
+            } else if ("no".equalsIgnoreCase(propose)) {
+                if (Boolean.TRUE.equals(c.getEstPropose())) return false;
+            }
+            // filter by minScore
+            if (minScore != null) {
+                Double s = scoresMap.get(c.getId());
+                if (s == null || s < minScore) return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+
+        // Trier : proposé first, puis ceux qui ont un planning, puis dateDebut asc, puis score desc, puis nom
+        filtered.sort((a, b) -> {
+            boolean propA = Boolean.TRUE.equals(a.getEstPropose());
+            boolean propB = Boolean.TRUE.equals(b.getEstPropose());
+            if (propA != propB) return propA ? -1 : 1;
+
+            boolean hasA = contratsMap.get(a.getId()) != null;
+            boolean hasB = contratsMap.get(b.getId()) != null;
+            if (hasA != hasB) return hasA ? -1 : 1;
+
+            PlaningEntretien pa = contratsMap.get(a.getId());
+            PlaningEntretien pb = contratsMap.get(b.getId());
+            if (hasA && hasB) {
+                if (pa != null && pb != null && pa.getDateDebut() != null && pb.getDateDebut() != null) {
+                    int cmpDate = pa.getDateDebut().compareTo(pb.getDateDebut());
+                    if (cmpDate != 0) return cmpDate;
+                } else if (pa != null && pa.getDateDebut() != null) {
+                    return -1;
+                } else if (pb != null && pb.getDateDebut() != null) {
+                    return 1;
+                }
+            }
+
+            Double sa = scoresMap.get(a.getId());
+            Double sb = scoresMap.get(b.getId());
+            double va = sa != null ? sa : Double.NEGATIVE_INFINITY;
+            double vb = sb != null ? sb : Double.NEGATIVE_INFINITY;
+            int cmpScore = Double.compare(vb, va);
+            if (cmpScore != 0) return cmpScore;
+
+            String na = a.getNom() != null ? a.getNom() : "";
+            String nb = b.getNom() != null ? b.getNom() : "";
+            return na.compareToIgnoreCase(nb);
+        });
+
+        model.addAttribute("candidats", filtered);
         model.addAttribute("contratsMap", contratsMap);
-        return "candidats/list";  // renvoie vers /WEB-INF/views/candidats/list.jsp
+        model.addAttribute("scoresMap", scoresMap);
+        model.addAttribute("profils", profils);
+
+        // conserver valeurs des filtres pour le formulaire
+        model.addAttribute("filterName", name);
+        model.addAttribute("filterMinScore", minScore);
+        model.addAttribute("filterProfil", profil);
+        model.addAttribute("filterPropose", propose);
+
+        return "candidats/list";
     }
 
     // Détail d'un candidat
