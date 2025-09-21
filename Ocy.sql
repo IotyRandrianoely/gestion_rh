@@ -32,7 +32,32 @@ CREATE TABLE mission (
     id SERIAL PRIMARY KEY,
     nom_mission VARCHAR(30) NOT NULL
 );
+INSERT INTO genre (genre) VALUES
+('Homme'),
+('Femme');
 
+-- Diplômes
+INSERT INTO diplome (nom_diplome) VALUES
+('Bepc'),
+('Baccalauréat'),
+('Licence'),
+('Master'),
+('Doctorat');
+
+-- Filières
+INSERT INTO filiere (nom_filiere) VALUES
+('Informatique'),
+('Gestion'),
+('Commerce'),
+('Droit'),
+('Médecine');
+
+-- Situations matrimoniales
+INSERT INTO situation_matrimonial (situation) VALUES
+('Célibataire'),
+('Marié(e)'),
+('Divorcé(e)'),
+('Veuf/Veuve');
 -- Table critere_rech
 CREATE TABLE critere_rech (
     id SERIAL PRIMARY KEY,
@@ -235,32 +260,7 @@ VALUES ('client1', '    ', 'client');
 -- ===============================
 
 -- Genres
-INSERT INTO genre (genre) VALUES
-('Homme'),
-('Femme');
 
--- Diplômes
-INSERT INTO diplome (nom_diplome) VALUES
-('Bepc'),
-('Baccalauréat'),
-('Licence'),
-('Master'),
-('Doctorat');
-
--- Filières
-INSERT INTO filiere (nom_filiere) VALUES
-('Informatique'),
-('Gestion'),
-('Commerce'),
-('Droit'),
-('Médecine');
-
--- Situations matrimoniales
-INSERT INTO situation_matrimonial (situation) VALUES
-('Célibataire'),
-('Marié(e)'),
-('Divorcé(e)'),
-('Veuf/Veuve');
 
 -- Exemples de candidats
 INSERT INTO candidat (id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome)
