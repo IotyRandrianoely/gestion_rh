@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détail candidat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .card { border: 1px solid #ddd; padding: 1.5rem; border-radius: 8px; max-width: 800px; }
+        .row { display:flex; gap:1rem; margin-bottom:0.5rem; }
+        .label { width:150px; font-weight:600; color:#333; }
+        .btn { display:inline-block; padding:0.5rem 0.9rem; border-radius:6px; text-decoration:none; color:white; }
+        .btn-primary { background:#3d5a80; }
+        .btn-success { background:#2a9d8f; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2 th:text="'Candidat : ' + ${candidat.nom} + ' ' + ${candidat.prenom}">Candidat</h2>
+
+    <div class="row"><div class="label">Nom :</div><div th:text="${candidat.nom}">Nom</div></div>
+    <div class="row"><div class="label">Prénom :</div><div th:text="${candidat.prenom}">Prénom</div></div>
+    <div class="row"><div class="label">Email :</div><div th:text="${candidat.email}">email@exemple.com</div></div>
+    <div class="row"><div class="label">Annonce :</div>
+        <div th:text="${candidat.annonce != null ? candidat.annonce.profil : '—'}">Profil annonce</div>
+    </div>
+    <div class="row"><div class="label">Date candidature :</div>
+        <div th:text="${candidat.dateCandidature != null ? #temporals.format(candidat.dateCandidature,'dd/MM/yyyy') : '—'}">01/01/2025</div>
+    </div>
+
+    <div class="row"><div class="label">Lettre motivation :</div>
+        <div th:text="${candidat.lettreMotivation != null ? candidat.lettreMotivation : '—'}">Lettre</div>
+    </div>
+
+    <div class="row"><div class="label">CV :</div>
+        <div>
+            <a th:if="${candidat.cv != null}" th:href="@{/candidats/cv/{file}(file=${candidat.cv})}" target="_blank">Télécharger CV</a>
+            <span th:if="${candidat.cv == null}">—</span>
+        </div>
+    </div>
+
+    <hr/>
+
+    <!-- Condition : si estPropose null ou false -> afficher bouton planifier entretien -->
+    <div th:if="${candidat.estPropose == null or !candidat.estPropose}">
+        <a th:href="@{/candidats/planifier_entretien/{id}(id=${candidat.id})}" class="btn btn-success">
+            Planifier entretien
+        </a>
+        <a th:href="@{/candidats/planifier_entretien_manual/{id}(id=${candidat.id})}" class="btn btn-success" style="background:#2a9d8f; margin-left:8px;">
+            Planifier entretien manuel
+        </a>
+    </div>
+
+    <!-- Sinon afficher la date de fin du contrat si elle est fournie via contratsMap dans le modèle -->
+    <div th:if="${candidat.estPropose != null and candidat.estPropose}">
+        <div class="row">
+            <div class="label">Contrat (fin) :</div>
+            <div th:text="${(contratsMap != null and contratsMap[candidat.id] != null and contratsMap[candidat.id].dateFin != null) ?
+                           #temporals.format(contratsMap[candidat.id].dateFin,'dd/MM/yyyy HH:mm') :
+                           'Contrat non trouvé'}">
+                01/01/2025 10:00
+            </div>
+        </div>
+    </div>
+
+    <p style="margin-top:1rem;">
+        <a th:href="@{/candidats}" class="btn btn-primary">Retour liste</a>
+    </p>
+</div>
+</body>
+</html>

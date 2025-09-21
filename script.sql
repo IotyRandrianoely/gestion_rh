@@ -94,7 +94,7 @@ create table poste_employe(
     id INT,
     id_employee INT,
     id_poste INT,
-    last_date DATE
+    last_date DATE 
 );
 create table departement(
     id INT,
@@ -125,12 +125,7 @@ create table historique_score(
     id_candidat INT,
     score double
 );
-create table historique_contrat_essai(
-    id INT,
-    id_candidat INT,
-    duree INT,
-    dateDebutContrat DATE
-);
+
 create table affiliation_organisme(
     id INT,
     idEmploye INT,
@@ -140,4 +135,30 @@ create table organisme(
     id INT,
     nomOrganisme VARCHAR(30),
     detail VARCHAR(30)
+);
+create table planing_entretien (
+    id INT primary key auto_increment,
+    id_candidat INT,
+    date_debut DATETIME,
+    date_fin DATETIME
+);
+create table contrat_essai (
+    id INT primary key auto_increment,
+    id_candidat INT,
+    id_poste INT,
+    date_debut DATE,
+    duree INT,
+    date_fin DATE,
+    salaire DOUBLE,
+    conditions TEXT,
+    etat VARCHAR(20) default 'En attente',
+    foreign key (id_candidat) references candidat(id),
+    foreign key (id_poste) references poste(id)
+);
+
+create table historique_contrat_essai(
+    id INT,
+    id_candidat INT,
+    duree INT,
+    dateDebutContrat DATE
 );

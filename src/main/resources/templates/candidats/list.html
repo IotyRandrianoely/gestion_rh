@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des candidats</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .filters { margin-bottom:1rem; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .filters label { font-size:0.9rem; }
+        input[type="text"], input[type="number"], select { padding:6px; border:1px solid #ccc; border-radius:4px; }
+        table { width:100%; border-collapse: collapse; margin-top:1rem; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+        th { background:#f4f6f8; }
+        .actions a { margin-right:6px; text-decoration:none; padding:6px 10px; border-radius:6px; color:#fff; }
+        .btn-success { background:#2a9d8f; }
+        .btn-primary { background:#3d5a80; }
+        .btn-info { background:linear-gradient(135deg,#98c1d9,#3d5a80); }
+        .small { font-size:0.9em; color:#555; }
+    </style>
+</head>
+<body>
+    <h1>Liste des candidats</h1>
+
+    <form class="filters" th:action="@{/candidats}" method="get">
+        <div>
+            <label>Nom / Prénom</label><br/>
+            <input type="text" name="name" th:value="${filterName}" placeholder="Recherche..." />
+        </div>
+
+        <div>
+            <label>Note ≥</label><br/>
+            <input type="number" step="0.1" name="minScore" th:value="${filterMinScore}" placeholder="ex: 70" />
+        </div>
+
+        <div>
+            <label>Profil annonce</label><br/>
+            <select name="profil">
+                <option value="">-- Tous --</option>
+                <option th:each="p : ${profils}" th:value="${p}" th:text="${p}" th:selected="${p==filterProfil}">Profil</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Proposé</label><br/>
+            <select name="propose">
+                <option value="">-- Tous --</option>
+                <option th:value="yes" th:selected="${filterPropose=='yes'}">Oui</option>
+                <option th:value="no" th:selected="${filterPropose=='no'}">Non</option>
+            </select>
+        </div>
+
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Note</th>
+                <th>Annonce</th>
+                <th>Actions</th>
+                <th>Entretien</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="c : ${candidats}">
+                <td th:text="${c.nom}">Nom</td>
+                <td th:text="${c.prenom}">Prénom</td>
+                <td th:text="${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id] : '—'}">—</td>
+                <td th:text="${c.annonce != null ? c.annonce.profil : '—'}">Profil annonce</td>
+                <td class="actions">
+                    <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn-primary">Détail</a>
+                    <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn-primary">Détail</a>
+                </td>
+                <td>
+                    <div th:if="${c.estPropose == null or !c.estPropose}" style="display:inline-block; margin-left:6px;">
+                        <a th:href="@{'/candidats/planifier_entretien/' + ${c.id}}" class="btn-success">Planifier entretien</a>
+                        <a th:href="@{'/candidats/planifier_entretien_manual/' + ${c.id}}" class="btn-info" style="margin-left:6px;">Planifier entretien manuel</a>
+                    </div>
+                    <div th:if="${c.estPropose != null and c.estPropose}">
+                        <span th:if="${contratsMap != null and contratsMap[c.id] != null and contratsMap[c.id].dateDebut != null}"
+                              th:text="${#temporals.format(contratsMap[c.id].dateDebut,'dd/MM/yyyy HH:mm')}">01/01/2025 09:00</span>
+                        <span th:if="${contratsMap == null or contratsMap[c.id] == null}" class="small">Proposé</span>
+                    </div>
+                </td>
+            </tr>
+
+            <tr th:if="${candidats == null or #lists.isEmpty(candidats)}">
+                <td colspan="6" style="text-align:center;">Aucun candidat trouvé.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p style="margin-top:1rem;">
+        <a th:href="@{/}" class="small">Accueil</a>
+    </p>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Annonces</title>
+</head>
+<body>
+<h2>Admin – Annonces</h2>
+<p><a th:href="@{/admin/annonces/new}">+ Nouvelle annonce</a></p>
+
+<table border="1" cellpadding="6">
+    <tr><th>ID</th><th>Profil</th><th>Description</th><th>Actions</th></tr>
+    <tr th:each="a : ${annonces}">
+        <td th:text="${a.id}"></td>
+        <td th:text="${a.profil}"></td>
+        <td th:text="${a.description}"></td>
+        <td>
+            <a th:href="@{/annonces/{id}(id=${a.id})}" target="_blank">Voir</a> |
+            <a th:href="@{/admin/annonces/edit/{id}(id=${a.id})}">Modifier</a> |
+            <a th:href="@{/admin/annonces/delete/{id}(id=${a.id})}"
+               onclick="return confirm('Supprimer ?');">Supprimer</a>
+        </td>
+    </tr>
+</table>
+
+<p><a th:href="@{/annonces}">⬅ Revenir au site</a></p>
+</body>
+</html>

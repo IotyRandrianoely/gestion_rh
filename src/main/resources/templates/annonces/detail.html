@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Détail annonce</title>
+</head>
+<body>
+<h2>Détail annonce</h2>
+<p><b>Profil :</b> <span th:text="${annonce.profil}"></span></p>
+<p><b>Description :</b> <span th:text="${annonce.description}"></span></p>
+<p><b>Date :</b> <span th:text="${annonce.datePublication}"></span></p>
+
+<h3>Critères</h3>
+<p>Expérience : <span th:text="${annonce.critereRech.anneesExperience}"></span> ans</p>
+<p>Diplôme : <span th:text="${annonce.critereRech.diplome.nomDiplome}"></span></p>
+<p>Filière : <span th:text="${annonce.critereRech.filiere.nomFiliere}"></span></p>
+
+<p><a th:href="@{/annonces}">Retour</a></p>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Liste des annonces</title>
+</head>
+<body>
+<h2>Liste des annonces</h2>
+<ul>
+    <li th:each="a : ${annonces}">
+        <b th:text="${a.profil}">Profil</b> -
+        <span th:text="${a.description}">Description</span>
+        <a th:href="@{/annonces/{id}(id=${a.id})}">Voir détail</a>
+    </li>
+</ul>
+<p><a th:href="@{/admin/annonces}">Espace admin</a></p>
+</body>
+</html>
