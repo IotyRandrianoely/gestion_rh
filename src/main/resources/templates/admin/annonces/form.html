@@ -12,86 +12,59 @@
       --accent:#2ecc71; --accent-d:#27ae60;
       --danger:#e74c3c; --danger-d:#c0392b;
     }
-
     *{box-sizing:border-box;margin:0;padding:0}
     body{
       font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
       background:var(--bg); padding:22px; max-width:900px; margin:0 auto;
     }
-
-    /* Header + stepper */
     .header{
       background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
       border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
     }
     h2{ font-size:22px; margin-bottom:8px }
     .hint{ color:var(--sub); font-size:13px }
-
-    .stepper{
-      display:flex; gap:18px; margin-top:14px; flex-wrap:wrap;
-    }
-    .step{
-      display:flex; align-items:center; gap:10px; color:var(--sub); font-weight:700; font-size:13px;
-    }
-    .dot{
-      width:26px; height:26px; border-radius:50%;
-      background:#eef6ff; color:#1d6fdc; display:grid; place-items:center; font-weight:800;
-      border:1px solid #d7e7ff;
-    }
+    .stepper{ display:flex; gap:18px; margin-top:14px; flex-wrap:wrap; }
+    .step{ display:flex; align-items:center; gap:10px; color:var(--sub); font-weight:700; font-size:13px; }
+    .dot{ width:26px; height:26px; border-radius:50%; background:#eef6ff; color:#1d6fdc; display:grid; place-items:center; font-weight:800; border:1px solid #d7e7ff; }
     .step.active .dot{ background:#3498db; border-color:#3498db; color:#fff }
     .step.active{ color:#1d6fdc }
-
-    /* Card form */
-    .form-card{
-      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px;
-      box-shadow:0 6px 16px rgba(0,0,0,.06);
-    }
-
-    .grid-2{
-      display:grid; grid-template-columns:1fr 1fr; gap:18px;
-    }
-    @media(max-width:780px){ .grid-2{ grid-template-columns:1fr; } }
-
-    .form-group{ display:flex; flex-direction:column; gap:8px; }
-    label{ font-weight:700; color:#243447; font-size:14px; }
-    input[type="number"], select, textarea{
+    .form-card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; box-shadow:0 6px 16px rgba(0,0,0,.06); }
+    .mode-switch{ display:flex; gap:14px; margin-bottom:14px; flex-wrap:wrap; }
+    .radio{ display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line); padding:10px 12px; border-radius:10px; cursor:pointer; }
+    .radio input{ accent-color:var(--primary) }
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
+    @media(max-width:780px){ .grid-2{ grid-template-columns:1fr } }
+    .form-group{ display:flex; flex-direction:column; gap:8px }
+    label{ font-weight:700; color:#243447; font-size:14px }
+    input[type="number"], select, textarea, input[type="text"]{
       width:100%; padding:12px 12px; border:1px solid #d7dde5; border-radius:10px; font-size:14px; background:#fff;
       transition:border-color .2s, box-shadow .2s;
     }
-    textarea{ min-height:110px; resize:vertical; }
-
-    input:focus, select:focus, textarea:focus{
-      border-color:#8ac4fb; box-shadow:0 0 0 4px rgba(52,152,219,.15); outline:none;
+    textarea{ min-height:110px; resize:vertical }
+    input:focus, select:focus, textarea:focus{ border-color:#8ac4fb; box-shadow:0 0 0 4px rgba(52,152,219,.15); outline:none }
+    .help{ font-size:12px; color:#6f7f90 }
+    .actions{ margin-top:22px; display:flex; gap:12px; flex-wrap:wrap }
+    .btn{ display:inline-block; padding:12px 18px; border-radius:10px; font-weight:800; font-size:14px; text-decoration:none; border:1px solid transparent; transition:transform .2s, box-shadow .2s, background .2s, border-color .2s }
+    .btn--save{ background:var(--accent); color:#fff }
+    .btn--save:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2) }
+    .btn--cancel{ background:#fff; color:#e74c3c; border-color:#ffd7d7 }
+    .btn--cancel:hover{ background:#fff5f5; border-color:#ffbcbc }
+    select{
+      appearance:none;
+      background-image:linear-gradient(45deg, transparent 50%, #8aa0b2 50%), linear-gradient(135deg, #8aa0b2 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+      background-size: 5px 5px, 5px 5px; background-repeat:no-repeat;
     }
-
-    .help{ font-size:12px; color:#6f7f90; }
-
-    .actions{
-      margin-top:22px; display:flex; gap:12px; flex-wrap:wrap;
-    }
-    .btn{
-      display:inline-block; padding:12px 18px; border-radius:10px;
-      font-weight:800; font-size:14px; text-decoration:none; border:1px solid transparent;
-      transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
-    }
-    .btn--save{ background:var(--accent); color:#fff; }
-    .btn--save:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2); }
-    .btn--cancel{ background:#fff; color:var(--danger); border-color:#ffd7d7; }
-    .btn--cancel:hover{ background:#fff5f5; border-color:#ffbcbc; }
-
-    /* Inputs inline pour selects */
-    select{ appearance:none; background-image:linear-gradient(45deg, transparent 50%, #8aa0b2 50%), linear-gradient(135deg, #8aa0b2 50%, transparent 50%);
-            background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
-            background-size: 5px 5px, 5px 5px; background-repeat:no-repeat; }
+    .hidden{ display:none }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h2 th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier l’annonce'}"></h2>
-    <div class="hint">Renseignez le poste et les critères requis. Les champs marqués sont obligatoires.</div>
-
-    <!-- Stepper purement décoratif (pas de JS) -->
+    <h2 th:text="${annonce.id == null ? 'Nouvelle annonce' : 'Modifier annonce'}"></h2>
+    <div class="hint">
+      En création, choisissez un poste existant ou créez-en un nouveau. En modification, vous pouvez changer de poste ou corriger le texte.
+    </div>
     <div class="stepper">
       <div class="step active"><span class="dot">1</span> Poste</div>
       <div class="step active"><span class="dot">2</span> Critères</div>
@@ -100,41 +73,72 @@
   </div>
 
   <div class="form-card">
+    <!-- Switch mode (toujours visible) -->
+    <div class="mode-switch" role="group" aria-label="Mode poste">
+      <label class="radio">
+        <input type="radio" name="modePoste" id="mode-existant" value="existant" checked>
+        <span>Utiliser un poste existant</span>
+      </label>
+      <label class="radio">
+        <input type="radio" name="modePoste" id="mode-nouveau" value="nouveau">
+        <span>Créer un nouveau poste</span>
+      </label>
+    </div>
+
     <form th:action="@{/admin/annonces}" method="post">
       <input type="hidden" name="id" th:value="${annonce.id}" />
 
-      <div class="grid-2">
-        <!-- Poste -->
-        <div class="form-group">
+      <!-- === POSTE EXISTANT === -->
+      <div id="group-existing" class="grid-2">
+        <div class="form-group" style="grid-column:1/-1;">
           <label for="poste">Poste</label>
           <select id="poste" name="poste.id" required>
+            <option value="">— Choisir un poste —</option>
             <option th:each="p : ${postes}"
                     th:value="${p.id}"
                     th:text="${p.profil}"
                     th:selected="${annonce.poste?.id == p.id}">
             </option>
           </select>
-          <div class="help">Ex : Développeur Java, Comptable, Guide touristique…</div>
+          <div class="help" th:if="${annonce.id == null}">Sélectionnez un poste existant.</div>
+          <div class="help" th:if="${annonce.id != null}">Vous pouvez changer de poste pour cette annonce.</div>
         </div>
 
-        <!-- Années d'expérience -->
+        <!-- Corrections du texte (optionnel) visibles uniquement en MODIFICATION -->
+        <div class="form-group" th:if="${annonce.id != null}">
+          <label for="corrProfil">Corriger l’intitulé (optionnel)</label>
+          <input type="text" id="corrProfil" name="poste.profil" placeholder="Laisser vide pour ne pas changer">
+        </div>
+        <div class="form-group" th:if="${annonce.id != null}" style="grid-column:1/-1;">
+          <label for="corrDesc">Corriger la description (optionnel)</label>
+          <textarea id="corrDesc" name="poste.description" rows="3" placeholder="Laisser vide pour ne pas changer"></textarea>
+          <div class="help">Ces corrections modifient le poste sélectionné dans la base (impactent aussi d’autres annonces liées à ce poste).</div>
+        </div>
+      </div>
+
+      <!-- === NOUVEAU POSTE === -->
+      <div id="group-new" class="grid-2 hidden">
+        <div class="form-group">
+          <label for="posteProfil">Intitulé du poste</label>
+          <input type="text" id="posteProfil" name="poste.profil" placeholder="Ex : Développeur Java" disabled />
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label for="posteDescription">Description</label>
+          <textarea id="posteDescription" name="poste.description" rows="4"
+                    placeholder="Missions, responsabilités, stack, contexte…" disabled></textarea>
+        </div>
+      </div>
+
+      <!-- === CRITÈRES (communs) === -->
+      <div class="grid-2" style="margin-top:6px;">
         <div class="form-group">
           <label for="anneesExperience">Années d'expérience</label>
           <input type="hidden" name="critereRech.id" th:value="${annonce.critereRech?.id}" />
           <input type="number" id="anneesExperience" name="critereRech.anneesExperience"
                  th:value="${annonce.critereRech?.anneesExperience}" required min="0" />
-          <div class="help">Nombre d’années minimum exigées (0 si débutant accepté).</div>
+          <div class="help">0 si débutant accepté.</div>
         </div>
 
-        <!-- Description (pleine largeur) -->
-        <div class="form-group" style="grid-column:1/-1;">
-          <label for="description">Description</label>
-          <textarea id="description" name="poste.description" rows="4"
-                    th:text="${annonce.poste?.description}" required></textarea>
-          <div class="help">Décrivez les missions, la stack, les responsabilités, le contexte…</div>
-        </div>
-
-        <!-- Diplôme -->
         <div class="form-group">
           <label for="diplome">Diplôme</label>
           <select id="diplome" name="critereRech.diplome.id" required>
@@ -144,10 +148,8 @@
                     th:selected="${annonce.critereRech?.diplome?.id == d.id}">
             </option>
           </select>
-          <div class="help">Ex : Licence, Master, Doctorat…</div>
         </div>
 
-        <!-- Filière -->
         <div class="form-group">
           <label for="filiere">Filière</label>
           <select id="filiere" name="critereRech.filiere.id" required>
@@ -157,7 +159,6 @@
                     th:selected="${annonce.critereRech?.filiere?.id == f.id}">
             </option>
           </select>
-          <div class="help">Ex : Informatique, Gestion, Droit, Santé, Tourisme…</div>
         </div>
       </div>
 
@@ -169,5 +170,48 @@
   </div>
 
 
+  <script>
+    (function(){
+      const radioEx = document.getElementById('mode-existant');
+      const radioNew = document.getElementById('mode-nouveau');
+
+      const groupExisting = document.getElementById('group-existing');
+      const groupNew      = document.getElementById('group-new');
+
+      const selectId = document.getElementById('poste');            // poste.id
+      const profil   = document.getElementById('posteProfil');      // poste.profil (nouveau)
+      const desc     = document.getElementById('posteDescription'); // poste.description (nouveau)
+
+      function switchMode(mode){
+        if(mode === 'existant'){
+          groupExisting.classList.remove('hidden');
+          groupNew.classList.add('hidden');
+
+          // activer select existant, désactiver "nouveau"
+          selectId.disabled = false; selectId.required = true;
+
+          profil.disabled = true;  profil.required = false; profil.value = '';
+          desc.disabled   = true;  desc.required   = false; desc.value   = '';
+        }else{
+          groupExisting.classList.add('hidden');
+          groupNew.classList.remove('hidden');
+
+          // désactiver le select (ne pas envoyer poste.id)
+          selectId.disabled = true; selectId.required = false; selectId.value = '';
+
+          // activer les champs "nouveau poste"
+          profil.disabled = false; profil.required = true;
+          desc.disabled   = false; desc.required   = true;
+        }
+      }
+
+      // état initial : existant sélectionné
+      switchMode('existant');
+
+      // listeners
+      radioEx.addEventListener('change', ()=>switchMode('existant'));
+      radioNew.addEventListener('change', ()=>switchMode('nouveau'));
+    })();
+  </script>
 </body>
 </html>
