@@ -67,11 +67,11 @@ public class CandidatController {
         if (allCandidats == null) allCandidats = List.of();
 
         // Construire scoresMap pour tous les candidats
-        Map<Long, Double> scoresMap = new java.util.HashMap<>();
+        Map<Integer, Double> scoresMap = new java.util.HashMap<>();
         for (Candidat c : allCandidats) {
             try {
                 Integer annonceId = c.getAnnonce() != null ? c.getAnnonce().getId() : null;
-                Double score = (annonceId != null) ? historiqueScoreService.getLatestScoreFor(c.getId(), annonceId) : null;
+                Double score = (annonceId != null) ? historiqueScoreService.getLatestScoreFor((long) c.getId(), annonceId) : null;
                 scoresMap.put(c.getId(), score);
             } catch (Exception ex) {
                 scoresMap.put(c.getId(), null);
@@ -80,11 +80,11 @@ public class CandidatController {
 
         // Construire contratsMap
         List<PlaningEntretien> contrats = planingEntretienService.listerPLaningEntretien();
-        Map<Long, PlaningEntretien> contratsMap = new java.util.HashMap<>();
+        Map<Integer, PlaningEntretien> contratsMap = new java.util.HashMap<>();
         if (contrats != null) {
             for (PlaningEntretien pe : contrats) {
                 if (pe != null && pe.getCandidat() != null && pe.getCandidat().getId() != null) {
-                    Long cid = pe.getCandidat().getId();
+                    int cid = pe.getCandidat().getId();
                     if (!contratsMap.containsKey(cid)) contratsMap.put(cid, pe);
                 }
             }
@@ -175,7 +175,7 @@ public class CandidatController {
 
     // Détail d'un candidat
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable int id, Model model) {
         model.addAttribute("candidat", candidatService.getById(id));
         return "candidats/detail"; // renvoie vers /WEB-INF/views/candidats/detail.jsp
     }
@@ -199,20 +199,20 @@ public class CandidatController {
     }
 
     @GetMapping("planifier_entretien/{id}")
-    public String planifierEntretien(@PathVariable Long id) {
+    public String planifierEntretien(@PathVariable int id) {
         planingEntretienService.creerPlaningEntretienPourCandidat(id);
         return "redirect:/candidats";
     }
 
     // --- NOUVEAU : Planification manuelle ---
     @GetMapping("planifier_entretien_manual/{id}")
-    public String planifierEntretienManual(@PathVariable Long id, Model model) {
+    public String planifierEntretienManual(@PathVariable int id, Model model) {
         model.addAttribute("candidat", candidatService.getById(id));
         return "candidats/planifier_entretien_manual";
     }
 
     @PostMapping("planifier_entretien_manual")
-    public String enregistrerPlaningManuel(@RequestParam Long candidatId,
+    public String enregistrerPlaningManuel(@RequestParam int candidatId,
                                            @RequestParam String date,
                                            @RequestParam String time) {
         Candidat candidat = candidatService.getById(candidatId);

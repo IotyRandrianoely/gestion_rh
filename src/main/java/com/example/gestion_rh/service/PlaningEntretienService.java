@@ -47,7 +47,7 @@ public class PlaningEntretienService {
         repository.deleteById(id);
     }
     // ...existing code...
-        public void creerPlaningEntretienPourCandidat(Long candidatId) {
+        public void creerPlaningEntretienPourCandidat(int candidatId) {
             Candidat candidat = candidatRepository.findById(candidatId).orElseThrow();
             PlaningEntretien planing = new PlaningEntretien();
             planing.setCandidat(candidat);

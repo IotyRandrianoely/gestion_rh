@@ -45,12 +45,12 @@ INSERT INTO diplome (nom_diplome) VALUES
 ('Doctorat');
 
 -- Filières
-INSERT INTO filiere (nom_filiere) VALUES
-('Informatique'),
-('Gestion'),
-('Commerce'),
-('Droit'),
-('Médecine');
+INSERT INTO filiere (id,nom_filiere) VALUES
+(1,'Informatique'),
+(2,'Gestion'),
+(3,'Commerce'),
+(4,'Droit'),
+(5,'Médecine');
 
 -- Situations matrimoniales
 INSERT INTO situation_matrimonial (situation) VALUES
@@ -103,9 +103,9 @@ CREATE TABLE critere_rech_mission (
 --  ('Licence'), ('Master'), ('Doctorat');
 
 -- Filières
-INSERT INTO filiere (nom_filiere) VALUES
- ('Informatique'), ('Gestion'), ('Santé'),
- ('Droit'), ('Tourisme');
+    INSERT INTO filiere (nom_filiere) VALUES
+    ('Informatique'), ('Gestion'), ('Santé'),
+    ('Droit'), ('Tourisme');
 
 INSERT INTO poste(profil, description) VALUES 
  ('Développeur Java', 'Développement et maintenance des applications'),('Comptable', 'Gestion des écritures comptables et bilans financiers'),('Guide touristique', 'Accompagner les visiteurs et expliquer les sites');
@@ -127,9 +127,9 @@ VALUES (2, 4, 25, 1, 1);  -- Licence, 25 ans, Homme, Informatique
 -- Exemple d’annonce avec date posée
 INSERT INTO annonce (critere_rech_id, date_publication, id_poste)
 VALUES 
- (1, DATE '2025-01-15', 1),
- (1, DATE '2025-02-10', 2),
- (1, DATE '2025-03-05',3);
+ (4, DATE '2025-01-15', 1),
+ (4, DATE '2025-02-10', 2),
+ (4, DATE '2025-03-05',3);
 
 
 CREATE TABLE candidat (
@@ -244,16 +244,16 @@ VALUES ('client1', '    ', 'client');
 
 
 -- Exemples de candidats
-INSERT INTO candidat (id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome)
+INSERT INTO candidat (id,id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome,est_propose)
 VALUES
-(1, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
- 'Motivé pour évoluer dans votre entreprise', 'cv_jean.pdf', 2),
+(1,10, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
+ 'Motivé pour évoluer dans votre entreprise', 'cv_jean.pdf', 2,false),
 
-(1, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
- 'Expérimentée et dynamique', 'cv_marie.pdf', 3),
+(2,10, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
+ 'Expérimentée et dynamique', 'cv_marie.pdf', 3,false),
 
-(2, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
- 'Prêt à relever des défis', 'cv_paul.pdf', 4);
+(3,12, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
+ 'Prêt à relever des défis', 'cv_paul.pdf', 4,false);
 
 CREATE TABLE qcm_questions (
     question_id SERIAL PRIMARY KEY,

@@ -17,7 +17,7 @@ public class HistoriqueScoreService {
         return repo.save(score);
     }
 
-    public Double getLatestScoreFor(Integer candidatId, Integer annonceId) {
+    public Double getLatestScoreFor(Long candidatId, Integer annonceId) {
         return repo.findFirstByIdCandidatAndIdAnnonceOrderByIdDesc(candidatId, annonceId)
                    .map(HistoriqueScore::getScore)
                    .orElse(null);

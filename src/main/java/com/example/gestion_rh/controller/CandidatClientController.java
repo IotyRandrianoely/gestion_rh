@@ -19,7 +19,7 @@ import com.example.gestion_rh.service.DiplomeService;
 import com.example.gestion_rh.service.FileStorageService;
 
 @Controller
-@RequestMapping("/candidats")
+@RequestMapping("/client/candidats")
 public class CandidatClientController {
 
     private final CandidatService candidatService;

@@ -49,15 +49,15 @@ insert into genre(id, genre) values
 (2, 'Femme');
 
 -- Candidats
-insert into candidat(id, id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, date_candidature) values
-(1, 1, 'Dupont', 'Jean', 26, 1, '123 rue A', 'jean.dupont@mail.com', 3, 'Motivé et passionné.', 'cv_jean.pdf', '2025-09-10'),
-(2, 2, 'Martin', 'Sophie', 31, 2, '456 rue B', 'sophie.martin@mail.com', 6, 'Expérience confirmée.', 'cv_sophie.pdf', '2025-09-12');
+insert into candidat(id, id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, date_candidature,est_propose) values
+(1, 1, 'Dupont', 'Jean', 26, 1, '123 rue A', 'jean.dupont@mail.com', 3, 'Motivé et passionné.', 'cv_jean.pdf', '2025-09-10',false),
+(2, 2, 'Martin', 'Sophie', 31, 2, '456 rue B', 'sophie.martin@mail.com', 6, 'Expérience confirmée.', 'cv_sophie.pdf', '2025-09-12',false);
 insert into poste(id, nom_poste) values
 (1, 'Développeur Java'),
 (2, 'Analyste RH'),
 (3, 'Chef de projet');
-insert into candidat(id, id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, date_candidature) values
-(3, 1, 'ibuoyaeFV', 'onicew', 26, 1, '123 rue A', 'jean.dupont@mail.com', 3, 'Motivé et passionné.', 'cv_jean.pdf', '2025-09-10');
+insert into candidat(id, id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, date_candidature,est_propose) values
+(3, 1, 'ibuoyaeFV', 'onicew', 26, 1, '123 rue A', 'jean.dupont@mail.com', 3, 'Motivé et passionné.', 'cv_jean.pdf', '2025-09-10',false);
 
 -- Historique des scores (id, id_annonce, id_candidat, score)
 insert into historique_score(id, id_annonce, id_candidat, score) values

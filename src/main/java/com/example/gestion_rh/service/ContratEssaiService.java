@@ -47,7 +47,7 @@ public class ContratEssaiService {
         repository.deleteById(id);
     }
     // ...existing code...
-        public void creerContratPourCandidat(Long candidatId) {
+        public void creerContratPourCandidat(int candidatId) {
             Candidat candidat = candidatRepository.findById(candidatId).orElseThrow();
             ContratEssai contrat = new ContratEssai();
             contrat.setCandidat(candidat);
