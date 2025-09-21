@@ -24,17 +24,17 @@
     <form class="filters" th:action="@{/candidats}" method="get">
         <div>
             <label>Nom / Prénom</label><br/>
-            <input type="text" name="name" th:value="${filterName}" placeholder="Recherche..." />
+            <input type="text" id="filter-name" name="name" th:value="${filterName}" placeholder="Recherche..." />
         </div>
 
         <div>
             <label>Note ≥</label><br/>
-            <input type="number" step="0.1" name="minScore" th:value="${filterMinScore}" placeholder="ex: 70" />
+            <input type="number" id="filter-minscore" step="0.1" name="minScore" th:value="${filterMinScore}" placeholder="ex: 70" />
         </div>
 
         <div>
             <label>Profil annonce</label><br/>
-            <select name="profil">
+            <select id="filter-profil" name="profil">
                 <option value="">-- Tous --</option>
                 <option th:each="p : ${profils}" th:value="${p}" th:text="${p}" th:selected="${p==filterProfil}">Profil</option>
             </select>
@@ -42,7 +42,7 @@
 
         <div>
             <label>Proposé</label><br/>
-            <select name="propose">
+            <select id="filter-propose" name="propose">
                 <option value="">-- Tous --</option>
                 <option th:value="yes" th:selected="${filterPropose=='yes'}">Oui</option>
                 <option th:value="no" th:selected="${filterPropose=='no'}">Non</option>
@@ -63,7 +63,12 @@
             </tr>
         </thead>
         <tbody>
-            <tr th:each="c : ${candidats}">
+            <tr th:each="c : ${candidats}"
+                th:attr="data-name=${c.nom != null ? c.nom.toLowerCase() : ''},
+                         data-prenom=${c.prenom != null ? c.prenom.toLowerCase() : ''},
+                         data-score=${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id] : ''},
+                         data-profil=${c.annonce != null ? c.annonce.profil : ''},
+                         data-propose=${c.estPropose}">
                 <td th:text="${c.nom}">Nom</td>
                 <td th:text="${c.prenom}">Prénom</td>
                 <td th:text="${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id] : '—'}">—</td>
@@ -94,5 +99,64 @@
     <p style="margin-top:1rem;">
         <a th:href="@{/}" class="small">Accueil</a>
     </p>
+
+    <script>
+        (function(){
+            const nameInput = document.getElementById('filter-name');
+            const minScoreInput = document.getElementById('filter-minscore');
+            const profilSelect = document.getElementById('filter-profil');
+            const proposeSelect = document.getElementById('filter-propose');
+            const tbody = document.querySelector('table tbody');
+            let debounceTimer = null;
+
+            function parseScore(v){
+                const n = parseFloat(v);
+                return isNaN(n) ? null : n;
+            }
+
+            function filterRows(){
+                const name = nameInput ? nameInput.value.trim().toLowerCase() : '';
+                const minScore = minScoreInput ? parseScore(minScoreInput.value) : null;
+                const profil = profilSelect ? profilSelect.value : '';
+                const propose = proposeSelect ? proposeSelect.value : '';
+
+                tbody.querySelectorAll('tr[data-name]').forEach(row => {
+                    const dName = (row.dataset.name || '').toLowerCase();
+                    const dPrenom = (row.dataset.prenom || '').toLowerCase();
+                    const dScore = row.dataset.score ? parseFloat(row.dataset.score) : null;
+                    const dProfil = row.dataset.profil || '';
+                    const dPropose = (row.dataset.propose === 'true');
+
+                    let visible = true;
+                    if (name) {
+                        if (!(dName.includes(name) || dPrenom.includes(name))) visible = false;
+                    }
+                    if (minScore != null) {
+                        if (dScore == null || dScore < minScore) visible = false;
+                    }
+                    if (profil && profil !== '') {
+                        if (dProfil !== profil) visible = false;
+                    }
+                    if (propose === 'yes' && !dPropose) visible = false;
+                    if (propose === 'no' && dPropose) visible = false;
+
+                    row.style.display = visible ? '' : 'none';
+                });
+            }
+
+            function scheduleFilter(){
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(filterRows, 150);
+            }
+
+            if (nameInput) nameInput.addEventListener('input', scheduleFilter);
+            if (minScoreInput) minScoreInput.addEventListener('input', scheduleFilter);
+            if (profilSelect) profilSelect.addEventListener('change', filterRows);
+            if (proposeSelect) proposeSelect.addEventListener('change', filterRows);
+
+            // initial filter pass (useful when page loads with query params)
+            document.addEventListener('DOMContentLoaded', filterRows);
+        })();
+    </script>
 </body>
 </html>

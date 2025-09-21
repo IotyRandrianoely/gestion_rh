@@ -61,6 +61,6 @@ insert into candidat(id, id_annonce, nom, prenom, age, genre, adresse, email, an
 
 -- Historique des scores (id, id_annonce, id_candidat, score)
 insert into historique_score(id, id_annonce, id_candidat, score) values
-(1, 1, 1, 78.5),
-(2, 2, 2, 85.0),
-(3, 1, 4, 72.3);
+(1, 1, 10, 78.5),
+(2, 2, 11, 85.0),
+(3, 1, 12, 72.3);
