@@ -45,7 +45,7 @@
         <p><strong>Description :</strong> <span th:text="${selectedAnnonce.description}"></span></p>
     </div>
 
-    <form th:action="@{/candidats/postuler}" method="post" th:object="${candidat}" enctype="multipart/form-data">
+    <form th:action="@{/candidats/client/postuler}" method="post" th:object="${candidat}" enctype="multipart/form-data">
         <input type="hidden" th:field="*{id}" />
 
         <!-- Si une annonce est pré-sélectionnée, on la cache et la pré-remplit -->

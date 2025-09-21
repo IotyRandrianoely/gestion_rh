@@ -36,22 +36,22 @@ public class CandidatClientController {
     }
 
     // Liste des candidats avec filtre par annonce
-    @GetMapping
-    public String list(Model model, @RequestParam(required = false) Integer annonceId) {
-        try {
-            if (annonceId != null) {
-                model.addAttribute("candidats", candidatService.getByAnnonceId(annonceId));
-            } else {
-                model.addAttribute("candidats", candidatService.getAll());
-            }
-            model.addAttribute("annonces", annonceService.getAll());
-            model.addAttribute("selectedAnnonce", annonceId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("error", "Erreur lors du chargement des candidats: " + e.getMessage());
-        }
-        return "candidats/list";
-    }
+    // @GetMapping
+    // public String list(Model model, @RequestParam(required = false) Integer annonceId) {
+    //     try {
+    //         if (annonceId != null) {
+    //             model.addAttribute("candidats", candidatService.getByAnnonceId(annonceId));
+    //         } else {
+    //             model.addAttribute("candidats", candidatService.getAll());
+    //         }
+    //         model.addAttribute("annonces", annonceService.getAll());
+    //         model.addAttribute("selectedAnnonce", annonceId);
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         model.addAttribute("error", "Erreur lors du chargement des candidats: " + e.getMessage());
+    //     }
+    //     return "candidats/list";
+    // }
 
     // Formulaire de candidature
     @GetMapping("/postuler")
