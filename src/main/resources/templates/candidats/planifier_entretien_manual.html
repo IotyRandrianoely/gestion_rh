@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Planifier entretien manuel</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .box { max-width: 480px; margin:auto; padding:1.5rem; border:1px solid #ddd; border-radius:8px;}
+        .hidden { display:none; }
+        .btn { padding:0.5rem 1rem; border-radius:6px; cursor:pointer; }
+        .btn-primary { background:#3d5a80; color:white; border:none; }
+        .btn-secondary { background:#e2e8f0; color:#333; border:none; margin-left:8px; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>Planifier entretien manuel</h2>
+    <div>
+        <p><strong th:text="${candidat.nom} + ' ' + ${candidat.prenom}">Candidat</strong></p>
+    </div>
+
+    <form id="form" method="post" th:action="@{/candidats/planifier_entretien_manual}">
+        <input type="hidden" name="candidatId" th:value="${candidat.id}" />
+
+        <div id="step-date">
+            <label for="date">Choisir une date :</label><br/>
+            <input type="date" id="date" name="date" required />
+            <div style="margin-top:1rem;">
+                <button type="button" class="btn btn-primary" id="nextBtn">Suivant</button>
+                <a href="/candidats" class="btn btn-secondary">Annuler</a>
+            </div>
+        </div>
+
+        <div id="step-time" class="hidden">
+            <label for="time">Choisir l'heure :</label><br/>
+            <input type="time" id="time" name="time" required />
+            <div style="margin-top:1rem;">
+                <button type="submit" class="btn btn-primary">Valider</button>
+                <button type="button" class="btn btn-secondary" id="backBtn">Retour</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const stepDate = document.getElementById('step-date');
+        const stepTime = document.getElementById('step-time');
+        const dateInput = document.getElementById('date');
+
+        nextBtn.addEventListener('click', function(){
+            if (!dateInput.value) { alert('Veuillez choisir une date'); return; }
+            stepDate.classList.add('hidden');
+            stepTime.classList.remove('hidden');
+            // Focus time input
+            document.getElementById('time').focus();
+        });
+
+        backBtn.addEventListener('click', function(){
+            stepTime.classList.add('hidden');
+            stepDate.classList.remove('hidden');
+        });
+
+        // set default date = today
+        const today = new Date().toISOString().substr(0,10);
+        if (!dateInput.value) dateInput.value = today;
+    });
+</script>
+</body>
+</html>

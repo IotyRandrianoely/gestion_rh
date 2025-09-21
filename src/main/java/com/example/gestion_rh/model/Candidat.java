@@ -25,6 +25,9 @@ public class Candidat {
     @JoinColumn(name = "id_annonce")
     private Annonce annonce;
 
+    @JoinColumn(name = "est_propose")
+    private boolean estPropose;
+
     @Column(nullable = false, length = 40)
     private String nom;
     
@@ -105,4 +108,12 @@ public class Candidat {
     // *** NOUVEAU GETTER/SETTER POUR DIPLOME ***
     public Diplome getDiplome() { return diplome; }
     public void setDiplome(Diplome diplome) { this.diplome = diplome; }
+    
+    public Boolean getEstPropose() {
+        return estPropose;
+    }
+
+    public void setEstPropose(Boolean estPropose) {
+        this.estPropose = estPropose;
+    }
 }
