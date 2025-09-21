@@ -342,7 +342,7 @@ CREATE TABLE annonce (
     date_publication DATE NOT NULL,
     id_poste INT NOT NULL REFERENCES poste(id)
 );
-insert into annonce ()
+-- insert into annonce ()
 
 -- Table liaison critere_rech ↔ qualite
 CREATE TABLE critere_rech_qualite (
@@ -551,11 +551,11 @@ INSERT INTO situation_matrimonial (situation) VALUES
 -- Exemples de candidats
 INSERT INTO candidat (id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome)
 VALUES
-(1, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
+(7, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
  'Motivé pour évoluer dans votre entreprise', 'cv_jean.pdf', 2),
 
-(1, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
+(7, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
  'Expérimentée et dynamique', 'cv_marie.pdf', 3),
 
-(2, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
+(8, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
  'Prêt à relever des défis', 'cv_paul.pdf', 4);
