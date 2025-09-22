@@ -1,193 +1,233 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Connexion - Gestion RH</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .login-container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 400px;
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .login-header h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .login-header p {
-            color: #666;
-            margin: 0;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        input[type="text"]:focus, input[type="password"]:focus {
-            border-color: #667eea;
-            outline: none;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-        }
-        .btn-login {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn-login:hover {
-            transform: translateY(-2px);
-        }
-        .alert {
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .demo-accounts {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #17a2b8;
-        }
-        .demo-accounts h4 {
-            margin-top: 0;
-            color: #17a2b8;
-        }
-        .demo-account {
-            margin: 10px 0;
-            padding: 8px;
-            background: white;
-            border-radius: 3px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .demo-account:hover {
-            background-color: #e9ecef;
-        }
-        .demo-account strong {
-            color: #495057;
-        }
-    </style>
+  <title>Connexion — Gestion RH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --danger:#e74c3c; --danger-d:#c0392b;
+      --muted:#8aa0b2;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); min-height:100vh; display:grid; place-items:center; padding:20px;
+    }
+
+    /* Wrapper 2 colonnes (image + panneau) */
+    .auth-wrap{
+      width:100%; max-width:1000px; min-height:560px;
+      background:var(--card); border:1px solid var(--line); border-radius:18px;
+      overflow:hidden; box-shadow:0 12px 28px rgba(0,0,0,.12);
+      display:grid; grid-template-columns:1.1fr .9fr;
+    }
+    @media(max-width:940px){ .auth-wrap{ grid-template-columns:1fr } }
+
+    /* Colonne image */
+    .auth-image{
+      position:relative; background:#dfe9f3;
+      background-image:url('/images/banner.jpg');
+      background-size:cover; background-position:center; min-height:280px;
+    }
+    .auth-image::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(0,0,0,.20), rgba(52,152,219,.25));
+    }
+    .image-caption{
+      position:absolute; left:20px; right:20px; bottom:20px; z-index:1;
+      background:rgba(255,255,255,.9); border:1px solid var(--line); backdrop-filter: blur(3px);
+      border-radius:14px; padding:14px 16px; box-shadow:0 4px 10px rgba(0,0,0,.08);
+    }
+    .caption-title{ font-weight:900; font-size:18px; margin-bottom:6px; color:#1f3347 }
+    .caption-text{ color:var(--sub); font-size:13px }
+
+    /* Colonne formulaire */
+    .auth-panel{ padding:28px 26px 24px; display:flex; flex-direction:column; gap:16px }
+    .brand{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand h1{ font-size:22px; letter-spacing:.2px }
+    .badge{
+      background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff;
+      padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px;
+    }
+    .sub{ color:var(--muted); font-size:13px; margin-top:-4px }
+
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+
+    /* Tabs rôle */
+    .role-tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px }
+    .role-tab{
+      padding:10px 12px; border:1px solid var(--line); border-radius:12px; cursor:pointer;
+      background:#fff; color:#41607a; font-weight:800; font-size:13px;
+      transition:background .2s, border-color .2s;
+    }
+    .role-tab.active{ background:#3498db; color:#fff; border-color:#3498db }
+    .role-hint{ font-size:12px; color:var(--sub); margin-top:-6px; margin-bottom:8px }
+
+    .form-group{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px }
+    label{ font-weight:800; color:#243447; font-size:14px }
+    input[type="text"], input[type="password"]{
+      width:100%; padding:12px; border:1px solid #d7dde5; border-radius:10px; font-size:14px; background:#fff;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    input:focus{ border-color:#8ac4fb; box-shadow:0 0 0 4px rgba(52,152,219,.15); outline:none }
+
+    .btn-login{
+      width:100%; padding:12px 16px; border-radius:12px; font-weight:900; letter-spacing:.2px;
+      border:1px solid transparent; color:#fff; background:var(--accent);
+      transition:transform .15s, box-shadow .15s, background .15s; cursor:pointer;
+    }
+    .btn-login:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2) }
+
+    /* Alerts */
+    .alert{ padding:12px; border-radius:10px; border:1px solid; text-align:center; margin-bottom:10px; font-size:14px }
+    .alert-error{ background:#fdecea; color:#a12622; border-color:#f3c3c0 }
+    .alert-success{ background:#eafaf1; color:#1b7f45; border-color:#c9eedc }
+
+    /* Comptes de démo */
+    .demo{
+      margin-top:8px; background:#f8fbff; border:1px dashed #cfe2f7; border-radius:14px; padding:14px;
+    }
+    .demo h4{ margin-bottom:8px; color:#1d6fdc; font-size:14px }
+    .demo-grid{ display:grid; grid-template-columns:1fr; gap:8px }
+    .demo-item{
+      display:flex; justify-content:space-between; align-items:center; gap:8px;
+      padding:10px 12px; background:#fff; border:1px solid var(--line); border-radius:10px;
+      cursor:pointer; transition:background .2s, border-color .2s;
+    }
+    .demo-item:hover{ background:#f3f8ff; border-color:#b7d5f6 }
+    .demo-item strong{ color:#243447 }
+
+    .foot{ text-align:center; color:var(--sub); font-size:12px; margin-top:6px }
+    .link{ color:var(--primary); text-decoration:none }
+    .link:hover{ color:var(--primary-d) }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>🏢 Gestion RH</h1>
-            <p>Connectez-vous pour accéder à l'application</p>
-        </div>
 
-        <!-- Messages -->
-        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-        <div th:if="${param.logout}" class="alert alert-success">Vous avez été déconnecté avec succès</div>
-
-        <!-- Formulaire de connexion -->
-        <form th:action="@{/login}" method="post" id="loginForm">
-            <div class="form-group">
-                <label for="username">👤 Nom d'utilisateur</label>
-                <input type="text" id="username" name="username" required 
-                       placeholder="Entrez votre nom d'utilisateur" />
-            </div>
-
-            <div class="form-group">
-                <label for="password">🔒 Mot de passe</label>
-                <input type="password" id="password" name="password" required 
-                       placeholder="Entrez votre mot de passe" />
-            </div>
-
-            <button type="submit" class="btn-login">
-                🚀 Se connecter
-            </button>
-        </form>
-
-        <!-- Comptes de démonstration -->
-        <div class="demo-accounts">
-            <h4>📋 Comptes de test</h4>
-            <div class="demo-account" onclick="fillLogin('admin1', 'admin123')">
-                <strong>👑 Admin :</strong> admin1 / admin123
-            </div>
-            <div class="demo-account" onclick="fillLogin('rh1', 'rh123')">
-                <strong>👥 RH :</strong> rh1 / rh123
-            </div>
-            <div class="demo-account" onclick="fillLogin('client1', 'client123')">
-                <strong>👤 Client :</strong> client1 / client123
-            </div>
-        </div>
+  <div class="auth-wrap">
+    <!-- Colonne image -->
+    <div class="auth-image">
+      <div class="image-caption">
+        <div class="caption-title">Bienvenue sur Gestion RH</div>
+        <div class="caption-text">Choisissez votre espace (Client, RH ou Admin) puis connectez-vous.</div>
+      </div>
     </div>
 
-    <script>
-        // Focus automatique sur le champ username
-        document.getElementById('username').focus();
-        
-        // Fonction pour remplir automatiquement les champs de login
-        function fillLogin(username, password) {
-            document.getElementById('username').value = username;
-            document.getElementById('password').value = password;
-            document.getElementById('username').focus();
-        }
-        
-        // Gestion des raccourcis clavier
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON')) {
-                document.getElementById('loginForm').submit();
-            }
-        });
+    <!-- Colonne formulaire -->
+    <div class="auth-panel">
+      <div class="brand">
+        <h1>Connexion</h1>
+        <span class="badge" id="roleBadge">Client</span>
+      </div>
+      <div class="sub">Accédez à votre espace sécurisé.</div>
 
-        // Animation du bouton au survol
-        const loginBtn = document.querySelector('.btn-login');
-        loginBtn.addEventListener('mouseenter', function() {
-            this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
-        });
-        loginBtn.addEventListener('mouseleave', function() {
-            this.style.boxShadow = 'none';
-        });
+      <!-- Messages -->
+      <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+      <div th:if="${param.logout}" class="alert alert-success">Vous avez été déconnecté avec succès</div>
 
-        // Log pour debug
-        console.log('=== PAGE LOGIN CHARGÉE ===');
-        console.log('URL actuelle:', window.location.href);
-    </script>
+      <div class="card">
+        <!-- Tabs de choix de rôle -->
+        <div class="role-tabs" role="tablist" aria-label="Choix du rôle">
+          <button type="button" class="role-tab active" data-role="client"  onclick="switchRole('client', this)">👤 Client</button>
+          <button type="button" class="role-tab"        data-role="rh"      onclick="switchRole('rh', this)">👥 RH</button>
+          <button type="button" class="role-tab"        data-role="admin"   onclick="switchRole('admin', this)">👑 Admin</button>
+        </div>
+        <div class="role-hint" id="roleHint">Espace candidat pour consulter les offres et suivre vos candidatures.</div>
+
+        <!-- Formulaire -->
+        <form th:action="@{/login}" method="post" id="loginForm">
+          <!-- Champ facultatif : le back peut l’ignorer sans souci -->
+          <input type="hidden" name="role" id="roleInput" value="client" />
+
+          <div class="form-group">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" name="username" placeholder="Entrez votre identifiant" required />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" placeholder="Votre mot de passe" required />
+          </div>
+
+          <button type="submit" class="btn-login">Se connecter</button>
+        </form>
+      </div>
+
+      <!-- Comptes de démo -->
+      <div class="demo">
+        <h4>📋 Comptes de test</h4>
+        <div class="demo-grid">
+          <div class="demo-item" onclick="quickFill('client','client1','client123')">
+            <div><strong>👤 Client</strong> — client1 / client123</div><div>Remplir</div>
+          </div>
+          <div class="demo-item" onclick="quickFill('rh','rh1','rh123')">
+            <div><strong>👥 RH</strong> — rh1 / rh123</div><div>Remplir</div>
+          </div>
+          <div class="demo-item" onclick="quickFill('admin','admin1','admin123')">
+            <div><strong>👑 Admin</strong> — admin1 / admin123</div><div>Remplir</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot">
+        Besoin d’aide ? <a href="#" class="link">Contacter le support</a> · <a class="link" th:href="@{/annonces}">Voir les annonces</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Focus auto
+    document.getElementById('username').focus();
+
+    function switchRole(role, el){
+      // UI tabs
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+
+      // Badge + hint + hidden role
+      document.getElementById('roleInput').value = role;
+      const badge = document.getElementById('roleBadge');
+      const hint  = document.getElementById('roleHint');
+
+      if(role === 'client'){
+        badge.textContent = 'Client';
+        hint.textContent  = "Espace candidat pour consulter les offres et suivre vos candidatures.";
+      }else if(role === 'rh'){
+        badge.textContent = 'RH';
+        hint.textContent  = "Espace Ressources Humaines — gestion des candidatures et pré-sélections.";
+      }else{
+        badge.textContent = 'Admin';
+        hint.textContent  = "Accès complet à la gestion des annonces, postes et utilisateurs.";
+      }
+
+      // Placeholders orientés (facultatif, n'affecte pas le back)
+      const u = document.getElementById('username');
+      u.placeholder = (role === 'admin') ? "Ex : admin1" : (role === 'rh' ? "Ex : rh1" : "Ex : client1");
+      u.focus();
+    }
+
+    function quickFill(role, username, password){
+      switchRole(role, document.querySelector('.role-tab[data-role="'+role+'"]') || document.querySelector('.role-tab.active'));
+      document.getElementById('username').value = username;
+      document.getElementById('password').value = password;
+      document.getElementById('username').focus();
+    }
+
+    // Soumission avec Enter
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON')){
+        document.getElementById('loginForm').submit();
+      }
+    });
+  </script>
 </body>
 </html>

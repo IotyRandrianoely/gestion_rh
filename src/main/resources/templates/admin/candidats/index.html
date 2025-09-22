@@ -1,58 +1,169 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin - Candidats</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .btn { padding: 5px 10px; margin: 2px; text-decoration: none; color: white; border-radius: 3px; }
-        .btn-success { background-color: #28a745; }
-        .btn-primary { background-color: #007bff; }
-        .btn-warning { background-color: #ffc107; color: black; }
-        .btn-danger { background-color: #dc3545; }
-        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
-        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Admin – Candidats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --warn:#f39c12; --danger:#e74c3c;
+      --muted:#8aa0b2;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); padding:22px; max-width:1200px; margin:0 auto; line-height:1.6;
+    }
+
+    /* Header / toolbar */
+    .page-header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    }
+    .page-title{ display:flex; flex-direction:column; gap:6px }
+    .page-title h2{ font-size:22px; letter-spacing:.2px }
+    .subtitle{ color:var(--sub); font-size:13px }
+    .stats{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+    .pill{
+      background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff;
+      padding:6px 12px; border-radius:999px; font-weight:800; font-size:12px;
+    }
+    .toolbar{ display:flex; gap:10px; flex-wrap:wrap }
+    .btn{
+      text-decoration:none; display:inline-block; padding:10px 14px; border-radius:10px; font-weight:700; font-size:14px;
+      border:1px solid transparent; transition:background .2s, border-color .2s, transform .2s, box-shadow .2s;
+      cursor:pointer;
+    }
+    .btn--primary{ background:var(--accent); color:#fff; }
+    .btn--primary:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2); }
+    .btn--ghost{ background:#fff; color:var(--primary); border-color:#cfe2f7; border:1px solid #cfe2f7; }
+    .btn--ghost:hover{ background:#f3f8ff; border-color:#b7d5f6; }
+
+    /* Alerts */
+    .alert{
+      padding:12px 14px; border-radius:10px; border:1px solid; margin-bottom:12px;
+      background:#fff;
+    }
+    .alert-error{ background:#fdecea; color:#a12622; border-color:#f3c3c0 }
+    .alert-success{ background:#eafaf1; color:#1b7f45; border-color:#c9eedc }
+
+    /* Table */
+    .table-wrap{ background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; }
+    th, td{ padding:14px 14px; border-bottom:1px solid var(--line); }
+    thead th{
+      background:#1f2b38; color:#ecf0f1; text-align:left; position:sticky; top:0; z-index:1;
+      font-weight:700; letter-spacing:.3px;
+    }
+    tbody tr:hover{ background:#f8fbff; }
+    tbody tr:nth-child(even){ background:#fcfeff; }
+    .col-id{ width:80px; color:#556372 }
+    .col-actions a{
+      margin:0 6px; text-decoration:none; font-weight:800; font-size:13px;
+      padding:6px 10px; border-radius:8px; border:1px solid transparent; display:inline-block;
+    }
+    .action-view{ background:#fff; color:#3498db; border-color:#cfe2f7 }
+    .action-view:hover{ background:#f3f8ff; border-color:#b7d5f6 }
+    .action-edit{ background:#fff6e6; color:#a66a00; border-color:#ffe1b6 }
+    .action-edit:hover{ background:#ffefcf; }
+    .action-files{ background:#eaf9f0; color:#17965a; border-color:#c9efd8 }
+    .action-files:hover{ background:#ddf3e7; }
+    .action-del{ background:#fff; color:var(--danger); border-color:#ffd7d7 }
+    .action-del:hover{ background:#fff5f5; border-color:#ffbcbc }
+
+    /* Responsive -> cartes */
+    @media (max-width: 860px){
+      thead{ display:none; }
+      table, tbody, tr, td{ display:block; width:100%; }
+      .table-wrap{ border:0; background:transparent; }
+      tr{
+        background:#fff; margin:12px 0; border:1px solid var(--line); border-radius:12px;
+        box-shadow:0 6px 16px rgba(0,0,0,.06);
+      }
+      td{ border:0; border-bottom:1px dashed var(--line); }
+      td:last-child{ border-bottom:0; }
+      td[data-label]::before{
+        content:attr(data-label) " : ";
+        font-weight:800; color:#607086; display:block; margin-bottom:4px;
+      }
+      .col-actions{ padding-top:4px; }
+    }
+
+    /* Footer/back link */
+    .back{ margin-top:16px; display:inline-block; color:#3498db; text-decoration:none; font-weight:700 }
+    .back:hover{ color:#2980b9 }
+  </style>
 </head>
 <body>
-    <h2>Admin – Candidats</h2>
-    
-    <!-- Messages d'erreur et de succès -->
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    
-    <p><a th:href="@{/admin/candidats/new}" class="btn btn-success">+ Nouveau candidat</a></p>
 
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">
+      <h2>Administration des Candidats</h2>
+      <div class="subtitle">Suivi des candidatures, consultation et actions rapides.</div>
+    </div>
+
+    <div class="stats">
+      <span class="pill">Total&nbsp;: <span th:text="${#lists.size(candidats)}">0</span></span>
+    </div>
+
+    <div class="toolbar">
+      <a class="btn btn--primary" th:href="@{/admin/candidats/new}">+ Nouveau candidat</a>
+      <a class="btn btn--ghost" th:href="@{/admin/candidats}">Actualiser</a>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
     <table>
+      <thead>
         <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Email</th>
-            <th>Annonce</th>
-            <th>Date candidature</th>
-            <th>Actions</th>
+          <th class="col-id">ID</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Email</th>
+          <th>Annonce</th>
+          <th>Date candidature</th>
+          <th style="width:260px">Actions</th>
         </tr>
+      </thead>
+      <tbody>
         <tr th:each="c : ${candidats}">
-            <td th:text="${c.id}"></td>
-            <td th:text="${c.nom}"></td>
-            <td th:text="${c.prenom}"></td>
-            <td th:text="${c.email}"></td>
-            <td th:text="${c.annonce != null ? c.annonce.profil : ''}"></td>
-            <td th:text="${c.dateCandidature}"></td>
-            <td>
-                <a th:href="@{/admin/candidats/{id}(id=${c.id})}" class="btn btn-primary">Voir</a>
-                <a th:href="@{/admin/candidats/edit/{id}(id=${c.id})}" class="btn btn-warning">Modifier</a>
-                <a th:href="@{/admin/files/candidat/{id}(id=${c.id})}" class="btn btn-success">📁</a>
-                <a th:href="@{/admin/candidats/delete/{id}(id=${c.id})}"
-                   onclick="return confirm('Supprimer ce candidat ?');" class="btn btn-danger">Supprimer</a>
-            </td>
+          <td class="col-id" th:text="${c.id}" th:attr="data-label='ID'">1</td>
+          <td th:text="${c.nom}" th:attr="data-label='Nom'">Nom</td>
+          <td th:text="${c.prenom}" th:attr="data-label='Prénom'">Prénom</td>
+          <td th:text="${c.email}" th:attr="data-label='Email'">email@exemple.com</td>
+          <td th:text="${c.annonce != null ? c.annonce.profil : ''}" th:attr="data-label='Annonce'">Profil</td>
+          <td th:text="${c.dateCandidature}" th:attr="data-label='Date'">2025-01-01</td>
+          <td class="col-actions" th:attr="data-label='Actions'">
+            <a th:href="@{/admin/candidats/{id}(id=${c.id})}" class="action-view">Voir</a>
+            <a th:href="@{/admin/candidats/edit/{id}(id=${c.id})}" class="action-edit">Modifier</a>
+            <a th:href="@{/admin/files/candidat/{id}(id=${c.id})}" class="action-files">📁 Fichiers</a>
+            <a th:href="@{/admin/candidats/delete/{id}(id=${c.id})}"
+               onclick="return confirm('Supprimer ce candidat ?');"
+               class="action-del">Supprimer</a>
+          </td>
         </tr>
-    </table>
 
-    <p><a th:href="@{/candidats}">⬅ Revenir au site</a></p>
+        <tr th:if="${candidats == null or #lists.isEmpty(candidats)}">
+          <td colspan="7" style="text-align:center; color:var(--muted); padding:20px;">
+            Aucun candidat trouvé.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <a th:href="@{/candidats}" class="back">← Revenir au site</a>
+
 </body>
 </html>

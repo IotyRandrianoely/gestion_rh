@@ -1,73 +1,132 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Options Correctes - QCM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .options-list {
-            list-style: none;
-            padding: 0;
-        }
-        .option-item {
-            background-color: #e8f5e9;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border-left: 4px solid #4caf50;
-        }
-        .question-card {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Options Correctes - QCM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --danger:#e74c3c; --muted:#8aa0b2;
+      --header:#1f2b38;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Arial, sans-serif; color:var(--text);
+      background:var(--bg); line-height:1.6; padding:22px;
+    }
+    .container{ max-width:1000px; margin:0 auto; }
+
+    /* Page header */
+    .page-header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+    }
+    .page-title h1{ font-size:22px; letter-spacing:.2px; }
+    .subtitle{ color:var(--sub); font-size:13px; }
+
+    /* Breadcrumb simple */
+    .crumbs{ display:flex; gap:8px; align-items:center; font-size:13px; color:#e1e7ee; }
+    .crumbs-wrap{
+      background:var(--header); color:#ecf0f1; border-radius:10px; padding:10px 12px; margin-bottom:18px;
+      border:1px solid #28384b;
+    }
+    .crumbs a{ color:#a8c8ff; text-decoration:none }
+    .crumbs a:hover{ color:#cfe2ff; text-decoration:underline }
+    .sep{ opacity:.5 }
+
+    /* Cards */
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06); margin-bottom:18px;
+    }
+    .card h3{ font-size:18px; margin-bottom:8px; }
+    .question{
+      background:#f8fbff; border:1px solid #dfe9f7; border-left:4px solid var(--primary);
+      border-radius:12px; padding:14px; margin-top:8px; color:#243447;
+    }
+
+    /* List of correct options */
+    .options-list{ list-style:none; margin-top:10px; display:flex; flex-direction:column; gap:10px; padding:0; }
+    .option{
+      display:flex; gap:10px; align-items:flex-start;
+      background:#f1fff4; border:1px solid #cfeedd; border-left:4px solid var(--accent);
+      border-radius:12px; padding:12px 14px;
+    }
+    .check{
+      flex:0 0 26px; height:26px; width:26px; border-radius:50%;
+      display:grid; place-items:center; font-size:14px; font-weight:800; color:#fff; background:var(--accent);
+      box-shadow:0 3px 8px rgba(39,174,96,.25);
+    }
+    .empty{
+      background:#fffdf4; border:1px dashed #ffe8a6; color:#7a5a14; border-radius:12px; padding:14px; font-size:14px;
+    }
+
+    /* Actions */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start; }
+    .btn{
+      display:inline-block; padding:12px 16px; border-radius:10px; font-weight:800; font-size:14px;
+      text-decoration:none; border:1px solid transparent; transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
+    }
+    .btn--primary{ background:var(--primary); color:#fff; }
+    .btn--primary:hover{ background:var(--primary-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(41,128,185,.25); }
+    .btn--ghost{ background:#fff; color:var(--primary); border-color:#cfe2f7; }
+    .btn--ghost:hover{ background:#f3f8ff; border-color:#b7d5f6; }
+  </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <nav aria-label="breadcrumb" class="mb-4">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a th:href="@{/qcm/questions}">Questions</a></li>
-                        <li class="breadcrumb-item active">Options Correctes</li>
-                    </ol>
-                </nav>
+  <div class="container">
 
-                <h1 class="mb-4">Options Correctes</h1>
-                
-                <div th:if="${question != null}" class="question-card">
-                    <h5 class="card-title">Question :</h5>
-                    <p class="card-text" th:text="${question.text}">Texte de la question</p>
-                </div>
-
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4">Réponses correctes :</h5>
-                        <div th:if="${correctOptions != null and not #lists.isEmpty(correctOptions)}">
-                            <ul class="options-list">
-                                <li th:each="option : ${correctOptions}" class="option-item" th:text="${option.text}">
-                                    Option text
-                                </li>
-                            </ul>
-                        </div>
-                        <p th:if="${correctOptions == null or #lists.isEmpty(correctOptions)}" class="text-muted">
-                            Aucune option correcte trouvée pour cette question.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <a th:href="@{/qcm/questions}" class="btn btn-primary">
-                        ← Retour à la liste des questions
-                    </a>
-                </div>
-            </div>
-        </div>
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Options Correctes — QCM</h1>
+        <div class="subtitle">Visualisez les réponses validées pour la question sélectionnée.</div>
+      </div>
+      <div class="actions">
+        <a th:href="@{/qcm/questions}" class="btn btn--ghost">← Retour aux questions</a>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Breadcrumb -->
+    <div class="crumbs-wrap">
+      <div class="crumbs">
+        <a th:href="@{/qcm/questions}">Questions</a>
+        <span class="sep">›</span>
+        <span>Options correctes</span>
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="card" th:if="${question != null}">
+      <h3>Question</h3>
+      <div class="question" th:text="${question.text}">Texte de la question</div>
+    </div>
+
+    <!-- Options correctes -->
+    <div class="card">
+      <h3>Réponses correctes</h3>
+
+      <ul class="options-list" th:if="${correctOptions != null and not #lists.isEmpty(correctOptions)}">
+        <li class="option" th:each="option : ${correctOptions}">
+          <div class="check">✓</div>
+          <div th:text="${option.text}">Option text</div>
+        </li>
+      </ul>
+
+      <div class="empty" th:if="${correctOptions == null or #lists.isEmpty(correctOptions)}">
+        Aucune option correcte trouvée pour cette question.
+      </div>
+
+      <div class="actions" style="margin-top:12px;">
+        <a th:href="@{/qcm/questions}" class="btn btn--primary">← Retour à la liste des questions</a>
+      </div>
+    </div>
+
+  </div>
 </body>
 </html>

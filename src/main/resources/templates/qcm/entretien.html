@@ -1,255 +1,311 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Questions d'Entretien - QCM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .question-card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            padding: 20px;
-            position: relative;
-        }
-        .timer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #dc3545;
-        }
-        .question-number {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-        .question-text {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-        }
-        .options-list {
-            list-style: none;
-            padding: 0;
-            margin-bottom: 20px;
-        }
-        .option-item {
-            margin-bottom: 10px;
-        }
-        .option-label {
-            display: block;
-            padding: 10px 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-        .option-label:hover {
-            background-color: #e9ecef;
-        }
-        .option-label.selected {
-            background-color: #cfe2ff;
-            border-color: #0d6efd;
-        }
-        .option-checkbox {
-            margin-right: 10px;
-        }
-        .time-warning {
-            background-color: #fff3cd;
-        }
-        .time-danger {
-            background-color: #f8d7da;
-        }
-        .error-message {
-            color: #dc3545;
-            margin-bottom: 10px;
-            display: none;
-        }
-        .navigation-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Questions d'Entretien - QCM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --danger:#e74c3c; --warn:#f39c12;
+      --muted:#8aa0b2;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Arial, sans-serif; color:var(--text);
+      background:var(--bg); line-height:1.6;
+    }
+
+    .container{ max-width:900px; margin:0 auto; padding:24px 18px; }
+    h1{ font-size:26px; text-align:center; margin-bottom:16px; }
+    .subtitle{ text-align:center; color:var(--sub); font-size:13px; margin-bottom:14px; }
+
+    /* Progress global */
+    .progress-wrap{
+      background:#eaf3ff; border:1px solid #d7e7ff; border-radius:999px; height:10px; overflow:hidden;
+      box-shadow:inset 0 1px 2px rgba(0,0,0,.05); margin:0 auto 18px; max-width:640px;
+    }
+    .progress-bar{
+      height:100%; width:0%; background:linear-gradient(90deg,#3498db,#2ecc71);
+      transition:width .35s ease; border-radius:999px;
+    }
+    .counter{
+      text-align:center; color:#1d6fdc; font-weight:800; font-size:12px; margin-bottom:16px;
+    }
+
+    /* Carte question */
+    .question-card{
+      position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px;
+      padding:20px; box-shadow:0 6px 16px rgba(0,0,0,.06); margin-bottom:18px;
+      transition:transform .2s, box-shadow .2s;
+    }
+    .question-card.time-warning{ background:#fffdf4 }
+    .question-card.time-danger{ background:#fff6f6 }
+
+    .timer{
+      position:absolute; top:16px; right:16px; font-weight:800; font-size:14px;
+      background:#fff; color:#dc3545; padding:6px 10px; border-radius:999px; border:1px solid #ffd3d3;
+      box-shadow:0 2px 8px rgba(220,53,69,.15);
+    }
+    .q-num{ color:var(--muted); font-size:12px; margin-bottom:8px; font-weight:700; }
+    .q-text{ font-size:18px; font-weight:800; margin-bottom:16px; color:#243447 }
+
+    /* Options */
+    .options-list{ list-style:none; display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+    .option-item{}
+    .option-label{
+      display:flex; align-items:flex-start; gap:10px; cursor:pointer;
+      background:#fcfeff; border:1px solid #dfe7f1; border-radius:10px; padding:12px 14px;
+      transition:background .2s, border-color .2s, box-shadow .2s;
+      user-select:none;
+    }
+    .option-label:hover{ background:#f3f8ff; border-color:#cfe2f7; box-shadow:0 6px 12px rgba(0,0,0,.06); }
+    .option-label.selected{ background:#eaf3ff; border-color:#8ec5ff; box-shadow:0 8px 16px rgba(0,0,0,.08); }
+    .option-checkbox{ margin-top:3px; accent-color:#3498db; }
+
+    /* Message erreur */
+    .error-message{
+      display:none; color:#dc3545; font-weight:700; font-size:13px; margin-bottom:8px;
+      background:#ffeaea; border:1px solid #f5c6cb; padding:8px 10px; border-radius:8px;
+    }
+
+    /* Actions */
+    .nav-actions{
+      display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:6px;
+    }
+    .btn{
+      appearance:none; border:1px solid transparent; border-radius:10px; cursor:pointer;
+      font-weight:800; font-size:14px; padding:12px 16px; transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
+    }
+    .btn--primary{ background:var(--primary); color:#fff; }
+    .btn--primary:hover{ background:var(--primary-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(41,128,185,.25); }
+    .btn--ghost{ background:#fff; color:var(--primary); border-color:#cfe2f7; }
+    .btn--ghost:hover{ background:#f3f8ff; border-color:#b7d5f6; }
+
+    /* Helper chips */
+    .chip{
+      display:inline-block; padding:6px 10px; border-radius:999px; background:#eef6ff; color:#1d6fdc;
+      border:1px solid #d7e7ff; font-weight:800; font-size:12px;
+    }
+
+    @media (max-width:640px){
+      .q-text{ font-size:16px }
+      .btn{ width:100%; text-align:center }
+      .nav-actions{ flex-direction:column; align-items:stretch }
+    }
+  </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <h1 class="mb-4">Examen QCM</h1>
-                
-                <div th:if="${questions != null and not #lists.isEmpty(questions)}">
-                    <form id="qcmForm" th:action="@{/qcm/submit-answers}" method="post" th:object="${qcmSubmission}">
-                        <input type="hidden" name="candidatId" th:value="${candidatId}" />
-                        <input type="hidden" name="annonceId" th:value="${annonceId}" />
-    
-                        <div th:each="question, status : ${questions}" 
-                             th:id="'question-' + ${status.index}"
-                             class="question-card"
-                             th:style="${status.index > 0 ? 'display: none;' : ''}">
-                            
-                            <div class="timer" th:id="'timer-' + ${status.index}">20s</div>
-                            
-                            <div class="question-number" 
-                                 th:text="'Question ' + ${status.count} + '/10'">
-                            </div>
-                            
-                            <div class="question-text" th:text="${question.text}">
-                                Question text
-                            </div>
-                            
-                            <div class="error-message" th:id="'error-' + ${status.index}">
-                                Veuillez sélectionner au moins une réponse avant de continuer.
-                            </div>
+  <div class="container">
+    <h1>Examen QCM</h1>
+    <div class="subtitle">Répondez à chaque question avant la fin du temps imparti.</div>
 
-                            <input type="hidden" 
-                                   th:name="'answers[' + ${status.index} + '].questionId'"
-                                   th:value="${question.id}" />
-                            
-                            <input type="hidden" 
-                                   th:name="'answers[' + ${status.index} + '].timeSpent'"
-                                   th:id="'timeSpent-' + ${status.index}"
-                                   value="0" />
-                            
-                            <ul class="options-list" th:id="'options-' + ${status.index}">
-                                <li th:each="option : ${question.options}" class="option-item">
-                                    <label class="option-label">
-                                        <input type="checkbox" 
-                                               class="option-checkbox"
-                                               th:name="'answers[' + ${status.index} + '].selectedOptionIds'"
-                                               th:value="${option.id}" 
-                                               onchange="handleOptionSelection(this)"/>
-                                        <span th:text="${option.text}">Option text</span>
-                                    </label>
-                                </li>
-                            </ul>
-
-                            <div class="navigation-buttons">
-                                <button type="button" 
-                                        class="btn btn-primary"
-                                        th:onclick="'validateAndNext(' + ${status.index} + ')'">
-                                    Question suivante →
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                
-                <div th:if="${questions == null or #lists.isEmpty(questions)}" 
-                     class="alert alert-info">
-                    Aucune question disponible pour cette filière.
-                </div>
-            </div>
-        </div>
+    <!-- Progress global -->
+    <div class="counter">
+      <span id="counterText" class="chip">Question 1 / 10</span>
+    </div>
+    <div class="progress-wrap">
+      <div id="progressBar" class="progress-bar"></div>
     </div>
 
-    <script th:inline="javascript">
-        const questionCount = /*[[${questions.size()}]]*/ 0;
-        const timePerQuestion = 20; // Configurable, en secondes
-        let currentQuestion = 0;
-        let timer;
-        let startTime;
-        let questionStarted = false;
+    <div th:if="${questions != null and not #lists.isEmpty(questions)}">
+      <form id="qcmForm" th:action="@{/qcm/submit-answers}" method="post" th:object="${qcmSubmission}">
+        <input type="hidden" name="candidatId" th:value="${candidatId}" />
+        <input type="hidden" name="annonceId" th:value="${annonceId}" />
 
-        function handleOptionSelection(checkbox) {
-            const label = checkbox.closest('.option-label');
-            if (checkbox.checked) {
-                label.classList.add('selected');
-            } else {
-                label.classList.remove('selected');
-            }
-            document.getElementById(`error-${currentQuestion}`).style.display = 'none';
+        <div th:each="question, status : ${questions}"
+             th:id="'question-' + ${status.index}"
+             class="question-card"
+             th:style="${status.index > 0 ? 'display:none;' : ''}">
+
+          <div class="timer" th:id="'timer-' + ${status.index}">20s</div>
+
+          <div class="q-num" th:text="'Question ' + ${status.count} + '/10'"></div>
+          <div class="q-text" th:text="${question.text}">Question text</div>
+
+          <div class="error-message" th:id="'error-' + ${status.index}">
+            ⚠️ Veuillez sélectionner au moins une réponse avant de continuer.
+          </div>
+
+          <!-- Hidden bindings -->
+          <input type="hidden"
+                 th:name="'answers[' + ${status.index} + '].questionId'"
+                 th:value="${question.id}" />
+          <input type="hidden"
+                 th:name="'answers[' + ${status.index} + '].timeSpent'"
+                 th:id="'timeSpent-' + ${status.index}"
+                 value="0" />
+
+          <!-- Options -->
+          <ul class="options-list" th:id="'options-' + ${status.index}">
+            <li th:each="option : ${question.options}" class="option-item">
+              <label class="option-label">
+                <input type="checkbox"
+                       class="option-checkbox"
+                       th:name="'answers[' + ${status.index} + '].selectedOptionIds'"
+                       th:value="${option.id}"
+                       onchange="handleOptionSelection(this)" />
+                <span th:text="${option.text}">Option text</span>
+              </label>
+            </li>
+          </ul>
+
+          <!-- Actions -->
+          <div class="nav-actions">
+            <button type="button"
+                    class="btn btn--ghost"
+                    th:if="${status.index > 0}"
+                    th:onclick="'goPrev(' + ${status.index} + ')'">
+              ← Précédente
+            </button>
+
+            <button type="button"
+                    class="btn btn--primary"
+                    th:onclick="'validateAndNext(' + ${status.index} + ')'">
+              <span th:text="${status.index + 1 == questions.size()} ? 'Terminer et envoyer' : 'Question suivante →'">
+                Question suivante →
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div th:if="${questions == null or #lists.isEmpty(questions)}"
+         style="text-align:center; color:var(--sub); background:#fff; border:1px dashed var(--line); border-radius:12px; padding:22px; margin-top:14px;">
+      Aucune question disponible pour cette filière.
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    const questionCount = /*[[${questions.size()}]]*/ 0;
+    const timePerQuestion = 20; // secondes
+    let currentQuestion = 0;
+    let timer, startTime;
+    let questionStarted = false;
+
+    function updateProgress(){
+      const bar = document.getElementById('progressBar');
+      const text = document.getElementById('counterText');
+      const n = currentQuestion + 1;
+      const pct = questionCount ? (n / questionCount) * 100 : 0;
+      bar.style.width = pct + '%';
+      text.textContent = 'Question ' + n + ' / ' + (questionCount || 0);
+    }
+
+    function handleOptionSelection(checkbox){
+      const label = checkbox.closest('.option-label');
+      if (checkbox.checked) label.classList.add('selected'); else label.classList.remove('selected');
+      const err = document.getElementById(`error-${currentQuestion}`);
+      if (err) err.style.display = 'none';
+    }
+
+    function validateAndNext(questionIndex){
+      if (!questionStarted) return;
+
+      const card = document.getElementById(`question-${questionIndex}`);
+      const checks = card.querySelectorAll('input[type="checkbox"]:checked');
+
+      // Si du temps reste, exiger au moins une sélection
+      if (checks.length === 0 && timer){
+        const err = document.getElementById(`error-${questionIndex}`);
+        if (err) err.style.display = 'block';
+        return;
+      }
+      nextQuestion();
+    }
+
+    function goPrev(questionIndex){
+      if (timer) clearInterval(timer);
+      questionStarted = false;
+
+      const current = document.getElementById(`question-${questionIndex}`);
+      if (current) current.style.display = 'none';
+
+      currentQuestion = Math.max(0, questionIndex - 1);
+      const prev = document.getElementById(`question-${currentQuestion}`);
+      if (prev){
+        prev.style.display = 'block';
+        prev.classList.remove('time-warning','time-danger');
+      }
+      updateProgress();
+      setTimeout(startTimer, 150);
+    }
+
+    function startTimer(){
+      if (questionStarted) return;
+      questionStarted = true;
+
+      const card = document.getElementById(`question-${currentQuestion}`);
+      const timerEl = document.getElementById(`timer-${currentQuestion}`);
+      if (!card || !timerEl) return;
+
+      card.classList.remove('time-warning','time-danger');
+      let timeLeft = timePerQuestion;
+      startTime = Date.now();
+      timerEl.textContent = timeLeft + 's';
+
+      timer = setInterval(()=>{
+        timeLeft--;
+        timerEl.textContent = timeLeft + 's';
+
+        if (timeLeft <= 10) card.classList.add('time-warning');
+        if (timeLeft <= 5){
+          card.classList.remove('time-warning');
+          card.classList.add('time-danger');
         }
-
-        function validateAndNext(questionIndex) {
-            if (!questionStarted) return; // Empêcher le doublon
-
-            const currentCard = document.getElementById(`question-${questionIndex}`);
-            const checkboxes = currentCard.querySelectorAll('input[type="checkbox"]:checked');
-            
-            if (checkboxes.length === 0 && timer) { // Vérifie seulement s'il reste du temps
-                document.getElementById(`error-${questionIndex}`).style.display = 'block';
-                return false;
-            }
-
-            nextQuestion();
-            return true;
+        if (timeLeft <= 0){
+          nextQuestion();
         }
+      },1000);
+    }
 
-        function startTimer() {
-            if (questionStarted) return; // Empêcher le doublon
-            questionStarted = true;
+    function nextQuestion(){
+      questionStarted = false;
 
-            const timerElement = document.getElementById(`timer-${currentQuestion}`);
-            let timeLeft = timePerQuestion;
-            startTime = Date.now();
+      // enregistre le temps passé
+      const spentEl = document.getElementById(`timeSpent-${currentQuestion}`);
+      if (spentEl && startTime){
+        const spent = Math.min(Math.round((Date.now() - startTime)/1000), timePerQuestion);
+        spentEl.value = spent;
+      }
 
-            timer = setInterval(() => {
-                timeLeft--;
-                timerElement.textContent = timeLeft + 's';
+      if (timer) clearInterval(timer);
 
-                if (timeLeft <= 5) {
-                    timerElement.parentElement.classList.add('time-danger');
-                } else if (timeLeft <= 10) {
-                    timerElement.parentElement.classList.add('time-warning');
-                }
+      const currentEl = document.getElementById(`question-${currentQuestion}`);
+      if (currentEl) currentEl.style.display = 'none';
 
-                if (timeLeft <= 0) {
-                    // Quand le temps est écoulé, on passe directement à la question suivante
-                    nextQuestion();
-                }
-            }, 1000);
+      currentQuestion++;
+
+      if (currentQuestion < questionCount){
+        const nextEl = document.getElementById(`question-${currentQuestion}`);
+        if (nextEl){
+          nextEl.style.display = 'block';
+          nextEl.classList.remove('time-warning','time-danger');
         }
+        updateProgress();
+        setTimeout(startTimer, 150);
+      }else{
+        // fin -> submit
+        document.getElementById('qcmForm').submit();
+      }
+    }
 
-        function nextQuestion() {
-            questionStarted = false; // Réinitialiser pour la prochaine question
-            
-            const timeSpentElement = document.getElementById(`timeSpent-${currentQuestion}`);
-            const timeSpent = Math.min(Math.round((Date.now() - startTime) / 1000), timePerQuestion);
-            timeSpentElement.value = timeSpent;
+    document.addEventListener('DOMContentLoaded', ()=>{
+      updateProgress();
+      setTimeout(startTimer, 400);
 
-            clearInterval(timer);
-            
-            // Cache la question courante
-            const currentQuestionElement = document.getElementById(`question-${currentQuestion}`);
-            currentQuestionElement.style.display = 'none';
-            
-            currentQuestion++;
-
-            if (currentQuestion < questionCount) {
-                // Affiche la question suivante
-                const nextQuestionElement = document.getElementById(`question-${currentQuestion}`);
-                nextQuestionElement.style.display = 'block';
-                
-                // S'assure que les options sont visibles
-                const optionsList = document.getElementById(`options-${currentQuestion}`);
-                if (optionsList) {
-                    optionsList.style.display = 'block';
-                }
-                
-                // Réinitialise les classes d'avertissement du timer
-                const nextTimerElement = document.getElementById(`timer-${currentQuestion}`);
-                if (nextTimerElement && nextTimerElement.parentElement) {
-                    nextTimerElement.parentElement.classList.remove('time-warning', 'time-danger');
-                }
-                
-                startTimer();
-            } else {
-                // À la fin, on soumet simplement le formulaire
-                document.getElementById('qcmForm').submit();
-            }
+      // Accessibilité: Enter = suivant si focus dans la carte
+      document.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          validateAndNext(currentQuestion);
         }
-
-        // Démarrer le timer pour la première question après un court délai
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(startTimer, 500);
-        });
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+      });
+    });
+  </script>
 </body>
 </html>

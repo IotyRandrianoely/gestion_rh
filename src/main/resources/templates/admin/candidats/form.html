@@ -1,143 +1,271 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${candidat.id == null ? 'Nouveau candidat' : 'Modifier candidat'}"></title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        textarea { height: 100px; resize: vertical; }
-        .btn { padding: 10px 20px; margin: 5px; text-decoration: none; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-success { background-color: #28a745; }
-        .btn-secondary { background-color: #6c757d; }
-        .required { color: red; }
-        .alert { padding: 10px; margin: 10px 0; border-radius: 4px; }
-        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    </style>
+  <title th:text="${candidat.id == null ? 'Nouveau candidat' : 'Modifier candidat'}"></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --danger:#e74c3c; --danger-d:#c0392b;
+      --muted:#8aa0b2;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); padding:22px; max-width:1000px; margin:0 auto; line-height:1.6;
+    }
+
+    /* ===== Header (theme admin) ===== */
+    .page-header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    }
+    .titles h1{ font-size:22px; margin-bottom:6px; letter-spacing:.2px }
+    .subtitle{ color:var(--sub); font-size:13px }
+    .pill{ background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff; padding:6px 12px; border-radius:999px; font-weight:800; font-size:12px }
+
+    .stepper{ display:flex; gap:18px; margin-top:10px; flex-wrap:wrap }
+    .step{ display:flex; align-items:center; gap:10px; color:var(--sub); font-weight:800; font-size:13px }
+    .dot{ width:26px; height:26px; border-radius:50%; background:#eef6ff; color:#1d6fdc; display:grid; place-items:center; border:1px solid #d7e7ff; font-weight:800 }
+    .step.active .dot{ background:#3498db; color:#fff; border-color:#3498db }
+    .step.active{ color:#1d6fdc }
+
+    /* ===== Card / layout ===== */
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06); margin-bottom:18px;
+    }
+    .section-title{ font-size:16px; font-weight:800; margin:6px 0 12px; color:#243447 }
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
+    @media(max-width:780px){ .grid-2{ grid-template-columns:1fr } }
+
+    /* Form controls */
+    .form-group{ display:flex; flex-direction:column; gap:8px }
+    label{ font-weight:800; color:#243447; font-size:14px }
+    input[type="text"], input[type="email"], input[type="number"], input[type="date"], textarea, select{
+      width:100%; padding:12px; border:1px solid #d7dde5; border-radius:10px; font-size:14px; background:#fff;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    textarea{ min-height:120px; resize:vertical }
+    input:focus, select:focus, textarea:focus{
+      border-color:#8ac4fb; box-shadow:0 0 0 4px rgba(52,152,219,.15); outline:none;
+    }
+    select{
+      appearance:none;
+      background-image:linear-gradient(45deg, transparent 50%, #8aa0b2 50%), linear-gradient(135deg, #8aa0b2 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+      background-size:5px 5px,5px 5px; background-repeat:no-repeat;
+    }
+    .help{ font-size:12px; color:#6f7f90 }
+
+    /* Alerts (serveur) */
+    .alert{ padding:14px; border-radius:10px; border:1px solid; margin-bottom:14px }
+    .alert-error{ background:#fdecea; color:#a12622; border-color:#f3c3c0 }
+    .alert-success{ background:#eafaf1; color:#1b7f45; border-color:#c9eedc }
+
+    /* Inline errors (JS) */
+    .inline-error{ display:none; font-size:12px; color:#a12622; margin-top:-2px }
+
+    /* Buttons */
+    .actions{ margin-top:20px; display:flex; gap:12px; flex-wrap:wrap }
+    .btn{
+      display:inline-block; padding:12px 18px; border-radius:10px; font-weight:800; font-size:14px;
+      text-decoration:none; border:1px solid transparent; transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
+      cursor:pointer;
+    }
+    .btn-success{ background:var(--accent); color:#fff }
+    .btn-success:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2) }
+    .btn-secondary{ background:#fff; color:#3498db; border-color:#cfe2f7 }
+    .btn-secondary:hover{ background:#f3f8ff; border-color:#b7d5f6 }
+
+    /* Tiny badge preview */
+    .chip{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      background:#eef6ff; border:1px solid #d7e7ff; color:#1d6fdc; font-weight:800; font-size:12px; margin-top:6px;
+    }
+  </style>
 </head>
 <body>
-    <h2 th:text="${candidat.id == null ? 'Nouveau candidat' : 'Modifier candidat'}"></h2>
 
-    <!-- Messages d'erreur et de succès -->
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <!-- ===== HEADER ===== -->
+  <div class="page-header">
+    <div class="titles">
+      <h1 th:text="${candidat.id == null ? 'Nouveau candidat' : 'Modifier candidat'}"></h1>
+      <div class="subtitle">Renseignez les informations puis enregistrez. Tous les champs marqués sont obligatoires.</div>
 
+      <div class="stepper" aria-hidden="true">
+        <div class="step active"><span class="dot">1</span> Identité</div>
+        <div class="step active"><span class="dot">2</span> Coordonnées</div>
+        <div class="step"><span class="dot">3</span> Document</div>
+      </div>
+    </div>
+    <div class="pill">Espace admin</div>
+  </div>
+
+  <!-- Messages serveur -->
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+  <!-- ===== FORMULAIRE (back-end inchangé) ===== -->
+  <div class="card">
     <form th:action="@{/admin/candidats}" method="post" th:object="${candidat}">
-        <input type="hidden" th:field="*{id}" />
+      <input type="hidden" th:field="*{id}" />
 
+      <!-- Annonce liée -->
+      <div class="form-group">
+        <label for="annonce">Annonce <span style="color:var(--danger)">*</span></label>
+        <select th:field="*{annonce.id}" id="annonce" required>
+          <option value="">-- Sélectionner une annonce --</option>
+          <option th:each="a : ${annonces}" th:value="${a.id}" th:text="${a.profil + ' - ' + a.description}"></option>
+        </select>
+        <div class="help">L’annonce choisie sera associée à ce candidat.</div>
+      </div>
+
+      <!-- Identité -->
+      <div class="section-title">Identité</div>
+      <div class="grid-2">
         <div class="form-group">
-            <label for="annonce">Annonce <span class="required">*</span></label>
-            <select th:field="*{annonce.id}" id="annonce" required>
-                <option value="">-- Sélectionner une annonce --</option>
-                <option th:each="a : ${annonces}"
-                        th:value="${a.id}"
-                        th:text="${a.profil + ' - ' + a.description}">
-                </option>
-            </select>
+          <label for="nom">Nom <span style="color:var(--danger)">*</span></label>
+          <input type="text" th:field="*{nom}" id="nom" required maxlength="40"/>
+          <div id="err-nom" class="inline-error">Veuillez saisir le nom.</div>
+        </div>
+        <div class="form-group">
+          <label for="prenom">Prénom <span style="color:var(--danger)">*</span></label>
+          <input type="text" th:field="*{prenom}" id="prenom" required maxlength="40"/>
+          <div id="err-prenom" class="inline-error">Veuillez saisir le prénom.</div>
+        </div>
+      </div>
+
+      <!-- Coordonnées -->
+      <div class="section-title">Coordonnées</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="email">Email <span style="color:var(--danger)">*</span></label>
+          <input type="email" th:field="*{email}" id="email" required maxlength="40"/>
+          <div id="err-email" class="inline-error">Adresse email invalide.</div>
+        </div>
+        <div class="form-group">
+          <label for="age">Âge <span style="color:var(--danger)">*</span></label>
+          <input type="number" th:field="*{age}" id="age" required min="16" max="70"/>
+          <div id="err-age" class="inline-error">L’âge doit être entre 16 et 70 ans.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="genre">Genre <span style="color:var(--danger)">*</span></label>
+          <select th:field="*{genre}" id="genre" required>
+            <option value="">-- Sélectionner --</option>
+            <option value="1">Homme</option>
+            <option value="2">Femme</option>
+          </select>
+          <div id="err-genre" class="inline-error">Veuillez sélectionner le genre.</div>
         </div>
 
         <div class="form-group">
-            <label for="nom">Nom <span class="required">*</span></label>
-            <input type="text" th:field="*{nom}" id="nom" required maxlength="40"/>
+          <label for="diplome">Diplôme <span style="color:var(--danger)">*</span></label>
+          <select th:field="*{diplome.id}" id="diplome" required>
+            <option value="">-- Sélectionner un diplôme --</option>
+            <option th:each="d : ${diplomes}" th:value="${d.id}" th:text="${d.nomDiplome}"></option>
+          </select>
+          <div id="err-diplome" class="inline-error">Veuillez choisir un diplôme.</div>
         </div>
+      </div>
 
+      <div class="grid-2">
         <div class="form-group">
-            <label for="prenom">Prénom <span class="required">*</span></label>
-            <input type="text" th:field="*{prenom}" id="prenom" required maxlength="40"/>
+          <label for="adresse">Adresse</label>
+          <input type="text" th:field="*{adresse}" id="adresse" maxlength="60"/>
         </div>
-
         <div class="form-group">
-            <label for="email">Email <span class="required">*</span></label>
-            <input type="email" th:field="*{email}" id="email" required maxlength="40"/>
+          <label for="anneesExperience">Années d'expérience <span style="color:var(--danger)">*</span></label>
+          <input type="number" th:field="*{anneesExperience}" id="anneesExperience" required min="0" max="50"/>
+          <div id="err-exp" class="inline-error">Les années d’expérience doivent être ≥ 0.</div>
         </div>
+      </div>
 
+      <!-- Document -->
+      <div class="section-title">Document</div>
+      <div class="form-group">
+        <label for="lettreMotivation">Lettre de motivation</label>
+        <textarea th:field="*{lettreMotivation}" id="lettreMotivation" maxlength="300"
+                  placeholder="Notes ou résumé (300 caractères max)…"></textarea>
+        <div class="help"><span id="lm-count">0</span>/300 caractères</div>
+      </div>
+
+      <div class="grid-2">
         <div class="form-group">
-            <label for="age">Âge <span class="required">*</span></label>
-            <input type="number" th:field="*{age}" id="age" required min="16" max="70"/>
+          <label for="cv">CV (chemin fichier)</label>
+          <input type="text" th:field="*{cv}" id="cv" maxlength="60" placeholder="ex: cv_doe.pdf"/>
         </div>
-
         <div class="form-group">
-            <label for="genre">Genre <span class="required">*</span></label>
-            <select th:field="*{genre}" id="genre" required>
-                <option value="">-- Sélectionner --</option>
-                <option value="1">Homme</option>
-                <option value="2">Femme</option>
-            </select>
+          <label for="dateCandidature">Date de candidature</label>
+          <input type="date" th:field="*{dateCandidature}" id="dateCandidature"/>
         </div>
+      </div>
 
-        <!-- *** NOUVEAU CHAMP DIPLOME *** -->
-        <div class="form-group">
-            <label for="diplome">Diplôme <span class="required">*</span></label>
-            <select th:field="*{diplome.id}" id="diplome" required>
-                <option value="">-- Sélectionner un diplôme --</option>
-                <option th:each="d : ${diplomes}"
-                        th:value="${d.id}"
-                        th:text="${d.nomDiplome}">
-                </option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="adresse">Adresse</label>
-            <input type="text" th:field="*{adresse}" id="adresse" maxlength="60"/>
-        </div>
-
-        <div class="form-group">
-            <label for="anneesExperience">Années d'expérience <span class="required">*</span></label>
-            <input type="number" th:field="*{anneesExperience}" id="anneesExperience" required min="0" max="50"/>
-        </div>
-
-        <div class="form-group">
-            <label for="lettreMotivation">Lettre de motivation</label>
-            <textarea th:field="*{lettreMotivation}" id="lettreMotivation" maxlength="300"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="cv">CV (chemin fichier)</label>
-            <input type="text" th:field="*{cv}" id="cv" maxlength="60"/>
-        </div>
-
-        <div class="form-group">
-            <label for="dateCandidature">Date de candidature</label>
-            <input type="date" th:field="*{dateCandidature}" id="dateCandidature"/>
-        </div>
-
+      <!-- Actions -->
+      <div class="actions">
         <button type="submit" class="btn btn-success">Enregistrer</button>
         <a th:href="@{/admin/candidats}" class="btn btn-secondary">Annuler</a>
+      </div>
     </form>
+  </div>
 
-    <script>
-        // Validation côté client
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const annonce = document.getElementById('annonce').value;
-            const nom = document.getElementById('nom').value.trim();
-            const prenom = document.getElementById('prenom').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const age = document.getElementById('age').value;
-            const genre = document.getElementById('genre').value;
-            const diplome = document.getElementById('diplome').value; // *** NOUVEAU ***
-            const anneesExperience = document.getElementById('anneesExperience').value;
-            
-            if (!annonce || !nom || !prenom || !email || !age || !genre || !diplome || !anneesExperience) {
-                e.preventDefault();
-                alert('Veuillez remplir tous les champs obligatoires');
-                return false;
-            }
-            
-            if (age < 16 || age > 70) {
-                e.preventDefault();
-                alert('L\'âge doit être entre 16 et 70 ans');
-                return false;
-            }
-            
-            if (anneesExperience < 0) {
-                e.preventDefault();
-                alert('Les années d\'expérience ne peuvent pas être négatives');
-                return false;
-            }
-        });
-    </script>
+  <script>
+    // Compteur caractères LM
+    (function(){
+      const lm = document.getElementById('lettreMotivation');
+      const cnt = document.getElementById('lm-count');
+      if(lm && cnt){
+        const update = ()=> cnt.textContent = (lm.value||'').length;
+        lm.addEventListener('input', update); update();
+      }
+    })();
+
+    // Validation front (garde le back intact)
+    (function(){
+      const form = document.querySelector('form');
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      function show(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
+      function hide(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
+
+      form.addEventListener('submit', function(e){
+        let ok = true;
+
+        const annonce = document.getElementById('annonce');
+        const nom = document.getElementById('nom');
+        const prenom = document.getElementById('prenom');
+        const email = document.getElementById('email');
+        const age = document.getElementById('age');
+        const genre = document.getElementById('genre');
+        const diplome = document.getElementById('diplome');
+        const exp = document.getElementById('anneesExperience');
+
+        ['err-nom','err-prenom','err-email','err-age','err-genre','err-diplome','err-exp'].forEach(hide);
+
+        if(!annonce.value) ok = false; // select required
+        if(!nom.value.trim()){ show('err-nom'); ok = false; }
+        if(!prenom.value.trim()){ show('err-prenom'); ok = false; }
+        if(!email.value.trim() || !emailRe.test(email.value.trim())){ show('err-email'); ok = false; }
+
+        const ageVal = parseInt(age.value,10);
+        if(isNaN(ageVal) || ageVal < 16 || ageVal > 70){ show('err-age'); ok = false; }
+
+        if(!genre.value){ show('err-genre'); ok = false; }
+        if(!diplome.value){ show('err-diplome'); ok = false; }
+
+        const expVal = parseInt(exp.value,10);
+        if(isNaN(expVal) || expVal < 0){ show('err-exp'); ok = false; }
+
+        if(!ok){ e.preventDefault(); window.scrollTo({top:0, behavior:'smooth'}); }
+      });
+    })();
+  </script>
 </body>
 </html>

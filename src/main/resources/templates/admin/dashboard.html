@@ -1,162 +1,279 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard Admin - Gestion RH</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; background-color: #f8f9fa; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); }
-        .card h3 { margin-top: 0; color: #333; }
-        .btn { padding: 10px 20px; margin: 5px; text-decoration: none; color: white; border: none; border-radius: 4px; cursor: pointer; display: inline-block; transition: all 0.2s; }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-primary { background-color: #007bff; }
-        .btn-success { background-color: #28a745; }
-        .btn-warning { background-color: #ffc107; color: black; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-info { background-color: #17a2b8; }
-        .user-info { background-color: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-        .stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
-        .stat-box { text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 5px; }
-        .stat-number { font-size: 2em; font-weight: bold; }
-        .quick-actions { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Dashboard Admin - Gestion RH</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --info:#1abc9c; --warning:#f1c40f; --danger:#e74c3c;
+      --muted:#8aa0b2; --header:#1f2b38;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Arial, sans-serif; color:var(--text);
+      background:var(--bg); line-height:1.6;
+    }
+    .container{ max-width:1200px; margin:0 auto; padding:22px; }
+
+    /* ===== HERO (bannière comme l'accueil) ===== */
+    .hero {
+      width: 100%; height: 260px;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+        url('/images/banner.jpg') center/cover no-repeat;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; color:#fff; text-shadow:0 3px 12px rgba(0,0,0,.45);
+    }
+    .hero h1{ font-size:34px; font-weight:700; }
+    .hero p{ margin-top:8px; font-size:15px; opacity:.95; }
+
+    /* ===== NAV (comme l'accueil) ===== */
+    nav{
+      background:#1f2b38; display:flex; justify-content:center; gap:36px; padding:14px 16px;
+    }
+    nav a{
+      color:#ecf0f1; text-decoration:none; font-weight:500; padding:6px 8px; border-radius:6px;
+      transition:background .25s, color .25s;
+    }
+    nav a:hover{ background:#2b3b4f; color:#1abc9c; }
+
+    /* ===== USER BAR ===== */
+    .userbar{ max-width:1200px; margin:18px auto 0; padding:0 22px; }
+    .user-info{
+      background:#ffffff; border:1px solid var(--line); border-radius:12px; padding:10px 12px;
+      color:#243447; font-size:14px; box-shadow:0 6px 16px rgba(0,0,0,.06);
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:space-between;
+    }
+    .user-info .meta{ color:var(--sub) }
+    .user-info a{ color:var(--primary); text-decoration:none; font-weight:700 }
+    .user-info a:hover{ color:var(--primary-d) }
+
+    /* ===== STATS ===== */
+    .stats{
+      margin-top:16px; display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;
+    }
+    @media (max-width:900px){ .stats{ grid-template-columns:1fr; } }
+    .stat{
+      background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px;
+      display:flex; align-items:center; gap:12px; box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .stat .icon{
+      width:42px; height:42px; border-radius:12px; display:grid; place-items:center;
+      background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff; font-weight:800;
+    }
+    .stat .meta{ font-size:13px; color:var(--sub); }
+    .stat .value{ font-size:16px; font-weight:800; color:#243447 }
+
+    /* ===== QUICK ACTIONS ===== */
+    .quick-actions{
+      background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:center;
+    }
+    .quick-actions h3{ font-size:18px; margin-right:auto; }
+
+    /* ===== GRID CARDS ===== */
+    .grid{
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; margin-top:18px;
+    }
+    @media (max-width:1100px){ .grid{ grid-template-columns:repeat(2, 1fr); } }
+    @media (max-width:720px){ .grid{ grid-template-columns:1fr; } }
+
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06); transition:transform .2s, box-shadow .2s;
+    }
+    .card:hover{ transform:translateY(-3px); box-shadow:0 10px 20px rgba(0,0,0,.1); }
+    .card h3{ font-size:18px; margin-bottom:6px; }
+    .card p{ color:var(--sub); margin-bottom:10px; }
+
+    /* ===== BUTTONS ===== */
+    .btn{
+      display:inline-block; padding:10px 14px; border-radius:10px; font-weight:800; font-size:14px;
+      text-decoration:none; border:1px solid transparent; transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
+      margin:4px 6px 0 0;
+    }
+    .btn--primary{ background:var(--primary); color:#fff; }
+    .btn--primary:hover{ background:var(--primary-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(41,128,185,.25); }
+    .btn--success{ background:var(--accent); color:#fff; }
+    .btn--success:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.25); }
+    .btn--info{ background:var(--info); color:#fff; }
+    .btn--info:hover{ filter:brightness(.95); transform:translateY(-1px); box-shadow:0 8px 16px rgba(26,188,156,.25); }
+    .btn--warning{ background:#fff; color:#c27c0e; border-color:#ffe08a; }
+    .btn--warning:hover{ background:#fff8e0; border-color:#ffd86b; }
+
+    /* ===== FOOTER ===== */
+    footer{ text-align:center; padding:18px; color:#7f8c8d; background:#f0f3f6; margin-top:28px; }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>🔧 Dashboard Administrateur</h1>
-            <div class="user-info">
-                👤 Connecté en tant que : <strong th:text="${user.username}"></strong> 
-                | 🎯 Rôle : <strong th:text="${user.role}"></strong>
-                | 📅 <span th:text="${#temporals.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}"></span>
-                | <a th:href="@{/logout}" style="color: white;">🚪 Déconnexion</a>
-            </div>
-            
-            <div class="stats">
-                <div class="stat-box">
-                    <div class="stat-number">🎯</div>
-                    <div>Gestion complète</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">👥</div>
-                    <div>Tous les candidats</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">📢</div>
-                    <div>Toutes les annonces</div>
-                </div>
-            </div>
-        </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1>Dashboard Administrateur</h1>
+      <p>Pilotez les annonces, candidats, fichiers et évaluations dans un espace unifié.</p>
+    </div>
+  </section>
+
+  <!-- NAV -->
+  <nav>
+    <a th:href="@{/admin/dashboard}">Dashboard</a>
+    <a th:href="@{/admin/annonces}">Annonces</a>
+    <a th:href="@{/admin/candidats}">Candidats</a>
+    <a th:href="@{/admin/files}">Fichiers</a>
+    <a th:href="@{/qcm/list-questions}">QCM</a>
+    <a th:href="@{/candidats}">Candidats et Entretiens</a>
+    <a th:href="@{/logout}">Déconnexion</a>
+
+  </nav>
+
+  <!-- USER BAR + STATS -->
+  <div class="userbar">
+    <div class="user-info">
+      <div>
+        <b th:text="${user.username}">Utilisateur</b>
+        <span class="meta"> — Rôle : <b th:text="${user.role}">Rôle</b></span>
+      </div>
+      <div class="meta">
+        Créé le <span th:text="${#temporals.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}">--/--/----</span>
+        • <a th:href="@{/logout}">Déconnexion</a>
+      </div>
     </div>
 
-    <div class="container">
-        <!-- Actions rapides -->
-        <div class="quick-actions">
-            <h3>⚡ Actions Rapides</h3>
-            <a th:href="@{/admin/annonces/new}" class="btn btn-success">📝 Nouvelle annonce</a>
-            <a th:href="@{/admin/candidats/new}" class="btn btn-info">👤 Nouveau candidat</a>
-            <a th:href="@{/admin/files}" class="btn btn-warning">📁 Voir tous les fichiers</a>
+    <div class="stats">
+      <div class="stat">
+        <div class="icon">G</div>
+        <div>
+          <div class="value">Gestion complète</div>
+          <div class="meta">Administration centrale</div>
         </div>
-
-        <div class="dashboard-grid">
-            <!-- Gestion des Annonces -->
-            <div class="card">
-                <h3>📢 Gestion des Annonces</h3>
-                <p>Créer, modifier et gérer les offres d'emploi de l'entreprise</p>
-                <a th:href="@{/admin/annonces}" class="btn btn-primary">📋 Voir les annonces</a>
-                <a th:href="@{/admin/annonces/new}" class="btn btn-success">➕ Nouvelle annonce</a>
-                <br/>
-                <a th:href="@{/annonces}" class="btn btn-info" target="_blank">🌐 Vue publique</a>
-            </div>
-
-            <!-- Gestion des Candidats -->
-            <div class="card">
-                <h3>👥 Gestion des Candidats</h3>
-                <p>Consulter et gérer toutes les candidatures reçues</p>
-                <a th:href="@{/admin/candidats}" class="btn btn-primary">👤 Admin candidats</a>
-                <a th:href="@{/candidats}" class="btn btn-success">📊 Vue candidats</a>
-                <br/>
-                <a th:href="@{/candidats/client/postuler}" class="btn btn-info">📝 Nouvelle candidature</a>
-            </div>
-
-            <!-- Gestion des Fichiers -->
-            <div class="card">
-                <h3>📁 Gestion des Fichiers</h3>
-                <p>Gérer tous les CV et documents uploadés par les candidats</p>
-                <a th:href="@{/admin/files}" class="btn btn-primary">📄 Tous les fichiers</a>
-                <a th:href="@{/admin/files/list}" class="btn btn-success">📂 Vue détaillée</a>
-            </div>
-
-            <!-- Données de Référence -->
-            <div class="card">
-                <h3>🎯 Données de Référence</h3>
-                <p>Gérer les diplômes, filières et autres données de base</p>
-                <a href="#" class="btn btn-warning">🎓 Diplômes</a>
-                <a href="#" class="btn btn-warning">📚 Filières</a>
-                <br/>
-                <a href="#" class="btn btn-info">⚙️ Paramètres</a>
-            </div>
-
-            <!-- QCM et Évaluation -->
-            <div class="card">
-                <h3>📝 QCM et Évaluation</h3>
-                <p>Gérer les questions et les évaluations des candidats</p>
-                <a href="/qcm/list-questions" class="btn btn-primary">❓ Questions QCM</a>
-                <a href="/evaluation/admin" class="btn btn-success">📊 Résultats</a>
-            </div>
-
-            <!-- Rapports et Statistiques -->
-            <div class="card">
-                <h3>📈 Rapports et Statistiques</h3>
-                <p>Analyser les données de recrutement et générer des rapports</p>
-                <a href="#" class="btn btn-info">📊 Dashboard stats</a>
-                <a href="#" class="btn btn-primary">📄 Rapports PDF</a>
-            </div>
-
-            <!-- Accès rapide -->
-            <div class="card">
-                <h3>🔗 Accès Rapide</h3>
-                <p>Liens vers les fonctionnalités principales du système</p>
-                <a th:href="@{/annonces}" class="btn btn-success" target="_blank">🌐 Site public</a>
-                <a href="http://localhost:8070" class="btn btn-primary" target="_blank">🔗 Nouvelle fenêtre</a>
-                <br/>
-                <a th:href="@{/candidats/session-info}" class="btn btn-info">🔒 Info session</a>
-            </div>
-
-            <!-- Utilisateurs -->
-            <div class="card">
-                <h3>👨‍💼 Gestion Utilisateurs</h3>
-                <p>Gérer les comptes utilisateurs et les droits d'accès</p>
-                <a href="#" class="btn btn-warning">👤 Utilisateurs</a>
-                <a href="#" class="btn btn-danger">🔐 Sécurité</a>
-            </div>
+      </div>
+      <div class="stat">
+        <div class="icon">C</div>
+        <div>
+          <div class="value">Tous les candidats</div>
+          <div class="meta">Suivi et analyse</div>
         </div>
-
-        <!-- Informations système -->
-        <div style="margin-top: 30px; padding: 20px; background: white; border-radius: 8px; text-align: center;">
-            <h4>ℹ️ Informations Système</h4>
-            <p>Serveur : <strong>http://localhost:8070</strong> | Version : <strong>1.0.0</strong> | Environnement : <strong>Développement</strong></p>
-            <p>Dernière connexion : <span th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+      </div>
+      <div class="stat">
+        <div class="icon">A</div>
+        <div>
+          <div class="value">Toutes les annonces</div>
+          <div class="meta">Publication et édition</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <main class="container">
+
+    <!-- Actions rapides -->
+    <div class="quick-actions">
+      <h3>Actions rapides</h3>
+      <a th:href="@{/admin/annonces/new}" class="btn btn--success">Nouvelle annonce</a>
+      <a th:href="@{/admin/candidats/new}" class="btn btn--info">Nouveau candidat</a>
+      <a th:href="@{/admin/files}" class="btn btn--warning">Voir tous les fichiers</a>
     </div>
 
-    <script>
-        console.log('=== DASHBOARD ADMIN CHARGÉ ===');
-        console.log('Utilisateur:', '[[${user.username}]]');
-        console.log('Rôle:', '[[${user.role}]]');
-        
-        // Animation des cartes
-        document.querySelectorAll('.card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
-            });
-            card.addEventListener('mouseleave', function() {
-                this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            });
-        });
-    </script>
+    <!-- Grille de cartes -->
+    <section class="grid">
+      <!-- Annonces -->
+      <div class="card">
+        <h3>Gestion des annonces</h3>
+        <p>Créer, modifier et administrer les offres d’emploi.</p>
+        <a th:href="@{/admin/annonces}" class="btn btn--primary">Voir les annonces</a>
+        <a th:href="@{/admin/annonces/new}" class="btn btn--success">Nouvelle annonce</a>
+        <a th:href="@{/annonces}" class="btn btn--info" target="_blank">Vue publique</a>
+      </div>
+
+      <!-- Candidats -->
+      <div class="card">
+        <h3>Gestion des candidats</h3>
+        <p>Consulter et gérer toutes les candidatures.</p>
+        <a th:href="@{/admin/candidats}" class="btn btn--primary">Admin candidats</a>
+        <a th:href="@{/candidats}" class="btn btn--success">Vue candidats</a>
+        <a th:href="@{/candidats/client/postuler}" class="btn btn--info">Nouvelle candidature</a>
+      </div>
+
+      <!-- Fichiers -->
+      <div class="card">
+        <h3>Gestion des fichiers</h3>
+        <p>CV et documents uploadés par les candidats.</p>
+        <a th:href="@{/admin/files}" class="btn btn--primary">Tous les fichiers</a>
+        <a th:href="@{/admin/files/list}" class="btn btn--success">Vue détaillée</a>
+      </div>
+
+      <!-- Référentiels -->
+      <div class="card">
+        <h3>Données de référence</h3>
+        <p>Diplômes, filières et paramètres de base.</p>
+        <a href="#" class="btn btn--warning">Diplômes</a>
+        <a href="#" class="btn btn--warning">Filières</a>
+        <a href="#" class="btn btn--info">Paramètres</a>
+      </div>
+
+      <!-- QCM -->
+      <div class="card">
+        <h3>QCM et évaluation</h3>
+        <p>Questions et résultats d’évaluation.</p>
+        <a href="/qcm/list-questions" class="btn btn--primary">Questions QCM</a>
+        <a href="/evaluation/admin" class="btn btn--success">Résultats</a>
+      </div>
+
+      <!-- Rapports -->
+      <div class="card">
+        <h3>Rapports et statistiques</h3>
+        <p>Analyse des données de recrutement.</p>
+        <a href="#" class="btn btn--info">Dashboard stats</a>
+        <a href="#" class="btn btn--primary">Rapports PDF</a>
+      </div>
+
+      <!-- Accès rapide -->
+      <div class="card">
+        <h3>Accès rapide</h3>
+        <p>Raccourcis vers les fonctionnalités clés.</p>
+        <a th:href="@{/annonces}" class="btn btn--success" target="_blank">Site public</a>
+        <a href="http://localhost:8070" class="btn btn--primary" target="_blank">Nouvelle fenêtre</a>
+        <a th:href="@{/candidats/session-info}" class="btn btn--info">Info session</a>
+      </div>
+
+      <!-- Utilisateurs -->
+      <div class="card">
+        <h3>Gestion utilisateurs</h3>
+        <p>Comptes et droits d’accès.</p>
+        <a href="#" class="btn btn--warning">Utilisateurs</a>
+        <a href="#" class="btn btn--success">Sécurité</a>
+      </div>
+    </section>
+
+    <!-- Informations système -->
+    <section class="card" style="margin-top:18px;">
+      <h3>Informations système</h3>
+      <p>Serveur : <strong>http://localhost:8070</strong> | Version : <strong>1.0.0</strong> | Environnement : <strong>Développement</strong></p>
+      <p>Dernière connexion : <span th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 Entreprise de Recrutement RH — Tous droits réservés.
+  </footer>
+
+  <script>
+    // Micro-interactions
+    document.querySelectorAll('.card').forEach(card=>{
+      card.addEventListener('mouseenter',()=>card.style.boxShadow='0 10px 22px rgba(52,152,219,.15)');
+      card.addEventListener('mouseleave',()=>card.style.boxShadow='0 6px 16px rgba(0,0,0,.06)');
+    });
+    console.log('Dashboard Admin chargé');
+  </script>
 </body>
 </html>

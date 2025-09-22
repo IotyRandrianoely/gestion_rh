@@ -1,72 +1,184 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Planifier entretien manuel</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; }
-        .box { max-width: 480px; margin:auto; padding:1.5rem; border:1px solid #ddd; border-radius:8px;}
-        .hidden { display:none; }
-        .btn { padding:0.5rem 1rem; border-radius:6px; cursor:pointer; }
-        .btn-primary { background:#3d5a80; color:white; border:none; }
-        .btn-secondary { background:#e2e8f0; color:#333; border:none; margin-left:8px; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Planifier entretien manuel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --muted:#8aa0b2;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); padding:22px; max-width:900px; margin:0 auto;
+      line-height:1.6;
+    }
+
+    /* ===== Header ===== */
+    .page-header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    }
+    .title-wrap{ display:flex; flex-direction:column; gap:6px }
+    .title-wrap h1{ font-size:22px; letter-spacing:.2px }
+    .subtitle{ color:var(--sub); font-size:13px }
+    .pill{
+      background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff;
+      padding:6px 12px; border-radius:999px; font-weight:800; font-size:12px;
+    }
+    .back-link{ text-decoration:none; color:#3498db; font-weight:800 }
+    .back-link:hover{ color:#2980b9 }
+
+    /* Stepper */
+    .stepper{ display:flex; gap:18px; flex-wrap:wrap; margin-top:8px }
+    .step{ display:flex; align-items:center; gap:10px; color:var(--sub); font-weight:800; font-size:13px }
+    .dot{
+      width:26px; height:26px; border-radius:50%;
+      background:#eef6ff; color:#1d6fdc; display:grid; place-items:center; font-weight:800;
+      border:1px solid #d7e7ff;
+    }
+    .step.active .dot{ background:#3498db; color:#fff; border-color:#3498db }
+    .step.active{ color:#1d6fdc }
+
+    /* ===== Card / form ===== */
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06); margin-bottom:18px;
+    }
+    .candidate-chip{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      background:#f0f7ff; border:1px solid #d7e7ff; color:#1d6fdc; font-weight:800; font-size:13px;
+      margin-top:6px;
+    }
+
+    .form-group{ display:flex; flex-direction:column; gap:8px; margin-bottom:14px }
+    label{ font-weight:800; color:#243447; font-size:14px }
+    input[type="date"], input[type="time"]{
+      padding:12px; border:1px solid #d7dde5; border-radius:10px; background:#fff; font-size:14px;
+      transition:border-color .2s, box-shadow .2s;
+    }
+    input:focus{
+      border-color:#8ac4fb; box-shadow:0 0 0 4px rgba(52,152,219,.15); outline:none;
+    }
+
+    .hidden{ display:none }
+
+    /* Buttons */
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
+    .btn{
+      display:inline-block; padding:12px 16px; border-radius:10px; font-weight:800; font-size:14px;
+      text-decoration:none; border:1px solid transparent; cursor:pointer;
+      transition:transform .2s, box-shadow .2s, background .2s, border-color .2s
+    }
+    .btn--primary{ background:#3498db; color:#fff; }
+    .btn--primary:hover{ background:#2980b9; transform:translateY(-1px); box-shadow:0 8px 16px rgba(41,128,185,.2) }
+    .btn--ghost{ background:#fff; color:#3498db; border-color:#cfe2f7; }
+    .btn--ghost:hover{ background:#f3f8ff; border-color:#b7d5f6 }
+
+    /* Footnote */
+    .footnote{ color:var(--muted); font-size:12px; margin-top:6px }
+  </style>
 </head>
 <body>
-<div class="box">
-    <h2>Planifier entretien manuel</h2>
-    <div>
-        <p><strong th:text="${candidat.nom} + ' ' + ${candidat.prenom}">Candidat</strong></p>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="title-wrap">
+      <h1>Planifier entretien (manuel)</h1>
+      <div class="subtitle">
+        Sélectionnez la <b>date</b> puis l’<b>heure</b> du créneau d’entretien.
+      </div>
+      <div class="candidate-chip">
+        👤 <span th:text="${candidat.nom} + ' ' + ${candidat.prenom}">Candidat</span>
+      </div>
     </div>
+    <div>
+      <a class="back-link" th:href="@{/candidats}">← Retour à la liste</a>
+    </div>
+  </div>
 
+  <!-- Form -->
+  <div class="card">
     <form id="form" method="post" th:action="@{/candidats/planifier_entretien_manual}">
-        <input type="hidden" name="candidatId" th:value="${candidat.id}" />
+      <input type="hidden" name="candidatId" th:value="${candidat.id}" />
 
-        <div id="step-date">
-            <label for="date">Choisir une date :</label><br/>
-            <input type="date" id="date" name="date" required />
-            <div style="margin-top:1rem;">
-                <button type="button" class="btn btn-primary" id="nextBtn">Suivant</button>
-                <a href="/candidats" class="btn btn-secondary">Annuler</a>
-            </div>
+      <!-- Étape 1 : date -->
+      <div id="step-date">
+        <div class="stepper" aria-hidden="true">
+          <div class="step active"><span class="dot">1</span> Choisir la date</div>
+          <div class="step"><span class="dot">2</span> Choisir l’heure</div>
         </div>
 
-        <div id="step-time" class="hidden">
-            <label for="time">Choisir l'heure :</label><br/>
-            <input type="time" id="time" name="time" required />
-            <div style="margin-top:1rem;">
-                <button type="submit" class="btn btn-primary">Valider</button>
-                <button type="button" class="btn btn-secondary" id="backBtn">Retour</button>
-            </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label for="date">Date de l’entretien</label>
+          <input type="date" id="date" name="date" required />
+          <div class="footnote">Le créneau est enregistré en heure locale du serveur.</div>
         </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn--primary" id="nextBtn">Suivant</button>
+          <a th:href="@{/candidats}" class="btn btn--ghost">Annuler</a>
+        </div>
+      </div>
+
+      <!-- Étape 2 : heure -->
+      <div id="step-time" class="hidden">
+        <div class="stepper" aria-hidden="true">
+          <div class="step"><span class="dot">1</span> Choisir la date</div>
+          <div class="step active"><span class="dot">2</span> Choisir l’heure</div>
+        </div>
+
+        <div class="form-group" style="margin-top:12px;">
+          <label for="time">Heure de l’entretien</label>
+          <input type="time" id="time" name="time" required />
+          <div class="footnote">Exemples : 09:00, 14:30…</div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn--primary">Valider</button>
+          <button type="button" class="btn btn--ghost" id="backBtn">Retour</button>
+        </div>
+      </div>
     </form>
-</div>
+  </div>
 
-<script>
+  <script>
     document.addEventListener('DOMContentLoaded', function(){
-        const nextBtn = document.getElementById('nextBtn');
-        const backBtn = document.getElementById('backBtn');
-        const stepDate = document.getElementById('step-date');
-        const stepTime = document.getElementById('step-time');
-        const dateInput = document.getElementById('date');
+      const nextBtn   = document.getElementById('nextBtn');
+      const backBtn   = document.getElementById('backBtn');
+      const stepDate  = document.getElementById('step-date');
+      const stepTime  = document.getElementById('step-time');
+      const dateInput = document.getElementById('date');
+      const timeInput = document.getElementById('time');
 
-        nextBtn.addEventListener('click', function(){
-            if (!dateInput.value) { alert('Veuillez choisir une date'); return; }
-            stepDate.classList.add('hidden');
-            stepTime.classList.remove('hidden');
-            // Focus time input
-            document.getElementById('time').focus();
-        });
+      // min = aujourd'hui
+      const today = new Date().toISOString().slice(0,10);
+      if (!dateInput.value){ dateInput.value = today; }
+      dateInput.min = today;
 
-        backBtn.addEventListener('click', function(){
-            stepTime.classList.add('hidden');
-            stepDate.classList.remove('hidden');
-        });
+      nextBtn.addEventListener('click', function(){
+        if (!dateInput.value){
+          alert('Veuillez choisir une date');
+          dateInput.focus();
+          return;
+        }
+        stepDate.classList.add('hidden');
+        stepTime.classList.remove('hidden');
+        setTimeout(()=>timeInput.focus(), 0);
+      });
 
-        // set default date = today
-        const today = new Date().toISOString().substr(0,10);
-        if (!dateInput.value) dateInput.value = today;
+      backBtn.addEventListener('click', function(){
+        stepTime.classList.add('hidden');
+        stepDate.classList.remove('hidden');
+        dateInput.focus();
+      });
     });
-</script>
+  </script>
 </body>
 </html>

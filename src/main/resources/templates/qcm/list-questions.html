@@ -1,146 +1,204 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Liste des Questions QCM</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .filiere-section {
-            background: white;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .filiere-header {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .question-card {
-            background: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            border-left: 4px solid #007bff;
-        }
-        .question-content {
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .options-list {
-            list-style-type: none;
-            padding-left: 20px;
-        }
-        .option-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            margin: 5px 0;
-            background: white;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
-        .option-item:hover {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .correct-option {
-            border-left: 4px solid #28a745;
-            background-color: #f0fff0;
-        }
-        .no-questions {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
-            font-style: italic;
-        }
-        .option-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .option-text {
-            flex-grow: 1;
-        }
-        .btn-action {
-            padding: 4px 8px;
-            font-size: 0.875rem;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Admin – Questions QCM par Filière</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --warn:#f39c12; --warn-d:#d68910;
+      --danger:#e74c3c; --danger-d:#c0392b;
+      --muted:#8aa0b2; --header:#1f2b38;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Arial, sans-serif; color:var(--text);
+      background:var(--bg); line-height:1.6;
+    }
+
+    /* ===== HERO (même thème client) ===== */
+    .hero {
+      width: 100%; height: 260px;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+        url('/images/banner.jpg') center/cover no-repeat;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; color:#fff; text-shadow:0 3px 12px rgba(0,0,0,.45);
+    }
+    .hero h1{ font-size:34px; font-weight:700; }
+    .hero p{ margin-top:8px; font-size:15px; opacity:.95; }
+
+    /* ===== NAV (style client) ===== */
+    nav{
+      background:#1f2b38; display:flex; justify-content:center; gap:36px; padding:14px 16px;
+    }
+    nav a{
+      color:#ecf0f1; text-decoration:none; font-weight:500; padding:6px 8px; border-radius:6px;
+      transition:background .25s, color .25s;
+    }
+    nav a:hover{ background:#2b3b4f; color:#1abc9c; }
+
+    /* ===== PAGE HEADER (garde ton bandeau de section) ===== */
+    .page-header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin:22px auto 20px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+      max-width:1100px;
+    }
+    .page-title{ display:flex; flex-direction:column; gap:6px }
+    .page-title h1{ font-size:22px; letter-spacing:.2px }
+    .subtitle{ color:var(--sub); font-size:13px }
+    .toolbar{ display:flex; gap:10px; flex-wrap:wrap }
+    .pill{
+      background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff;
+      padding:6px 12px; border-radius:999px; font-weight:700; font-size:12px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn{
+      text-decoration:none; display:inline-block; padding:8px 12px; border-radius:10px; font-weight:800; font-size:13px;
+      border:1px solid transparent; transition:background .2s, border-color .2s, transform .2s, box-shadow .2s; cursor:pointer;
+    }
+    .btn--ghost{ background:#fff; color:var(--primary); border-color:#cfe2f7 }
+    .btn--ghost:hover{ background:#f3f8ff; border-color:#b7d5f6 }
+    .btn--success{ background:var(--accent); color:#fff }
+    .btn--success:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2) }
+    .btn--primary{ background:var(--primary); color:#fff }
+    .btn--primary:hover{ background:var(--primary-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(41,128,185,.2) }
+    .btn--warn{ background:var(--warn); color:#fff }
+    .btn--warn:hover{ background:var(--warn-d) }
+    .btn--danger{ background:var(--danger); color:#fff }
+    .btn--danger:hover{ background:var(--danger-d) }
+
+    /* ===== LAYOUT ===== */
+    .container{ max-width:1100px; margin:0 auto; padding:0 22px 22px; }
+
+    /* ===== FILIÈRE ===== */
+    .filiere-card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .filiere-head{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px;
+      border-bottom:1px dashed var(--line); padding-bottom:10px;
+    }
+    .filiere-title{ font-size:18px; font-weight:800; color:#243447 }
+    .count{ background:#eaf9f0; color:#1c9d57; border:1px solid #c9eedc; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px }
+
+    /* ===== QUESTION / OPTIONS ===== */
+    .question{
+      background:#f8fbff; border:1px solid #d7e7ff; border-left:4px solid var(--primary);
+      padding:14px; border-radius:10px; margin-bottom:12px;
+    }
+    .q-text{ font-weight:700; margin-bottom:10px }
+    .options{ display:flex; flex-direction:column; gap:8px }
+
+    .option{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+      transition:box-shadow .2s;
+    }
+    .option:hover{ box-shadow:0 6px 12px rgba(0,0,0,.08) }
+    .option.correct{ border-left:4px solid var(--accent); background:#f6fffa; }
+    .option-text{ flex:1; color:#2c3e50 }
+    .option-actions{ display:flex; gap:8px; flex-wrap:wrap }
+
+    .add-wrap{ display:flex; justify-content:flex-end; margin-top:8px }
+    .add-btn{ padding:8px 12px; border-radius:10px; font-weight:800; font-size:13px; text-decoration:none; }
+
+    /* ===== FOOTER ===== */
+    footer{ text-align:center; padding:18px; color:#7f8c8d; background:#f0f3f6; margin-top:28px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mb-4">Liste des Questions QCM par Filière</h1>
-        
-        <div th:each="filiere : ${filieres}" class="filiere-section">
-            <div class="filiere-header">
-                <h2 th:text="${filiere.nomFiliere}">Nom de la filière</h2>
-            </div>
-            
-            <div th:if="${not #lists.isEmpty(questionsByFiliere.get(filiere.id))}">
-                <div th:each="question : ${questionsByFiliere.get(filiere.id)}" class="question-card">
-                    <div class="question-content">
-                        <span th:text="${question.text}">Question content</span>
-                    </div>
-                    
-                    <div class="options-list">
-                        <div th:each="option : ${question.options}" 
-                             th:class="${'option-item' + (option.correct ? ' correct-option' : '')}">
-                            <span class="option-text" th:text="${option.text}">Option content</span>
-                            <div class="option-actions">
-                                <a th:href="@{/qcm/options/edit/{id}(id=${option.id})}" 
-                                   class="btn btn-warning btn-action">
-                                    <i class="bi bi-pencil"></i> Modifier
-                                </a>
-                                <a th:href="@{/qcm/options/delete/{id}(id=${option.id})}" 
-                                   class="btn btn-danger btn-action"
-                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette option ?')">
-                                    <i class="bi bi-trash"></i> Supprimer
-                                </a>
-                            </div>
-                        </div>
-                        <!-- Bouton pour ajouter une nouvelle option -->
-                        <div class="mt-3">
-                            <a th:href="@{/qcm/options/add/{id}(id=${question.id})}" 
-                               class="btn btn-success btn-sm">
-                                <i class="bi bi-plus-circle"></i> Ajouter une option
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div th:if="${#lists.isEmpty(questionsByFiliere.get(filiere.id))}" class="no-questions">
-                Aucune question n'est disponible pour cette filière.
-            </div>
-        </div>
 
-        <div class="mt-4">
-            <a href="/admin/dashboard" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Retour au tableau de bord
-            </a>
-        </div>
+  <!-- HERO (header visuel) -->
+  <section class="hero">
+    <div>
+      <h1>Questions QCM par filière</h1>
+      <p>Consultez et gérez les questions et leurs options dans un environnement unifié.</p>
     </div>
+  </section>
 
-    <!-- Ajout des icônes Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+  <!-- NAV (style client) -->
+  <nav>
+    <a th:href="@{/}">Accueil</a>
+    <a th:href="@{/annonces}">Annonces</a>
+    <a th:href="@{/qcm/questions}">QCM</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <!-- Bandeau de section (conserve ta structure) -->
+  <header class="page-header">
+    <div class="page-title">
+      <h1>Administration — Questions QCM par filière</h1>
+      <div class="subtitle">Consultez et gérez les questions ainsi que leurs options.</div>
+    </div>
+    <div class="toolbar">
+      <span class="pill">Vue regroupée</span>
+      <a class="btn btn--ghost" th:href="@{/admin/dashboard}">Tableau de bord</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Une carte par filière -->
+    <section th:each="filiere : ${filieres}" class="filiere-card">
+      <div class="filiere-head">
+        <div class="filiere-title" th:text="${filiere.nomFiliere}">Nom de la filière</div>
+        <div class="count">
+          <span th:text="${#lists.size(questionsByFiliere.get(filiere.id))}">0</span> question(s)
+        </div>
+      </div>
+
+      <!-- S'il y a des questions -->
+      <div th:if="${not #lists.isEmpty(questionsByFiliere.get(filiere.id))}">
+        <div th:each="question : ${questionsByFiliere.get(filiere.id)}" class="question">
+          <div class="q-text" th:text="${question.text}">Intitulé de la question</div>
+
+          <div class="options">
+            <!-- Chaque option -->
+            <div th:each="option : ${question.options}"
+                 th:class="${'option' + (option.correct ? ' correct' : '')}">
+              <div class="option-text" th:text="${option.text}">Texte de l’option</div>
+
+              <div class="option-actions">
+                <!-- Astuce: si tu veux masquer ces actions côté client pur, entoure-les d'une condition (ex: th:if="${isAdmin}") -->
+                <a th:href="@{/qcm/options/edit/{id}(id=${option.id})}" class="btn btn--warn" title="Modifier">✏️ Modifier</a>
+                <a th:href="@{/qcm/options/delete/{id}(id=${option.id})}"
+                   class="btn btn--danger" title="Supprimer"
+                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette option ?')">🗑️ Supprimer</a>
+              </div>
+            </div>
+
+            <!-- Ajouter une option -->
+            <div class="add-wrap">
+              <a th:href="@{/qcm/options/add/{id}(id=${question.id})}" class="btn btn--success add-btn">＋ Ajouter une option</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aucune question -->
+      <div th:if="${#lists.isEmpty(questionsByFiliere.get(filiere.id))}"
+           style="text-align:center; color:var(--muted); padding:14px; border:1px dashed var(--line); border-radius:10px;">
+        Aucune question n'est disponible pour cette filière.
+      </div>
+    </section>
+
+    <!-- Retour -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:22px;">
+      <a href="/admin/dashboard" class="btn btn--ghost">← Retour au tableau de bord</a>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="contact">
+    © 2025 Entreprise de Recrutement RH — Tous droits réservés.
+  </footer>
+
 </body>
 </html>

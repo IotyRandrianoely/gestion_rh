@@ -1,84 +1,162 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin - Détail candidat</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .info-section { margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px; }
-        .info-row { margin-bottom: 10px; }
-        .label { font-weight: bold; color: #333; }
-        .value { margin-left: 10px; }
-        .btn { padding: 8px 15px; margin: 5px; text-decoration: none; color: white; border-radius: 3px; }
-        .btn-primary { background-color: #007bff; }
-        .btn-warning { background-color: #ffc107; color: black; }
-    </style>
+  <title>Admin – Détail candidat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#3498db; --primary-d:#2980b9;
+      --accent:#2ecc71; --accent-d:#27ae60;
+      --warn:#f39c12; --warn-d:#d68910;
+      --muted:#8aa0b2;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
+      background:var(--bg); padding:22px; max-width:1200px; margin:0 auto; line-height:1.6;
+    }
+
+    /* Header */
+    .page-header{
+      background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
+      border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    }
+    .titles h1{ font-size:22px; margin-bottom:6px; letter-spacing:.2px }
+    .subtitle{ color:var(--sub); font-size:13px }
+    .pill{ background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff; padding:6px 12px; border-radius:999px; font-weight:800; font-size:12px }
+
+    /* Layout */
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
+    @media(max-width:880px){ .grid-2{ grid-template-columns:1fr } }
+
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .card h3{ font-size:16px; font-weight:800; margin-bottom:12px; color:#243447 }
+
+    /* Rows */
+    .row{ display:flex; gap:10px; margin:8px 0; flex-wrap:wrap }
+    .label{ min-width:180px; font-weight:800; color:#243447 }
+    .value{ color:#4b5a6a }
+
+    /* Chips / badges */
+    .chip{
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
+      background:#eef6ff; border:1px solid #d7e7ff; color:#1d6fdc; font-weight:800; font-size:12px;
+    }
+    .chip.green{ background:#eaf9f0; border-color:#c9efd8; color:#17965a }
+    .chip.warn{ background:#fff6e6; border-color:#ffe1b6; color:#a66a00 }
+
+    /* Buttons */
+    .actions{ margin-top:20px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center }
+    .btn{
+      display:inline-block; padding:10px 16px; border-radius:10px; font-weight:800; font-size:14px;
+      text-decoration:none; border:1px solid transparent; transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
+      cursor:pointer;
+    }
+    .btn-primary{ background:var(--primary); color:#fff }
+    .btn-primary:hover{ background:var(--primary-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(52,152,219,.2) }
+    .btn-warning{ background:var(--warn); color:#111; }
+    .btn-warning:hover{ background:var(--warn-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(243,156,18,.2) }
+
+    /* Small helpers */
+    .muted{ color:var(--muted) }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .spacer{ height:6px }
+    .hr{ border-top:1px dashed var(--line); margin:10px 0 }
+
+    /* CV block */
+    .cv-box{
+      background:#f8fbff; border:1px dashed #cfe2f7; border-radius:12px; padding:12px;
+    }
+    .cv-actions{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap }
+    .btn-ghost{
+      background:#fff; color:#3498db; border-color:#cfe2f7; border:1px solid #cfe2f7;
+      padding:8px 12px; border-radius:10px; font-weight:800; text-decoration:none;
+    }
+    .btn-ghost:hover{ background:#f3f8ff; border-color:#b7d5f6 }
+
+  </style>
 </head>
 <body>
-    <h2>Admin - Détail du candidat</h2>
 
-    <div class="info-section">
-        <h3>Informations personnelles</h3>
-        <div class="info-row">
-            <span class="label">ID :</span>
-            <span class="value" th:text="${candidat.id}"></span>
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="titles">
+      <h1>Admin – Détail du candidat</h1>
+      <div class="subtitle">
+        Dossier de
+        <b th:text="${candidat.nom} + ' ' + ${candidat.prenom}">Nom Prénom</b>
+        — ID <span class="mono" th:text="${candidat.id}">#</span>
+      </div>
+    </div>
+    <div class="pill">Espace admin</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="grid-2">
+    <!-- Colonne gauche -->
+    <div class="card">
+      <h3>📋 Informations personnelles</h3>
+      <div class="row"><div class="label">Nom :</div><div class="value" th:text="${candidat.nom}">—</div></div>
+      <div class="row"><div class="label">Prénom :</div><div class="value" th:text="${candidat.prenom}">—</div></div>
+      <div class="row"><div class="label">Email :</div><div class="value">
+        <span th:text="${candidat.email}">—</span>
+      </div></div>
+      <div class="row"><div class="label">Âge :</div><div class="value" th:text="${candidat.age} + ' ans'">—</div></div>
+      <div class="row"><div class="label">Genre :</div><div class="value" th:text="${candidat.genre == 1 ? 'Homme' : 'Femme'}">—</div></div>
+      <div class="row"><div class="label">Adresse :</div><div class="value" th:text="${candidat.adresse != null ? candidat.adresse : '—'}">—</div></div>
+      <div class="row"><div class="label">Diplôme :</div>
+        <div class="value">
+          <span class="chip green" th:text="${candidat.diplome != null ? candidat.diplome.nomDiplome : 'Non renseigné'}">Non renseigné</span>
         </div>
-        <div class="info-row">
-            <span class="label">Nom :</span>
-            <span class="value" th:text="${candidat.nom}"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Prénom :</span>
-            <span class="value" th:text="${candidat.prenom}"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Email :</span>
-            <span class="value" th:text="${candidat.email}"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Âge :</span>
-            <span class="value" th:text="${candidat.age} + ' ans'"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Genre :</span>
-            <span class="value" th:text="${candidat.genre == 1 ? 'Homme' : 'Femme'}"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Adresse :</span>
-            <span class="value" th:text="${candidat.adresse}"></span>
-        </div>
+      </div>
     </div>
 
-    <div class="info-section">
-        <h3>Informations professionnelles</h3>
-        <div class="info-row">
-            <span class="label">Années d'expérience :</span>
-            <span class="value" th:text="${candidat.anneesExperience} + ' ans'"></span>
+    <!-- Colonne droite -->
+    <div class="card">
+      <h3>💼 Informations professionnelles</h3>
+      <div class="row"><div class="label">Années d’expérience :</div><div class="value" th:text="${candidat.anneesExperience} + ' ans'">—</div></div>
+      <div class="row"><div class="label">CV :</div>
+        <div class="value cv-box">
+          <div th:if="${candidat.cv != null and !#strings.isEmpty(candidat.cv)}">
+            <span class="mono" th:text="${candidat.cv}">cv.pdf</span>
+            <div class="cv-actions">
+              <a class="btn-ghost" th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" target="_blank">📥 Télécharger</a>
+            </div>
+          </div>
+          <div th:if="${candidat.cv == null or #strings.isEmpty(candidat.cv)}" class="muted">Aucun CV fourni.</div>
         </div>
-        <div class="info-row">
-            <span class="label">CV :</span>
-            <span class="value" th:text="${candidat.cv}"></span>
+      </div>
+      <div class="hr"></div>
+      <h3>🎯 Candidature</h3>
+      <div class="row">
+        <div class="label">Annonce :</div>
+        <div class="value">
+          <span th:text="${candidat.annonce != null ? candidat.annonce.profil : '—'}">—</span>
         </div>
+      </div>
+      <div class="row"><div class="label">Date de candidature :</div>
+        <div class="value" th:text="${candidat.dateCandidature != null ? #temporals.format(candidat.dateCandidature,'dd/MM/yyyy') : '—'}">—</div>
+        
+      </div>
+      <div class="row" style="align-items:flex-start;">
+        <div class="label">Lettre de motivation :</div>
+        <div class="value" style="background:#f8f9fb;border:1px solid var(--line);border-radius:10px;padding:10px;white-space:pre-wrap;"
+             th:text="${candidat.lettreMotivation != null ? candidat.lettreMotivation : '—'}">—</div>
+      </div>
     </div>
+  </div>
 
-    <div class="info-section">
-        <h3>Candidature</h3>
-        <div class="info-row">
-            <span class="label">Annonce :</span>
-            <span class="value" th:text="${candidat.annonce != null ? candidat.annonce.profil : ''}"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Date de candidature :</span>
-            <span class="value" th:text="${candidat.dateCandidature}"></span>
-        </div>
-        <div class="info-row">
-            <span class="label">Lettre de motivation :</span>
-            <div class="value" th:text="${candidat.lettreMotivation}" style="margin-top: 5px; white-space: pre-wrap;"></div>
-        </div>
-    </div>
+  <!-- Actions -->
+  <div class="actions">
+    <a th:href="@{/admin/candidats}" class="btn btn-primary">← Retour à la liste</a>
+    <a th:href="@{/admin/candidats/edit/{id}(id=${candidat.id})}" class="btn btn-warning">✏️ Modifier</a>
+  </div>
 
-    <p>
-        <a th:href="@{/admin/candidats}" class="btn btn-primary">← Retour à la liste</a>
-        <a th:href="@{/admin/candidats/edit/{id}(id=${candidat.id})}" class="btn btn-warning">Modifier</a>
-    </p>
 </body>
 </html>
