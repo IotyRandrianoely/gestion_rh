@@ -74,13 +74,22 @@ public class AdminFilesController {
 
             List<FileInfo> files = new ArrayList<>();
 
+            System.out.println("=== DEBUG CANDIDAT FILES ===");
+            System.out.println("Candidat ID: " + candidat.getId());
+            System.out.println("CV filename: " + candidat.getCv());
+
             if (candidat.getCv() != null && !candidat.getCv().isEmpty()) {
-                // Déterminer le type de fichier
                 String fileName = candidat.getCv();
                 String fileType = isImageFile(fileName) ? "image" : "document";
                 String directory = isImageFile(fileName) ? imagesDir : uploadDir;
 
+                System.out.println("Type de fichier détecté: " + fileType);
+                System.out.println("Répertoire de recherche: " + directory);
+
                 Path filePath = Paths.get(directory).resolve(fileName);
+                System.out.println("Chemin complet: " + filePath.toString());
+                System.out.println("Fichier existe: " + Files.exists(filePath));
+
                 if (Files.exists(filePath)) {
                     try {
                         FileInfo fileInfo = new FileInfo();
@@ -91,16 +100,24 @@ public class AdminFilesController {
                         fileInfo.setCandidatNom(candidat.getNom() + " " + candidat.getPrenom());
                         fileInfo.setCandidatId(candidat.getId());
                         files.add(fileInfo);
+
+                        System.out.println("Fichier ajouté à la liste");
                     } catch (IOException e) {
                         System.err.println("Erreur lors de la lecture du fichier: " + fileName);
+                        e.printStackTrace();
                     }
+                } else {
+                    System.err.println("FICHIER INTROUVABLE: " + filePath.toString());
                 }
+            } else {
+                System.out.println("Aucun CV associé au candidat");
             }
 
             model.addAttribute("candidat", candidat);
             model.addAttribute("files", files);
 
         } catch (Exception e) {
+            e.printStackTrace();
             model.addAttribute("error", "Erreur lors du chargement: " + e.getMessage());
         }
 

@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.gestion_rh.model.Candidat;
 import com.example.gestion_rh.service.AnnonceService;
 import com.example.gestion_rh.service.CandidatService;
 import com.example.gestion_rh.service.DiplomeService;
+import com.example.gestion_rh.service.FileStorageService;
 
 @Controller
 @RequestMapping("/admin/candidats")
@@ -22,11 +24,14 @@ public class CandidatAdminController {
     private final CandidatService candidatService;
     private final AnnonceService annonceService;
     private final DiplomeService diplomeService;
+    private final FileStorageService fileStorageService;
 
-    public CandidatAdminController(CandidatService candidatService, AnnonceService annonceService, DiplomeService diplomeService) {
+    public CandidatAdminController(CandidatService candidatService, AnnonceService annonceService,
+            DiplomeService diplomeService, FileStorageService fileStorageService) {
         this.candidatService = candidatService;
         this.annonceService = annonceService;
         this.diplomeService = diplomeService;
+        this.fileStorageService = fileStorageService;
     }
 
     // Liste des candidats
@@ -73,6 +78,7 @@ public class CandidatAdminController {
     @PostMapping
     public String save(@ModelAttribute Candidat candidat,
             @RequestParam(name = "annonce.id", required = false) Integer annonceId,
+            @RequestParam(value = "cvFile", required = false) MultipartFile cvFile,
             RedirectAttributes redirectAttributes) {
         try {
             // Validation des champs obligatoires
@@ -120,11 +126,33 @@ public class CandidatAdminController {
             System.out.println("=== DEBUG ADMIN CANDIDAT ===");
             System.out.println("Candidat ID: " + candidat.getId());
             System.out.println("Nom: " + candidat.getNom());
-            System.out.println("Annonce ID: " + (candidat.getAnnonce() != null ? candidat.getAnnonce().getId() : "null"));
-            System.out.println("Diplome ID: " + (candidat.getDiplome() != null ? candidat.getDiplome().getId() : "null"));
+            System.out
+                    .println("Annonce ID: " + (candidat.getAnnonce() != null ? candidat.getAnnonce().getId() : "null"));
+            System.out
+                    .println("Diplome ID: " + (candidat.getDiplome() != null ? candidat.getDiplome().getId() : "null"));
+
+            // Gestion de l'upload du CV - AMÉLIORATION
+            if (cvFile != null && !cvFile.isEmpty()) {
+                try {
+                    System.out.println("=== UPLOAD CV ===");
+                    System.out.println("Fichier: " + cvFile.getOriginalFilename());
+                    System.out.println("Taille: " + cvFile.getSize());
+                    System.out.println("Type: " + cvFile.getContentType());
+
+                    String fileName = fileStorageService.storeFile(cvFile, FileStorageService.FileType.DOCUMENT);
+                    candidat.setCv(fileName);
+
+                    System.out.println("CV sauvegardé sous: " + fileName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    redirectAttributes.addFlashAttribute("error", "Erreur lors de l'upload du CV: " + e.getMessage());
+                    return "redirect:/admin/candidats/new";
+                }
+            }
 
             Candidat savedCandidat = candidatService.save(candidat);
-            System.out.println("Candidat sauvegardé avec ID: " + (savedCandidat != null ? savedCandidat.getId() : "null"));
+            System.out.println(
+                    "Candidat sauvegardé avec CV: " + (savedCandidat != null ? savedCandidat.getCv() : "null"));
 
             if (savedCandidat != null && savedCandidat.getId() != null) {
                 redirectAttributes.addFlashAttribute("success", "Candidat sauvegardé avec succès !");
@@ -137,7 +165,7 @@ public class CandidatAdminController {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Erreur technique: " + e.getMessage());
         }
-        
+
         return "redirect:/admin/candidats";
     }
 

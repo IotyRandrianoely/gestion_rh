@@ -112,7 +112,7 @@
 
   <!-- ===== FORMULAIRE (back-end inchangé) ===== -->
   <div class="card">
-    <form th:action="@{/admin/candidats}" method="post" th:object="${candidat}">
+    <form th:action="@{/admin/candidats}" method="post" th:object="${candidat}  " enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}" />
 
       <!-- Annonce liée -->
@@ -199,8 +199,9 @@
 
       <div class="grid-2">
         <div class="form-group">
-          <label for="cv">CV (chemin fichier)</label>
-          <input type="text" th:field="*{cv}" id="cv" maxlength="60" placeholder="ex: cv_doe.pdf"/>
+          <label for="cvFile">CV (PDF)</label>
+          <input type="file" id="cvFile" name="cvFile" accept=".pdf"/>
+          <small>Format accepté : PDF. Taille max : 10 Mo</small>
         </div>
         <div class="form-group">
           <label for="dateCandidature">Date de candidature</label>

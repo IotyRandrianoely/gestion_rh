@@ -201,8 +201,9 @@
       </div>
 
       <div class="form-group">
-        <label for="cv">CV (chemin fichier)</label>
-        <input type="text" th:field="*{cv}" id="cv" maxlength="60" placeholder="ex: cv_doe.pdf"/>
+        <label for="cvFile">CV (PDF)</label>
+        <input type="file" id="cvFile" name="cvFile" accept=".pdf"/>
+        <small>Format accepté : PDF. Taille max : 10 Mo</small>
       </div>
 
       <!-- Actions -->
