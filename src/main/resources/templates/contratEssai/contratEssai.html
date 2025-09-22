@@ -13,8 +13,13 @@
     <p>
         <label for="posteId">Poste :</label>
         <select name="posteId" id="posteId" required>
-            <option value="">-- Choisir --</option>
-            <option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.profil}">Poste</option>
+            <option value="">Choisir</option>
+            <option th:each="p : ${postes}"
+                    th:value="${p.id}"
+                    th:text="${p.profil}"
+                    th:selected="${(candidate != null and candidate.annonce != null and candidate.annonce.poste != null) ? (p.id == candidate.annonce.poste.id) : (param.posteId != null ? p.id == #numbers.parseInteger(param.posteId) : false)}">
+                Poste
+            </option>
         </select>
     </p>
 
@@ -50,6 +55,12 @@ function validateAndSubmit(form) {
     const dateDebut = document.getElementById('dateDebut').value;
     const duree = parseInt(document.getElementById('duree').value, 10);
     const salaire = parseFloat(document.getElementById('salaire').value);
+
+    // debug console pour vérifier l'envoi côté client
+    console.log('Submitting contratEssai form', {
+        candidateId: document.getElementById('candidateId').value,
+        posteId, dateDebut, duree, salaire
+    });
 
     if (!posteId || !dateDebut || !duree || isNaN(salaire)) {
         alert('Veuillez remplir tous les champs requis.');
