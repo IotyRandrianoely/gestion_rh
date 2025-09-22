@@ -195,10 +195,23 @@
           <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
              class="btn btn-primary" target="_blank">📥 Télécharger</a>
           <button onclick="toggleFullscreen()" class="btn btn-info">🔍 Plein écran</button>
-          <!-- Envoie candidateId et tente de préremplir posteId depuis candidat.annonce.poste.id ou annonce.idPoste -->
-          <a th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, 
-                        posteId=${candidat.annonce != null && candidat.annonce.poste != null ? candidat.annonce.poste.id : (candidat.annonce != null && candidat.annonce.idPoste != null ? candidat.annonce.idPoste : null)})}" 
-             class="btn btn-info">proposer contrat</a>
+          <!-- Boutons Proposer / Renouveler -->
+          <a th:if="${canPropose}" 
+             th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, posteId=${candidat.annonce != null && candidat.annonce.poste != null ? candidat.annonce.poste.id : (candidat.annonce != null && candidat.annonce.idPoste != null ? candidat.annonce.idPoste : null)})}" 
+             class="btn btn--success">Proposer contrat d'essai</a>
+          <a th:unless="${canPropose}" class="btn btn--success" style="opacity:.5;pointer-events:none;" title="Désactivé (contrat existant ou limite atteinte)">Proposer contrat d'essai</a>
+
+          <a th:if="${canRenew}" 
+             th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, maxDuration=${maxRenewDuration})}" 
+             class="btn btn--info">Renouveler contrat d'essai</a>
+          <a th:unless="${canRenew}" class="btn btn--info" style="opacity:.5;pointer-events:none;" title="Renouvellement non disponible">Renouveler contrat d'essai</a>
+        </div>
+        <div style="margin-bottom:10px; font-size:13px; color:var(--muted);">
+          <div th:if="${contratCount != null}">
+            <strong>Contrats existants :</strong> <span th:text="${contratCount}">0</span> — 
+            <strong>Total jours :</strong> <span th:text="${totalDureeContrats}">0</span> — 
+            <strong>Jours restants :</strong> <span th:text="${remainingDuree}">180</span>
+          </div>
         </div>
 
         <div id="cvContainer">
@@ -311,3 +324,4 @@
   </script>
 </body>
 </html>
+``` 

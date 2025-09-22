@@ -36,4 +36,19 @@ public class ContratEssaiService {
     public void supprimerContrat(Long id) {
         repository.deleteById(id);
     }
+
+    /**
+     * Nombre de contrats d'essai pour un candidat donné
+     */
+    public long countByCandidatId(Long candidatId) {
+        return repository.countByCandidatId(candidatId);
+    }
+
+    /**
+     * Somme des durees (en jours) pour tous les contrats du candidat.
+     * Retourne 0 si aucun contrat.
+     */
+    public int sumDureeByCandidatId(Long candidatId) {
+        return repository.sumDureeByCandidatId(candidatId);
+    }
 }

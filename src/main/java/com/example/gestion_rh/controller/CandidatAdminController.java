@@ -16,6 +16,7 @@ import com.example.gestion_rh.service.AnnonceService;
 import com.example.gestion_rh.service.CandidatService;
 import com.example.gestion_rh.service.DiplomeService;
 import com.example.gestion_rh.service.FileStorageService;
+import com.example.gestion_rh.service.ContratEssaiService;
 
 @Controller
 @RequestMapping("/admin/candidats")
@@ -24,13 +25,18 @@ public class CandidatAdminController {
     private final CandidatService candidatService;
     private final AnnonceService annonceService;
     private final DiplomeService diplomeService;
-    private final FileStorageService fileStorageService;
+    private final ContratEssaiService contratEssaiService;
+    private FileStorageService fileStorageService;
 
-    public CandidatAdminController(CandidatService candidatService, AnnonceService annonceService,
-            DiplomeService diplomeService, FileStorageService fileStorageService) {
+    public CandidatAdminController(CandidatService candidatService,
+                                   AnnonceService annonceService,
+                                   DiplomeService diplomeService,
+                                   ContratEssaiService contratEssaiService,
+                                   FileStorageService fileStorageService) {
         this.candidatService = candidatService;
         this.annonceService = annonceService;
         this.diplomeService = diplomeService;
+        this.contratEssaiService = contratEssaiService;
         this.fileStorageService = fileStorageService;
     }
 
@@ -179,6 +185,28 @@ public class CandidatAdminController {
                 return "redirect:/admin/candidats";
             }
             model.addAttribute("candidat", candidat);
+            // --- calculs contrats ---
+            long contratCount = 0L;
+            int totalDuree = 0;
+            try {
+                if (candidat.getId() != null) {
+                    contratCount = contratEssaiService.countByCandidatId(candidat.getId().longValue());
+                    totalDuree = contratEssaiService.sumDureeByCandidatId(candidat.getId().longValue());
+                }
+            } catch (Exception ex) {
+                // ne pas bloquer l'affichage si le service n'est pas disponible
+            }
+            int remaining = Math.max(0, 180 - totalDuree);
+            boolean canPropose = (contratCount == 0L) && remaining > 0;
+            boolean canRenew = (contratCount == 1L) && remaining > 0;
+
+            model.addAttribute("contratCount", contratCount);
+            model.addAttribute("totalDureeContrats", totalDuree);
+            model.addAttribute("remainingDuree", remaining);
+            model.addAttribute("canPropose", canPropose);
+            model.addAttribute("canRenew", canRenew);
+            model.addAttribute("maxRenewDuration", remaining);
+            // --- fin calculs ---
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Erreur lors du chargement: " + e.getMessage());

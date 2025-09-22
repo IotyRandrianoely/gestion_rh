@@ -218,6 +218,23 @@ public class CandidatController {
     @GetMapping("/{id}")
     public String detail(@PathVariable int id, Model model) {
         model.addAttribute("candidat", candidatService.getById(id));
+        try {
+            Long cid = Long.valueOf(id);
+            long contratCount = contratEssaiService.countByCandidatId(cid);
+            int totalDuree = contratEssaiService.sumDureeByCandidatId(cid);
+            int remaining = Math.max(0, 180 - totalDuree);
+            boolean canPropose = (contratCount == 0L) && remaining > 0;
+            boolean canRenew   = (contratCount == 1L) && remaining > 0;
+
+            model.addAttribute("contratCount", contratCount);
+            model.addAttribute("totalDureeContrats", totalDuree);
+            model.addAttribute("remainingDuree", remaining);
+            model.addAttribute("canPropose", canPropose);
+            model.addAttribute("canRenew", canRenew);
+            model.addAttribute("maxRenewDuration", remaining);
+        } catch (Exception ex) {
+            // ignore si service non dispo — ne bloque pas la page
+        }
         return "candidats/detail"; // renvoie vers /WEB-INF/views/candidats/detail.jsp
     }
 

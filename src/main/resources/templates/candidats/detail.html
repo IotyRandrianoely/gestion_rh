@@ -195,12 +195,27 @@
           <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
              class="btn btn-primary" target="_blank">📥 Télécharger</a>
           <button onclick="toggleFullscreen()" class="btn btn-info">🔍 Plein écran</button>
-          <!-- Envoie candidateId et tente de préremplir posteId depuis candidat.annonce.poste.id ou annonce.idPoste -->
-         <a th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, 
+
+          <!-- Proposer / Renouveler contrat (client) -->
+          <a th:if="${canPropose}" 
+             th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, 
                         posteId=${candidat.annonce != null && candidat.annonce.poste != null ? candidat.annonce.poste.id : (candidat.annonce != null && candidat.annonce.idPoste != null ? candidat.annonce.idPoste : null)})}" 
-             class="btn btn-info">proposer contrat</a>
+             class="btn btn--success">Proposer contrat d'essai</a>
+          <a th:unless="${canPropose}" class="btn btn--success" style="opacity:.5;pointer-events:none;" title="Proposer indisponible">Proposer contrat d'essai</a>
+
+          <a th:if="${canRenew}" 
+             th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, maxDuration=${maxRenewDuration})}" 
+             class="btn btn--info">Renouveler contrat d'essai</a>
+          <a th:unless="${canRenew}" class="btn btn--info" style="opacity:.5;pointer-events:none;" title="Renouvellement indisponible">Renouveler contrat d'essai</a>
         </div>
 
+        <div style="margin-top:10px; font-size:.95em; color:var(--muted);">
+          <span th:if="${contratCount != null}">
+            Contrats : <strong th:text="${contratCount}">0</strong> — Jours total : <strong th:text="${totalDureeContrats}">0</strong> — Restants : <strong th:text="${remainingDuree}">180</strong>
+          </span>
+        </div>
+        <!-- fin Proposer / Renouveler -->
+        
         <div id="cvContainer">
           <!-- Images -->
           <img th:if="${#strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpg') or 

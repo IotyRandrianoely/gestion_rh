@@ -48,12 +48,17 @@ public class ContratEssaiController {
 
     // Affiche le formulaire (inchangé)
     @GetMapping("/contratEssai")
-    public String showForm(@RequestParam(required = false) Long candidateId, Model model) {
+    public String showForm(@RequestParam(required = false) Long candidateId,
+                           @RequestParam(required = false) Integer maxDuration,
+                           Model model) {
         model.addAttribute("postes", posteRepo.findAll());
         if (candidateId != null) {
             Optional<Candidat> cand = candidatRepo.findById(candidateId);
             cand.ifPresent(c -> model.addAttribute("candidate", c));
             model.addAttribute("candidateId", candidateId);
+        }
+        if (maxDuration != null) {
+            model.addAttribute("maxDuration", maxDuration);
         }
         return "contratEssai/contratEssai";
     }
