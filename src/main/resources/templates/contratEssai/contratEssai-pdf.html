@@ -104,18 +104,18 @@
         <div class="sign-block">
             <div class="sign-title">L'EMPLOYEUR</div>
             <div class="sign-line">
-                SOCIÉTÉ X<br/>
+                SOCIÉTÉ Gestion RH<br/>
                 Le Directeur Général<br/>
-                (Signature et cachet)
+                __________________
             </div>
         </div>
-
+        <br/>
         <div class="sign-block">
             <div class="sign-title">LE SALARIÉ</div>
             <div class="sign-line">
                 <span th:text="${contrat.candidat != null ? contrat.candidat.nom + ' ' + contrat.candidat.prenom : 'NOM Prénom'}">NOM Prénom</span><br/>
                 Lu et approuvé<br/>
-                (Signature précédée de la mention)
+                __________________
             </div>
         </div>
     </div>
