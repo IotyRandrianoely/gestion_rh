@@ -45,12 +45,12 @@ INSERT INTO diplome (nom_diplome) VALUES
 ('Doctorat');
 
 -- Filières
-INSERT INTO filiere (id,nom_filiere) VALUES
-(1,'Informatique'),
-(2,'Gestion'),
-(3,'Commerce'),
-(4,'Droit'),
-(5,'Médecine');
+INSERT INTO filiere (nom_filiere) VALUES
+('Informatique'),
+('Gestion'),
+('Commerce'),
+('Droit'),
+('Médecine');
 
 -- Situations matrimoniales
 INSERT INTO situation_matrimonial (situation) VALUES
@@ -103,9 +103,9 @@ CREATE TABLE critere_rech_mission (
 --  ('Licence'), ('Master'), ('Doctorat');
 
 -- Filières
-    INSERT INTO filiere (nom_filiere) VALUES
-    ('Informatique'), ('Gestion'), ('Santé'),
-    ('Droit'), ('Tourisme');
+INSERT INTO filiere (nom_filiere) VALUES
+ ('RH'),('Informatique'),('Commerce'), ('Finance'), 
+ ('Marketing');
 
 INSERT INTO poste(profil, description) VALUES 
  ('Développeur Java', 'Développement et maintenance des applications'),('Comptable', 'Gestion des écritures comptables et bilans financiers'),('Guide touristique', 'Accompagner les visiteurs et expliquer les sites');
@@ -124,12 +124,12 @@ INSERT INTO mission (nom_mission) VALUES
 INSERT INTO critere_rech (annees_experience, diplome, age, genre, filiere)
 VALUES (2, 4, 25, 1, 1);  -- Licence, 25 ans, Homme, Informatique
 
--- Exemple d’annonce avec date posée
+-- Exemple d annonce avec date posée
 INSERT INTO annonce (critere_rech_id, date_publication, id_poste)
 VALUES 
- (4, DATE '2025-01-15', 1),
- (4, DATE '2025-02-10', 2),
- (4, DATE '2025-03-05',3);
+ (1, DATE '2025-01-15', 1),
+ (1, DATE '2025-02-10', 2),
+ (1, DATE '2025-03-05',3);
 
 
 CREATE TABLE candidat (
@@ -244,16 +244,16 @@ VALUES ('client1', '    ', 'client');
 
 
 -- Exemples de candidats
-INSERT INTO candidat (id,id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome,est_propose)
+INSERT INTO candidat (id_annonce, nom, prenom, age, genre, adresse, email, annees_experience, lettre_motivation, cv, id_diplome)
 VALUES
-(1,10, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
- 'Motivé pour évoluer dans votre entreprise', 'cv_jean.pdf', 2,false),
+(1, 'Rakoto', 'Jean', 25, 1, 'Antananarivo', 'jean.rakoto@email.com', 2, 
+ 'Motivé pour évoluer dans votre entreprise', 'cv_jean.pdf', 2),
 
-(2,10, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
- 'Expérimentée et dynamique', 'cv_marie.pdf', 3,false),
+(1, 'Rabe', 'Marie', 27, 2, 'Toamasina', 'marie.rabe@email.com', 4,
+ 'Expérimentée et dynamique', 'cv_marie.pdf', 3),
 
-(3,12, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
- 'Prêt à relever des défis', 'cv_paul.pdf', 4,false);
+(2, 'Randria', 'Paul', 30, 1, 'Fianarantsoa', 'paul.randria@email.com', 6,
+ 'Prêt à relever des défis', 'cv_paul.pdf', 4);
 
 CREATE TABLE qcm_questions (
     question_id SERIAL PRIMARY KEY,
@@ -268,172 +268,180 @@ CREATE TABLE qcm_options (
     is_correct BOOLEAN NOT NULL,
     FOREIGN KEY (question_id) REFERENCES qcm_questions(question_id)
 );
-
 INSERT INTO qcm_questions (entity_id, question_text) VALUES
-(1, 'Quels sont les avantages principaux de l''utilisation d''un modèle MVC dans le développement web ?'),
-(1, 'Quelles sont les techniques utilisées pour prévenir les attaques par injection SQL ?'),
-(1, 'Quels protocoles sont utilisés pour sécuriser les communications sur Internet ?'),
-(1, 'Quels sont les principes fondamentaux de l''agilité selon le Manifeste Agile ?'),
-(1, 'Quels sont les types de bases de données relationnelles ?'),
-(1, 'Quels sont les avantages de l''utilisation des conteneurs comme Docker ?'),
-(1, 'Quels sont les objectifs principaux de la méthode DevOps ?'),
-(1, 'Quels langages sont couramment utilisés pour le développement web côté client ?'),
-(1, 'Quels sont les risques associés à une mauvaise gestion des dépendances dans un projet logiciel ?'),
-(1, 'Quelles sont les étapes clés du cycle de vie du développement logiciel (SDLC) ?');
+(1, 'Pouvez-vous vous présenter en quelques mots ?'),
+(1, 'Quelles sont vos principales forces et vos points à améliorer ?'),
+(1, 'Comment gérez-vous le stress ou la pression au travail ?'),
+(1, 'Pouvez-vous donner un exemple de conflit que vous avez résolu ?'),
+(1, 'Qu est-ce qui vous motive le plus dans votre travail ?'),
+(1, 'Où vous voyez-vous dans 3 à 5 ans ?'),
+(1, 'Préférez-vous travailler seul ou en équipe ? Pourquoi ?'),
+(1, 'Quelles sont vos attentes vis-à-vis d un manager ?'),
+(1, 'Pouvez-vous citer une expérience professionnelle dont vous êtes fier ?'),
+(1, 'Comment organisez-vous vos priorités quand plusieurs tâches sont urgentes ?');
 
 INSERT INTO qcm_options (question_id, option_text, is_correct) VALUES
-(1, 'Réduction de la taille du code', FALSE),
-(1, 'Séparation des préoccupations (logique, interface, données)', TRUE),
-(1, 'Augmentation de la vitesse d''exécution', FALSE),
-(1, 'Meilleure modularité et maintenance', TRUE),
-(2, 'Utilisation de pare-feu', FALSE),
-(2, 'Requêtes paramétrées', TRUE),
-(2, 'Validation des entrées utilisateur', TRUE),
-(2, 'Augmentation de la bande passante', FALSE),
-(3, 'FTP', FALSE),
-(3, 'HTTPS', TRUE),
-(3, 'SSH', TRUE),
-(3, 'SMTP', FALSE),
-(4, 'Collaboration et communication continues', TRUE),
-(4, 'Automatisation des tests', TRUE),
-(4, 'Optimisation des profits', FALSE),
-(4, 'Réduction des effectifs', FALSE),
-(5, 'MySQL', TRUE),
-(5, 'MongoDB', FALSE),
-(5, 'PostgreSQL', TRUE),
-(5, 'Redis', FALSE),
-(6, 'Portabilité des applications', TRUE),
-(6, 'Augmentation des coûts matériels', FALSE),
-(6, 'Isolation des environnements', TRUE),
-(6, 'Complexité accrue du code', FALSE),
-(7, 'Amélioration de la collaboration entre développement et opérations', TRUE),
-(7, 'Réduction du temps de mise sur le marché', TRUE),
-(7, 'Augmentation des coûts de maintenance', FALSE),
-(7, 'Centralisation des données', FALSE),
-(8, 'JavaScript', TRUE),
-(8, 'Python', FALSE),
-(8, 'HTML/CSS', TRUE),
-(8, 'SQL', FALSE),
-(9, 'Conflits de versions', TRUE),
-(9, 'Augmentation de la sécurité', FALSE),
-(9, 'Retards dans les déploiements', TRUE),
-(9, 'Réduction des coûts', FALSE),
-(10, 'Analyse des besoins', TRUE),
-(10, 'Conception', TRUE),
-(10, 'Marketing du produit', FALSE),
-(10, 'Maintenance', TRUE);
+-- Q1
+(1, 'Réponse claire et structurée, adaptée au poste', TRUE),
+(1, 'Discours confus ou hors sujet', FALSE),
+(1, 'Trop de détails personnels', FALSE),
 
--- QCM pour Commercial
+-- Q2
+(2, 'Capacité d auto-évaluation honnête', TRUE),
+(2, 'Aucune faiblesse mentionnée', FALSE),
+(2, 'Forces non pertinentes pour le poste', FALSE),
+
+-- Q3
+(3, 'Utilisation de méthodes de gestion du stress (organisation, pause, sport, etc.)', TRUE),
+(3, 'Ignorer complètement le stress', FALSE),
+(3, 'Reporter la faute sur les autres', FALSE),
+
+-- Q4
+(4, 'Communication et recherche de compromis', TRUE),
+(4, 'Évitement total du problème', FALSE),
+(4, 'Conflit aggravé volontairement', FALSE),
+
+-- Q5
+(5, 'Motivation intrinsèque (apprentissage, défis, passion)', TRUE),
+(5, 'Motivation uniquement financière', FALSE),
+(5, 'Aucune motivation exprimée', FALSE),
+
+-- Q6
+(6, 'Projection réaliste et cohérente avec le poste', TRUE),
+(6, 'Aucune idée de son avenir', FALSE),
+(6, 'Ambitions irréalistes immédiates (ex: être PDG demain)', FALSE),
+
+-- Q7
+(7, 'Valorisation du travail en équipe (collaboration, complémentarité)', TRUE),
+(7, 'Préférence excessive pour le travail isolé', FALSE),
+(7, 'Indifférence totale', FALSE),
+
+-- Q8
+(8, 'Attentes claires (communication, soutien, reconnaissance)', TRUE),
+(8, 'Attentes irréalistes (aucune contrainte, liberté totale)', FALSE),
+(8, 'Aucune attente exprimée', FALSE),
+
+-- Q9
+(9, 'Exemple concret, lié au poste, montrant une compétence clé', TRUE),
+(9, 'Exemple sans rapport avec le travail', FALSE),
+(9, 'Aucun exemple donné', FALSE),
+
+-- Q10
+(10, 'Organisation par priorités et délais', TRUE),
+(10, 'Faire tout en même temps sans méthode', FALSE),
+(10, 'Laisser les tâches urgentes de côté', FALSE);
+
 INSERT INTO qcm_questions (entity_id, question_text) VALUES
-(2, 'Quels sont les éléments clés d''une stratégie de vente consultative ?'),
-(2, 'Quels outils sont essentiels pour la gestion des relations client ?'),
-(2, 'Quels indicateurs mesurent la performance commerciale ?'),
-(2, 'Quels sont les avantages d''une segmentation de marché ?'),
-(2, 'Quelles sont les étapes du processus de vente ?'),
-(2, 'Quels sont les types de canaux de distribution ?'),
-(2, 'Quelles sont les techniques de négociation efficaces ?'),
-(2, 'Quels sont les objectifs d''une campagne de prospection ?'),
-(2, 'Quels facteurs influencent la fidélité des clients ?'),
-(2, 'Quels sont les avantages de l''analyse des données commerciales ?');
+(2, 'Quels sont les avantages principaux de l''utilisation d''un modèle MVC dans le développement web ?'),
+(2, 'Quelles sont les techniques utilisées pour prévenir les attaques par injection SQL ?'),
+(2, 'Quels protocoles sont utilisés pour sécuriser les communications sur Internet ?'),
+(2, 'Quels sont les principes fondamentaux de l''agilité selon le Manifeste Agile ?'),
+(2, 'Quels sont les types de bases de données relationnelles ?'),
+(2, 'Quels sont les avantages de l''utilisation des conteneurs comme Docker ?'),
+(2, 'Quels sont les objectifs principaux de la méthode DevOps ?'),
+(2, 'Quels langages sont couramment utilisés pour le développement web côté client ?'),
+(2, 'Quels sont les risques associés à une mauvaise gestion des dépendances dans un projet logiciel ?'),
+(2, 'Quelles sont les étapes clés du cycle de vie du développement logiciel (SDLC) ?');
 
 INSERT INTO qcm_options (question_id, option_text, is_correct) VALUES
-(11, 'Identifier les besoins du client', TRUE),
-(11, 'Proposer des solutions adaptées', TRUE),
-(11, 'Vendre le produit le moins cher', FALSE),
-(11, 'Automatiser les ventes', FALSE),
-(12, 'CRM (Customer Relationship Management)', TRUE),
-(12, 'ERP (Enterprise Resource Planning)', FALSE),
-(12, 'Logiciels de comptabilité', FALSE),
-(12, 'Outils d''automatisation marketing', TRUE),
-(13, 'NPS (Net Promoter Score)', TRUE),
-(13, 'ROI (Return on Investment)', TRUE),
-(13, 'Taux de conversion', TRUE),
-(13, 'Nombre d''employés', FALSE),
-(14, 'Meilleure compréhension des clients', TRUE),
-(14, 'Réduction des coûts publicitaires', FALSE),
-(14, 'Ciblage plus précis', TRUE),
-(14, 'Augmentation des effectifs', FALSE),
-(15, 'Prospection', TRUE),
-(15, 'Négociation', TRUE),
-(15, 'Clôture', TRUE),
-(15, 'Production', FALSE),
-(16, 'Vente directe', TRUE),
-(16, 'Vente en ligne', TRUE),
-(16, 'Vente par correspondance', TRUE),
-(16, 'Vente interne', FALSE),
-(17, 'Écoute active', TRUE),
-(17, 'Proposition de valeur claire', TRUE),
-(17, 'Augmentation des prix', FALSE),
-(17, 'Flexibilité', TRUE),
-(18, 'Augmenter le chiffre d''affaires', TRUE),
-(18, 'Identifier de nouveaux clients', TRUE),
-(18, 'Réduire les coûts', FALSE),
-(18, 'Améliorer la logistique', FALSE),
-(19, 'Qualité du service', TRUE),
-(19, 'Expérience client', TRUE),
-(19, 'Prix compétitifs', TRUE),
-(19, 'Taille de l''entreprise', FALSE),
-(20, 'Prise de décision éclairée', TRUE),
-(20, 'Optimisation des campagnes', TRUE),
-(20, 'Réduction des effectifs', FALSE),
-(20, 'Augmentation des bénéfices', TRUE);
+(11, 'Réduction de la taille du code', FALSE),
+(11, 'Séparation des préoccupations (logique, interface, données)', TRUE),
+(11, 'Augmentation de la vitesse d''exécution', FALSE),
+(11, 'Meilleure modularité et maintenance', TRUE),
+(12, 'Utilisation de pare-feu', FALSE),
+(12, 'Requêtes paramétrées', TRUE),
+(12, 'Validation des entrées utilisateur', TRUE),
+(12, 'Augmentation de la bande passante', FALSE),
+(13, 'FTP', FALSE),
+(13, 'HTTPS', TRUE),
+(13, 'SSH', TRUE),
+(13, 'SMTP', FALSE),
+(14, 'Collaboration et communication continues', TRUE),
+(14, 'Automatisation des tests', TRUE),
+(14, 'Optimisation des profits', FALSE),
+(14, 'Réduction des effectifs', FALSE),
+(15, 'MySQL', TRUE),
+(15, 'MongoDB', FALSE),
+(15, 'PostgreSQL', TRUE),
+(15, 'Redis', FALSE),
+(16, 'Portabilité des applications', TRUE),
+(16, 'Augmentation des coûts matériels', FALSE),
+(16, 'Isolation des environnements', TRUE),
+(16, 'Complexité accrue du code', FALSE),
+(17, 'Amélioration de la collaboration entre développement et opérations', TRUE),
+(17, 'Réduction du temps de mise sur le marché', TRUE),
+(17, 'Augmentation des coûts de maintenance', FALSE),
+(17, 'Centralisation des données', FALSE),
+(18, 'JavaScript', TRUE),
+(18, 'Python', FALSE),
+(18, 'HTML/CSS', TRUE),
+(18, 'SQL', FALSE),
+(19, 'Conflits de versions', TRUE),
+(19, 'Augmentation de la sécurité', FALSE),
+(19, 'Retards dans les déploiements', TRUE),
+(19, 'Réduction des coûts', FALSE),
+(20, 'Analyse des besoins', TRUE),
+(20, 'Conception', TRUE),
+(20, 'Marketing du produit', FALSE),
+(20, 'Maintenance', TRUE);
 
--- QCM pour RH
+
+
 INSERT INTO qcm_questions (entity_id, question_text) VALUES
-(3, 'Quels sont les objectifs de la Gestion Prévisionnelle des Emplois et des Compétences (GPEC) ?'),
-(3, 'Quels documents sont obligatoires lors de l''embauche en France ?'),
-(3, 'Quels sont les avantages d''un plan de formation continue ?'),
-(3, 'Quelles sont les composantes d''une politique de rémunération ?'),
-(3, 'Quels sont les indicateurs clés de performance RH ?'),
-(3, 'Quelles sont les étapes du processus de recrutement ?'),
-(3, 'Quels sont les risques liés à une mauvaise gestion des conflits en entreprise ?'),
-(3, 'Quels sont les avantages de la diversité en milieu de travail ?'),
-(3, 'Quelles lois régissent la protection des données personnelles des employés en Europe ?'),
-(3, 'Quels sont les objectifs d''une évaluation annuelle des performances ?');
+(3, 'Quels sont les éléments clés d''une stratégie de vente consultative ?'),
+(3, 'Quels outils sont essentiels pour la gestion des relations client ?'),
+(3, 'Quels indicateurs mesurent la performance commerciale ?'),
+(3, 'Quels sont les avantages d''une segmentation de marché ?'),
+(3, 'Quelles sont les étapes du processus de vente ?'),
+(3, 'Quels sont les types de canaux de distribution ?'),
+(3, 'Quelles sont les techniques de négociation efficaces ?'),
+(3, 'Quels sont les objectifs d''une campagne de prospection ?'),
+(3, 'Quels facteurs influencent la fidélité des clients ?'),
+(3, 'Quels sont les avantages de l''analyse des données commerciales ?');
 
 INSERT INTO qcm_options (question_id, option_text, is_correct) VALUES
-(21, 'Anticiper les besoins en compétences', TRUE),
-(21, 'Réduire les effectifs', FALSE),
-(21, 'Planifier les évolutions de carrière', TRUE),
-(21, 'Automatiser les processus RH', FALSE),
-(22, 'Contrat de travail', TRUE),
-(22, 'Attestation de formation', FALSE),
-(22, 'Déclaration préalable à l''embauche', TRUE),
-(22, 'CV', FALSE),
-(23, 'Amélioration des compétences', TRUE),
-(23, 'Augmentation de la productivité', TRUE),
-(23, 'Réduction des congés', FALSE),
-(23, 'Engagement des employés', TRUE),
-(24, 'Salaire de base', TRUE),
-(24, 'Avantages en nature', TRUE),
-(24, 'Primes', TRUE),
-(24, 'Réduction des coûts', FALSE),
-(25, 'Taux de rétention des employés', TRUE),
-(25, 'Taux d''absentéisme', TRUE),
-(25, 'Chiffre d''affaires', FALSE),
-(25, 'Satisfaction des employés', TRUE),
-(26, 'Rédaction de l''offre d''emploi', TRUE),
-(26, 'Sélection des candidats', TRUE),
-(26, 'Intégration', TRUE),
-(26, 'Marketing produit', FALSE),
-(27, 'Baisse de la productivité', TRUE),
-(27, 'Démotivation des équipes', TRUE),
-(27, 'Augmentation des ventes', FALSE),
-(27, 'Turnover élevé', TRUE),
-(28, 'Innovation accrue', TRUE),
-(28, 'Meilleure prise de décision', TRUE),
-(28, 'Réduction des coûts', FALSE),
-(28, 'Satisfaction des clients', TRUE),
-(29, 'RGPD', TRUE),
-(29, 'Code du travail', TRUE),
-(29, 'Loi sur la cybersécurité', FALSE),
-(29, 'Directive e-Privacy', TRUE),
-(30, 'Identifier les forces et faiblesses', TRUE),
-(30, 'Fixer des objectifs', TRUE),
-(30, 'Réduire les salaires', FALSE),
-(30, 'Planifier les promotions', TRUE);
+(21, 'Identifier les besoins du client', TRUE),
+(21, 'Proposer des solutions adaptées', TRUE),
+(21, 'Vendre le produit le moins cher', FALSE),
+(21, 'Automatiser les ventes', FALSE),
+(22, 'CRM (Customer Relationship Management)', TRUE),
+(22, 'ERP (Enterprise Resource Planning)', FALSE),
+(22, 'Logiciels de comptabilité', FALSE),
+(22, 'Outils d''automatisation marketing', TRUE),
+(23, 'NPS (Net Promoter Score)', TRUE),
+(23, 'ROI (Return on Investment)', TRUE),
+(23, 'Taux de conversion', TRUE),
+(23, 'Nombre d''employés', FALSE),
+(24, 'Meilleure compréhension des clients', TRUE),
+(24, 'Réduction des coûts publicitaires', FALSE),
+(24, 'Ciblage plus précis', TRUE),
+(24, 'Augmentation des effectifs', FALSE),
+(25, 'Prospection', TRUE),
+(25, 'Négociation', TRUE),
+(25, 'Clôture', TRUE),
+(25, 'Production', FALSE),
+(26, 'Vente directe', TRUE),
+(26, 'Vente en ligne', TRUE),
+(26, 'Vente par correspondance', TRUE),
+(26, 'Vente interne', FALSE),
+(27, 'Écoute active', TRUE),
+(27, 'Proposition de valeur claire', TRUE),
+(27, 'Augmentation des prix', FALSE),
+(27, 'Flexibilité', TRUE),
+(28, 'Augmenter le chiffre d''affaires', TRUE),
+(28, 'Identifier de nouveaux clients', TRUE),
+(28, 'Réduire les coûts', FALSE),
+(28, 'Améliorer la logistique', FALSE),
+(29, 'Qualité du service', TRUE),
+(29, 'Expérience client', TRUE),
+(29, 'Prix compétitifs', TRUE),
+(29, 'Taille de l''entreprise', FALSE),
+(30, 'Prise de décision éclairée', TRUE),
+(30, 'Optimisation des campagnes', TRUE),
+(30, 'Réduction des effectifs', FALSE),
+(30, 'Augmentation des bénéfices', TRUE);
 
--- QCM pour Finance
+
 INSERT INTO qcm_questions (entity_id, question_text) VALUES
 (4, 'Quels sont les éléments principaux d''un bilan comptable ?'),
 (4, 'Quels sont les ratios financiers clés pour évaluer la santé d''une entreprise ?'),
@@ -454,7 +462,7 @@ INSERT INTO qcm_options (question_id, option_text, is_correct) VALUES
 (32, 'Ratio d''endettement', TRUE),
 (32, 'Ratio de liquidité', TRUE),
 (32, 'Taux de conversion', FALSE),
-(32, 'Marge brute', TRUE),
+(32, 'Marge brute', TRUE),..
 (33, 'Évaluer la rentabilité', TRUE),
 (33, 'Analyser la solvabilité', TRUE),
 (33, 'Augmenter les ventes', FALSE),
@@ -488,7 +496,7 @@ INSERT INTO qcm_options (question_id, option_text, is_correct) VALUES
 (40, 'Coûts directs', TRUE),
 (40, 'Coûts marketing', FALSE);
 
--- QCM pour Marketing
+
 INSERT INTO qcm_questions (entity_id, question_text) VALUES
 (5, 'Quels sont les objectifs principaux du marketing de contenu ?'),
 (5, 'Quelles sont les composantes du mix marketing (4P) ?'),
@@ -542,6 +550,7 @@ INSERT INTO qcm_options (question_id, option_text, is_correct) VALUES
 (50, 'Convertir les prospects', TRUE),
 (50, 'Fidéliser les clients', TRUE),
 (50, 'Réduire les effectifs', FALSE);
+
 
 CREATE TABLE bareme_notation (
     id SERIAL PRIMARY KEY,
