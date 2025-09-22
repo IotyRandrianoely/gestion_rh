@@ -1,147 +1,233 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8"/>
-    <title>Calendrier des entretiens</title>
-    <link rel="stylesheet" th:href="@{/css/calendrier.css}" />
+  <meta charset="UTF-8"/>
+  <title>Calendrier des entretiens – Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- (Optionnel) Ton CSS existant pour le calendrier -->
+  <link rel="stylesheet" th:href="@{/css/calendrier.css}" />
+
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#667eea; --primary-d:#5563d6;
+      --info:#1abc9c;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Arial, sans-serif; color:var(--text);
+      background:var(--bg); line-height:1.6;
+    }
+
+    /* ===== HERO (avec banner.jpg) ===== */
+    .hero{
+      height: 260px;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+        url('/images/banner.jpg') center/cover no-repeat;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; color:#fff;
+      text-shadow: 0 3px 12px rgba(0,0,0,.45);
+    }
+    .hero h1{ font-size: 32px; font-weight: 700; }
+    .hero p{ margin-top: 8px; font-size: 14px; opacity: .95; }
+
+    /* ===== NAV ===== */
+    nav{
+      background:#1f2b38;
+      display:flex; justify-content:center; gap:28px;
+      padding: 12px 16px;
+    }
+    nav a{
+      color:#ecf0f1; text-decoration:none; font-weight:600;
+      padding:6px 10px; border-radius:8px; transition:background .25s, color .25s;
+      font-size: 14px;
+    }
+    nav a:hover{ background:#2b3b4f; color:#1abc9c; }
+    nav a.active{ background:#2b3b4f; color:#fff; }
+
+    /* ===== CONTAINER & CARD ===== */
+    .container{ max-width:1200px; margin: 26px auto; padding: 0 18px; }
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .card-header{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;
+      border-bottom:1px dashed var(--line); padding-bottom:10px;
+    }
+    .card-header h2{ font-size: 18px; margin:0; }
+    .hint{ color:var(--sub); font-size: 13px; }
+
+    /* ===== FULLCALENDAR HEIGHT ===== */
+    #calendar{ min-height: 680px; }
+
+    /* ===== TOOLTIP ===== */
+    .custom-tooltip{
+      position: fixed; z-index: 1000;
+      background: rgba(10,10,10,0.92); color: #fff;
+      padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      pointer-events: none; white-space: nowrap;
+    }
+
+    /* ===== FOOTER ===== */
+    footer{
+      text-align:center; padding: 18px; color:#7f8c8d; background:#f0f3f6; margin-top: 32px;
+      border-top:1px solid var(--line);
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="cal-header">
-            <h1>Calendrier des Entretiens</h1>
-        </div>
-        <div id="calendar"></div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        let calendarEl = document.getElementById('calendar');
-    
-        let calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
-          locale: 'fr',
-          headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth'
-          },
-          events: async function(fetchInfo, successCallback, failureCallback) {
-            try {
-              let year = fetchInfo.start.getFullYear();
-              let month = fetchInfo.start.getMonth() + 1;
-      
-              let response = await fetch(`/api/entretiens/${year}/${month}`);
-              
-              if (!response.ok) {
-                throw new Error('Erreur lors du chargement des entretiens');
-              }
-              
-              let data = await response.json();
-              console.log('Données reçues:', data); // Debug
-      
-              let events = [];
-      
-              // Vérifier si data.entretiens existe
-              const entretiens = data.entretiens || data;
-              
-              for (let [dateStr, entretiensJour] of Object.entries(entretiens)) {
-                if (!entretiensJour || entretiensJour.length === 0) continue;
-                
-                // Trier les entretiens par heure de début
-                entretiensJour.sort((a, b) => new Date(a.dateDebut) - new Date(b.dateDebut));
-                
-                let premierEntretien = new Date(entretiensJour[0].dateDebut);
-                let dernierEntretien = new Date(entretiensJour[entretiensJour.length - 1].dateDebut);
-                
-                let heureDebut = premierEntretien.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-                let heureFin = dernierEntretien.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-      
-                events.push({
-                  title: `Entretiens prévus de ${heureDebut} à ${heureFin}`,
-                  start: dateStr,
-                  allDay: true,
-                  backgroundColor: '#0f62fe',
-                  borderColor: '#0f62fe',
-                  extendedProps: { 
-                    entretiens: entretiensJour,
-                    tooltipContent: entretiensJour.map(e => {
-                      let debut = new Date(e.dateDebut).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-                      let fin = e.dateFin ? new Date(e.dateFin).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '';
-                      let horaire = fin ? `${debut} à ${fin}` : debut;
-                      return `${horaire} — ${e.nom} ${e.prenom} — ${e.poste}`;
-                    }).join('\n')
-                  }
-                });
-              }
-      
-              console.log('Events créés:', events); // Debug
-              successCallback(events);
-            } catch (error) {
-              console.error('Erreur:', error);
-              failureCallback(error);
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1>Calendrier des entretiens</h1>
+      <p>Visualisez les entretiens planifiés par jour et leurs créneaux horaires.</p>
+    </div>
+  </section>
+
+  <!-- NAVIGATION ADMIN -->
+  <nav>
+    <a th:href="@{/admin/dashboard}">Dashboard</a>
+    <a th:href="@{/admin/candidats}">Candidats</a>
+    <a th:href="@{/admin/annonces}">Annonces</a>
+    <a href="/qcm/admin">QCM</a>
+    <a class="active" th:href="@{/admin/entretiens/calendrier}">Calendrier</a>
+    <a th:href="@{/admin/files}">Fichiers</a>
+  </nav>
+
+  <!-- CONTENU -->
+  <main class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2>Vue mensuelle</h2>
+        <div class="hint">Survolez un jour pour voir le détail des créneaux.</div>
+      </div>
+      <div id="calendar"></div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 Gestion RH — Calendrier des entretiens
+  </footer>
+
+  <!-- LIB FULLCALENDAR -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'fr',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth'
+        },
+        events: async function(fetchInfo, successCallback, failureCallback) {
+          try {
+            const year = fetchInfo.start.getFullYear();
+            const month = fetchInfo.start.getMonth() + 1;
+
+            const response = await fetch(`/api/entretiens/${year}/${month}`);
+            if (!response.ok) throw new Error('Erreur lors du chargement des entretiens');
+
+            const data = await response.json();
+            const entretiensData = data.entretiens || data;
+
+            const events = [];
+            for (const [dateStr, entretiensJour] of Object.entries(entretiensData)) {
+              if (!entretiensJour || entretiensJour.length === 0) continue;
+
+              // tri par heure de début
+              entretiensJour.sort((a, b) => new Date(a.dateDebut) - new Date(b.dateDebut));
+
+              const premier = new Date(entretiensJour[0].dateDebut);
+              const dernier = new Date(entretiensJour[entretiensJour.length - 1].dateDebut);
+
+              const heureDebut = premier.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+              const heureFin   = dernier.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+
+              events.push({
+                title: `Entretiens de ${heureDebut} à ${heureFin}`,
+                start: dateStr,
+                allDay: true,
+                backgroundColor: '#667eea',
+                borderColor: '#667eea',
+                textColor: '#fff',
+                extendedProps: {
+                  entretiens: entretiensJour,
+                  tooltipContent: entretiensJour.map(e => {
+                    const d1 = new Date(e.dateDebut);
+                    const d2 = e.dateFin ? new Date(e.dateFin) : null;
+                    const t1 = d1.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+                    const t2 = d2 ? d2.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '';
+                    const slot = t2 ? `${t1} à ${t2}` : t1;
+                    return `${slot} — ${e.nom} ${e.prenom} — ${e.poste}`;
+                  }).join('\n')
+                }
+              });
             }
-          },
-          eventDidMount: function(info) {
-            // Ajouter le tooltip au survol
-            let tooltipContent = info.event.extendedProps.tooltipContent;
-            
-            info.el.setAttribute('title', tooltipContent);
-            
-            // Optionnel : style plus avancé pour le tooltip
-            info.el.style.cursor = 'pointer';
-            
-            // Événement pour afficher le tooltip personnalisé
-            info.el.addEventListener('mouseenter', function(e) {
-              showTooltip(e, tooltipContent);
-            });
-            
-            info.el.addEventListener('mouseleave', function() {
-              hideTooltip();
-            });
+
+            successCallback(events);
+          } catch (error) {
+            console.error('Erreur:', error);
+            failureCallback(error);
           }
-        });
-    
-        calendar.render();
-        
-        // Fonctions pour tooltip personnalisé
-        let tooltipEl = null;
-        
-        function showTooltip(event, content) {
-          hideTooltip(); // Cacher le précédent s'il existe
-          
-          tooltipEl = document.createElement('div');
-          tooltipEl.className = 'custom-tooltip';
-          tooltipEl.innerHTML = content.replace(/\n/g, '<br>');
-          tooltipEl.style.cssText = `
-            position: fixed;
-            z-index: 1000;
-            background: rgba(10,10,10,0.92);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            pointer-events: none;
-            white-space: nowrap;
-          `;
-          
-          document.body.appendChild(tooltipEl);
-          
-          // Positionner le tooltip
-          let rect = tooltipEl.getBoundingClientRect();
-          tooltipEl.style.left = (event.clientX - rect.width / 2) + 'px';
-          tooltipEl.style.top = (event.clientY - rect.height - 10) + 'px';
-        }
-        
-        function hideTooltip() {
-          if (tooltipEl) {
-            document.body.removeChild(tooltipEl);
-            tooltipEl = null;
-          }
+        },
+        eventDidMount: function(info) {
+          const tooltipContent = info.event.extendedProps.tooltipContent || '';
+          info.el.setAttribute('title', tooltipContent);
+          info.el.style.cursor = 'pointer';
+
+          info.el.addEventListener('mouseenter', (e) => showTooltip(e, tooltipContent));
+          info.el.addEventListener('mousemove', (e) => moveTooltip(e));
+          info.el.addEventListener('mouseleave', hideTooltip);
         }
       });
-    </script>    
+
+      calendar.render();
+
+      // ===== Tooltip personnalisé =====
+      let tooltipEl = null;
+
+      function showTooltip(event, content) {
+        hideTooltip();
+        tooltipEl = document.createElement('div');
+        tooltipEl.className = 'custom-tooltip';
+        tooltipEl.innerHTML = (content || '').replace(/\n/g, '<br>');
+        document.body.appendChild(tooltipEl);
+        moveTooltip(event);
+      }
+
+      function moveTooltip(event) {
+        if (!tooltipEl) return;
+        const rect = tooltipEl.getBoundingClientRect();
+        let left = event.clientX - rect.width / 2;
+        let top  = event.clientY - rect.height - 12;
+
+        // garder dans l'écran
+        left = Math.max(8, Math.min(left, window.innerWidth - rect.width - 8));
+        top  = Math.max(8, top);
+
+        tooltipEl.style.left = left + 'px';
+        tooltipEl.style.top  = top + 'px';
+      }
+
+      function hideTooltip() {
+        if (tooltipEl) {
+          tooltipEl.remove();
+          tooltipEl = null;
+        }
+      }
+    });
+  </script>
 </body>
 </html>

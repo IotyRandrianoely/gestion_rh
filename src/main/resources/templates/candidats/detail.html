@@ -196,7 +196,7 @@
              class="btn btn-primary" target="_blank">📥 Télécharger</a>
           <button onclick="toggleFullscreen()" class="btn btn-info">🔍 Plein écran</button>
           <!-- Envoie candidateId et tente de préremplir posteId depuis candidat.annonce.poste.id ou annonce.idPoste -->
-          <a th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, 
+         <a th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, 
                         posteId=${candidat.annonce != null && candidat.annonce.poste != null ? candidat.annonce.poste.id : (candidat.annonce != null && candidat.annonce.idPoste != null ? candidat.annonce.idPoste : null)})}" 
              class="btn btn-info">proposer contrat</a>
         </div>
