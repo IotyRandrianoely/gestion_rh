@@ -13,6 +13,8 @@ import com.example.gestion_rh.service.HistoriqueScoreService;
 
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.List;
 import com.example.gestion_rh.model.ContratEssai;
 import com.example.gestion_rh.model.PlaningEntretien;
@@ -27,6 +29,9 @@ import java.net.URLConnection;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.example.gestion_rh.model.ResultatEntretien;
+import com.example.gestion_rh.service.CandidatService;
+import com.example.gestion_rh.service.ResultatEntretienService;
 
 // <-- Ajoute ces imports ----------
 import java.time.LocalDate;
@@ -39,6 +44,11 @@ import java.util.Set;
 @Controller
 @RequestMapping("/candidats")
 public class CandidatController {
+
+    @Autowired
+    private ResultatEntretienService service;
+    @Autowired
+    private ResultatEntretienService resultatEntretienService;
 
     private final CandidatService candidatService;
     private final ContratEssaiService contratEssaiService;
@@ -173,6 +183,7 @@ public class CandidatController {
         return "candidats/list";
     }
 
+
     // Détail d'un candidat
     @GetMapping("/{id}")
     public String detail(@PathVariable int id, Model model) {
@@ -210,6 +221,27 @@ public class CandidatController {
         model.addAttribute("candidat", candidatService.getById(id));
         return "candidats/planifier_entretien_manual";
     }
+    @PostMapping("noter_entretien")
+    public String noterEntretien(@RequestParam("candidatId") Long candidatId,
+                             @RequestParam("annonceId") Long annonceId,
+                             @RequestParam("niveau") Integer niveau,
+                             Model model) {
+    if (niveau == null) {
+        model.addAttribute("error", "Veuillez choisir un niveau.");
+        return "redirect:/candidats"; // le template de ta page
+    }
+
+    ResultatEntretien re = new ResultatEntretien();
+    re.setIdCandidat(candidatId != null ? candidatId.intValue() : 0);
+    re.setNiveau(niveau);
+
+    resultatEntretienService.save(re);
+
+    // recharger la liste des candidats pour réafficher la page
+    model.addAttribute("candidats", candidatService.getAll());
+    return "redirect:/candidats"; // rendu direct de la page
+}
+
 
     @PostMapping("planifier_entretien_manual")
     public String enregistrerPlaningManuel(@RequestParam int candidatId,

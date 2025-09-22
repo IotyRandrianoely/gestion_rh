@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Admin – Détail candidat</title>
+  <title>Détail candidat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -9,154 +9,305 @@
       --card:#ffffff; --line:#e6ecf2;
       --primary:#3498db; --primary-d:#2980b9;
       --accent:#2ecc71; --accent-d:#27ae60;
-      --warn:#f39c12; --warn-d:#d68910;
+      --danger:#e74c3c; --danger-d:#c0392b;
       --muted:#8aa0b2;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{
       font-family:'Segoe UI',Arial,sans-serif; color:var(--text);
-      background:var(--bg); padding:22px; max-width:1200px; margin:0 auto; line-height:1.6;
+      background:var(--bg); padding:22px; max-width:1200px; margin:0 auto;
+      line-height:1.6;
     }
 
-    /* Header */
+    /* ===== Page header (comme les pages admin) ===== */
     .page-header{
       background:linear-gradient(135deg, rgba(52,152,219,.12), rgba(46,204,113,.10));
       border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;
       display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
     }
-    .titles h1{ font-size:22px; margin-bottom:6px; letter-spacing:.2px }
+    .page-title{ display:flex; flex-direction:column; gap:6px }
+    .page-title h1{ font-size:22px; letter-spacing:.2px }
     .subtitle{ color:var(--sub); font-size:13px }
-    .pill{ background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff; padding:6px 12px; border-radius:999px; font-weight:800; font-size:12px }
 
-    /* Layout */
-    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
-    @media(max-width:880px){ .grid-2{ grid-template-columns:1fr } }
+    .stats{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+    .pill{
+      background:#eef6ff; color:#1d6fdc; border:1px solid #d7e7ff;
+      padding:6px 12px; border-radius:999px; font-weight:800; font-size:12px;
+    }
+
+    /* ===== Layout ===== */
+    .content{
+      display:grid; grid-template-columns:1.1fr .9fr; gap:18px;
+    }
+    @media (max-width: 980px){ .content{ grid-template-columns:1fr } }
 
     .card{
       background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px;
-      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      box-shadow:0 6px 16px rgba(0,0,0,.06); margin-bottom:18px;
     }
-    .card h3{ font-size:16px; font-weight:800; margin-bottom:12px; color:#243447 }
+    h3{ font-size:16px; font-weight:900; margin-bottom:10px; color:#243447 }
 
-    /* Rows */
-    .row{ display:flex; gap:10px; margin:8px 0; flex-wrap:wrap }
-    .label{ min-width:180px; font-weight:800; color:#243447 }
+    /* Infos lignes */
+    .info-row{ display:flex; gap:10px; margin:10px 0; border-bottom:1px dashed var(--line); padding-bottom:10px }
+    .info-row:last-child{ border-bottom:0; padding-bottom:0 }
+    .label{ min-width:180px; color:#243447; font-weight:800 }
     .value{ color:#4b5a6a }
 
-    /* Chips / badges */
-    .chip{
-      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px;
-      background:#eef6ff; border:1px solid #d7e7ff; color:#1d6fdc; font-weight:800; font-size:12px;
+    /* CV viewer */
+    .cv-info{
+      background:#eef6ff; border:1px solid #d7e7ff; border-left:4px solid var(--primary);
+      padding:10px; border-radius:10px; margin-bottom:12px;
     }
-    .chip.green{ background:#eaf9f0; border-color:#c9efd8; color:#17965a }
-    .chip.warn{ background:#fff6e6; border-color:#ffe1b6; color:#a66a00 }
+    .cv-controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px }
+    .cv-viewer{ width:100%; min-height:600px; border:1px solid var(--line); border-radius:10px; background:#fff }
+    .cv-image{ width:100%; height:auto; border-radius:10px; border:1px solid var(--line); background:#fff }
+    .no-cv{
+      text-align:center; padding:36px; color:var(--sub);
+      background:#fcfeff; border:1px dashed var(--line); border-radius:12px;
+    }
 
-    /* Buttons */
-    .actions{ margin-top:20px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center }
+    /* Boutons (même esprit admin) */
     .btn{
-      display:inline-block; padding:10px 16px; border-radius:10px; font-weight:800; font-size:14px;
-      text-decoration:none; border:1px solid transparent; transition:transform .2s, box-shadow .2s, background .2s, border-color .2s;
-      cursor:pointer;
+      text-decoration:none; display:inline-block; padding:10px 14px; border-radius:10px; font-weight:800; font-size:14px;
+      border:1px solid transparent; transition:background .2s, border-color .2s, transform .2s, box-shadow .2s; cursor:pointer;
     }
-    .btn-primary{ background:var(--primary); color:#fff }
-    .btn-primary:hover{ background:var(--primary-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(52,152,219,.2) }
-    .btn-warning{ background:var(--warn); color:#111; }
-    .btn-warning:hover{ background:var(--warn-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(243,156,18,.2) }
+    .btn--primary{ background:var(--primary); color:#fff; }
+    .btn--primary:hover{ background:var(--primary-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(41,128,185,.2); }
+    .btn--success{ background:var(--accent); color:#fff; }
+    .btn--success:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2); }
+    .btn--ghost{ background:#fff; color:var(--primary); border-color:#cfe2f7; }
+    .btn--ghost:hover{ background:#f3f8ff; border-color:#b7d5f6; }
+    .btn--info{ background:#1abc9c; color:#fff; }
+    .btn--info:hover{ background:#12947a; transform:translateY(-1px); box-shadow:0 8px 16px rgba(26,188,156,.2); }
 
-    /* Small helpers */
-    .muted{ color:var(--muted) }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    .spacer{ height:6px }
-    .hr{ border-top:1px dashed var(--line); margin:10px 0 }
-
-    /* CV block */
-    .cv-box{
-      background:#f8fbff; border:1px dashed #cfe2f7; border-radius:12px; padding:12px;
+    /* Footer actions */
+    .actions{
+      margin-top: 8px; padding-top: 16px; border-top: 2px solid #e9eef4;
+      display:flex; justify-content:center; gap:12px; flex-wrap:wrap;
     }
-    .cv-actions{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap }
-    .btn-ghost{
-      background:#fff; color:#3498db; border-color:#cfe2f7; border:1px solid #cfe2f7;
-      padding:8px 12px; border-radius:10px; font-weight:800; text-decoration:none;
-    }
-    .btn-ghost:hover{ background:#f3f8ff; border-color:#b7d5f6 }
-
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- Header -->
   <div class="page-header">
-    <div class="titles">
-      <h1>Admin – Détail du candidat</h1>
-      <div class="subtitle">
-        Dossier de
-        <b th:text="${candidat.nom} + ' ' + ${candidat.prenom}">Nom Prénom</b>
-        — ID <span class="mono" th:text="${candidat.id}">#</span>
-      </div>
+    <div class="page-title">
+      <h1>👤 Détail du candidat</h1>
+      <div class="subtitle" th:text="'Candidature de ' + ${candidat.nom} + ' ' + ${candidat.prenom}"></div>
     </div>
-    <div class="pill">Espace admin</div>
+
+    <div class="stats">
+      <span class="pill">
+        <b th:text="${#temporals.format(candidat.dateCandidature, 'dd/MM/yyyy')}">--/--/----</b>
+  Candidature du&nbsp;
+      </span>
+      <span class="pill" th:if="${candidat.annonce != null}">
+        Annonce : <b th:text="${candidat.annonce.profil}">—</b>
+      </span>
+    </div>
   </div>
 
-  <!-- CONTENT -->
-  <div class="grid-2">
-    <!-- Colonne gauche -->
-    <div class="card">
-      <h3>📋 Informations personnelles</h3>
-      <div class="row"><div class="label">Nom :</div><div class="value" th:text="${candidat.nom}">—</div></div>
-      <div class="row"><div class="label">Prénom :</div><div class="value" th:text="${candidat.prenom}">—</div></div>
-      <div class="row"><div class="label">Email :</div><div class="value">
-        <span th:text="${candidat.email}">—</span>
-      </div></div>
-      <div class="row"><div class="label">Âge :</div><div class="value" th:text="${candidat.age} + ' ans'">—</div></div>
-      <div class="row"><div class="label">Genre :</div><div class="value" th:text="${candidat.genre == 1 ? 'Homme' : 'Femme'}">—</div></div>
-      <div class="row"><div class="label">Adresse :</div><div class="value" th:text="${candidat.adresse != null ? candidat.adresse : '—'}">—</div></div>
-      <div class="row"><div class="label">Diplôme :</div>
-        <div class="value">
-          <span class="chip green" th:text="${candidat.diplome != null ? candidat.diplome.nomDiplome : 'Non renseigné'}">Non renseigné</span>
+  <!-- Contenu -->
+  <div class="content">
+
+    <!-- Colonne gauche : infos -->
+    <div>
+      <div class="card">
+        <h3>📋 Informations personnelles</h3>
+
+        <div class="info-row">
+          <div class="label">Nom complet</div>
+          <div class="value" th:text="${candidat.nom} + ' ' + ${candidat.prenom}"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Email</div>
+          <div class="value" th:text="${candidat.email}"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Âge</div>
+          <div class="value" th:text="${candidat.age} + ' ans'"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Diplôme</div>
+          <div class="value" th:text="${candidat.diplome != null ? candidat.diplome.nomDiplome : 'Non renseigné'}"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Genre</div>
+          <div class="value" th:text="${candidat.genre == 1 ? 'Homme' : 'Femme'}"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Adresse</div>
+          <div class="value" th:text="${candidat.adresse ?: 'Non renseignée'}"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>💼 Informations professionnelles</h3>
+
+        <div class="info-row">
+          <div class="label">Années d'expérience</div>
+          <div class="value" th:text="${candidat.anneesExperience} + ' ans'"></div>
+        </div>
+
+        <div class="info-row">
+          <div class="label">Date de candidature</div>
+          <div class="value" th:text="${#temporals.format(candidat.dateCandidature, 'dd/MM/yyyy')}"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🎯 Candidature</h3>
+
+        <div class="info-row">
+          <div class="label">Annonce</div>
+          <div class="value" th:text="${candidat.annonce != null ? candidat.annonce.profil : 'Non spécifiée'}"></div>
+        </div>
+
+        <div class="info-row" th:if="${candidat.annonce != null}">
+          <div class="label">Description</div>
+          <div class="value" th:text="${candidat.annonce.description}"></div>
+        </div>
+
+        <div class="info-row" th:if="${candidat.lettreMotivation != null and not #strings.isEmpty(candidat.lettreMotivation)}" style="display:block">
+          <div class="label" style="margin-bottom:6px;">Lettre de motivation</div>
+          <div class="value" style="background:#fcfeff; border:1px dashed var(--line); border-radius:10px; padding:10px; white-space:pre-wrap;"
+               th:text="${candidat.lettreMotivation}"></div>
         </div>
       </div>
     </div>
 
-    <!-- Colonne droite -->
+    <!-- Colonne droite : CV -->
     <div class="card">
-      <h3>💼 Informations professionnelles</h3>
-      <div class="row"><div class="label">Années d’expérience :</div><div class="value" th:text="${candidat.anneesExperience} + ' ans'">—</div></div>
-      <div class="row"><div class="label">CV :</div>
-        <div class="value cv-box">
-          <div th:if="${candidat.cv != null and !#strings.isEmpty(candidat.cv)}">
-            <span class="mono" th:text="${candidat.cv}">cv.pdf</span>
-            <div class="cv-actions">
-              <a class="btn-ghost" th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" target="_blank">📥 Télécharger</a>
-            </div>
+      <h3>📄 CV / Portfolio</h3>
+
+      <div th:if="${candidat.cv != null and not #strings.isEmpty(candidat.cv)}">
+        <div class="cv-info">
+          <strong>📄 Fichier :</strong> <span id="fileName" th:text="${candidat.cv}"></span><br/>
+          <strong>📊 Type :</strong> <span id="fileType">Détection en cours…</span>
+        </div>
+
+        <div class="cv-controls">
+          <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
+             class="btn btn-primary" target="_blank">📥 Télécharger</a>
+          <button onclick="toggleFullscreen()" class="btn btn-info">🔍 Plein écran</button>
+          <!-- Envoie candidateId et tente de préremplir posteId depuis candidat.annonce.poste.id ou annonce.idPoste -->
+          <a th:href="@{/contratEssai/contratEssai(candidateId=${candidat.id}, 
+                        posteId=${candidat.annonce != null && candidat.annonce.poste != null ? candidat.annonce.poste.id : (candidat.annonce != null && candidat.annonce.idPoste != null ? candidat.annonce.idPoste : null)})}" 
+             class="btn btn-info">proposer contrat</a>
+        </div>
+
+        <div id="cvContainer">
+          <!-- Images -->
+          <img th:if="${#strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpg') or 
+                       #strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpeg') or 
+                       #strings.endsWith(#strings.toLowerCase(candidat.cv), '.png') or 
+                       #strings.endsWith(#strings.toLowerCase(candidat.cv), '.gif') or 
+                       #strings.endsWith(#strings.toLowerCase(candidat.cv), '.bmp') or 
+                       #strings.endsWith(#strings.toLowerCase(candidat.cv), '.webp')}"
+               th:src="@{/api/files/download/image/{fileName}(fileName=${candidat.cv})}"
+               class="cv-image" th:alt="${candidat.cv}"
+               onerror="handleImageError(this)" onload="setFileType('Image')" />
+
+          <!-- PDF -->
+          <iframe th:if="${#strings.endsWith(#strings.toLowerCase(candidat.cv), '.pdf')}"
+                  th:src="@{/api/files/download/{fileName}(fileName=${candidat.cv})}"
+                  class="cv-viewer" onload="setFileType('PDF')" onerror="handlePdfError(this)">
+            Votre navigateur ne supporte pas l'affichage des PDFs.
+          </iframe>
+
+          <!-- Autres documents -->
+          <div th:if="${not (#strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpg') or 
+                             #strings.endsWith(#strings.toLowerCase(candidat.cv), '.jpeg') or 
+                             #strings.endsWith(#strings.toLowerCase(candidat.cv), '.png') or 
+                             #strings.endsWith(#strings.toLowerCase(candidat.cv), '.gif') or 
+                             #strings.endsWith(#strings.toLowerCase(candidat.cv), '.bmp') or 
+                             #strings.endsWith(#strings.toLowerCase(candidat.cv), '.webp') or 
+                             #strings.endsWith(#strings.toLowerCase(candidat.cv), '.pdf'))}"
+               class="no-cv" onload="setFileType('Document')">
+            <h4>📄 Document disponible</h4>
+            <p th:text="'Fichier : ' + ${candidat.cv}"></p>
+            <p>Ce type de document ne peut pas être affiché directement.<br/>Utilisez le bouton « Télécharger » pour l’ouvrir.</p>
+            <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" class="btn btn--success" target="_blank">📥 Télécharger et ouvrir</a>
           </div>
-          <div th:if="${candidat.cv == null or #strings.isEmpty(candidat.cv)}" class="muted">Aucun CV fourni.</div>
         </div>
       </div>
-      <div class="hr"></div>
-      <h3>🎯 Candidature</h3>
-      <div class="row">
-        <div class="label">Annonce :</div>
-        <div class="value">
-          <span th:text="${candidat.annonce != null ? candidat.annonce.profil : '—'}">—</span>
-        </div>
-      </div>
-      <div class="row"><div class="label">Date de candidature :</div>
-        <div class="value" th:text="${candidat.dateCandidature != null ? #temporals.format(candidat.dateCandidature,'dd/MM/yyyy') : '—'}">—</div>
-        
-      </div>
-      <div class="row" style="align-items:flex-start;">
-        <div class="label">Lettre de motivation :</div>
-        <div class="value" style="background:#f8f9fb;border:1px solid var(--line);border-radius:10px;padding:10px;white-space:pre-wrap;"
-             th:text="${candidat.lettreMotivation != null ? candidat.lettreMotivation : '—'}">—</div>
+
+      <div th:if="${candidat.cv == null or #strings.isEmpty(candidat.cv)}" class="no-cv">
+        <h4>📭 Aucun CV fourni</h4>
+        <p>Ce candidat n’a pas encore uploadé de CV ou de document.</p>
       </div>
     </div>
   </div>
 
-  <!-- Actions -->
+  <!-- Actions globales -->
   <div class="actions">
-    <a th:href="@{/admin/candidats}" class="btn btn-primary">← Retour à la liste</a>
-    <a th:href="@{/admin/candidats/edit/{id}(id=${candidat.id})}" class="btn btn-warning">✏️ Modifier</a>
+    <a th:href="@{/candidats}" class="btn btn--ghost">← Retour à la liste</a>
+    <a th:if="${candidat.annonce != null}"
+       th:href="@{/candidats?annonceId={id}(id=${candidat.annonce.id})}"
+       class="btn btn--info">📋 Autres candidats de cette annonce</a>
   </div>
 
+  <script>
+    // Type de fichier (affichage)
+    function setFileType(type){ document.getElementById('fileType').textContent = type; }
+
+    // Erreur image
+    function handleImageError(img){
+      img.style.display = 'none';
+      const c = img.parentElement;
+      c.innerHTML = `
+        <div class="no-cv">
+          <h4>⚠️ Erreur d'affichage</h4>
+          <p>Impossible d'afficher cette image.</p>
+          <a href="${img.src}" class="btn btn--primary" target="_blank">📥 Télécharger le fichier</a>
+        </div>`;
+      setFileType('Image (erreur)');
+    }
+
+    // Erreur PDF
+    function handlePdfError(iframe){
+      iframe.style.display = 'none';
+      const c = iframe.parentElement;
+      c.innerHTML = `
+        <div class="no-cv">
+          <h4>⚠️ Erreur d'affichage PDF</h4>
+          <p>Votre navigateur ne peut pas afficher ce PDF directement.</p>
+          <a href="${iframe.src}" class="btn btn--primary" target="_blank">📥 Télécharger le PDF</a>
+        </div>`;
+      setFileType('PDF (erreur)');
+    }
+
+    // Plein écran
+    function toggleFullscreen(){
+      const container = document.getElementById('cvContainer');
+      const el = container.firstElementChild;
+      if(!el) return;
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    }
+
+    // Init : déduire le type depuis l’extension
+    document.addEventListener('DOMContentLoaded', function(){
+      const nameEl = document.getElementById('fileName');
+      if (!nameEl) return;
+      const fileName = nameEl.textContent || '';
+      if (!fileName) return;
+
+      const ext = fileName.split('.').pop().toLowerCase();
+      const img = ['jpg','jpeg','png','gif','bmp','webp'];
+      const doc = ['doc','docx','txt','rtf'];
+
+      if (img.includes(ext)) setFileType('Image ('+ext.toUpperCase()+')');
+      else if (ext === 'pdf') setFileType('PDF');
+      else if (doc.includes(ext)) setFileType('Document ('+ext.toUpperCase()+')');
+      else setFileType('Fichier ('+ext.toUpperCase()+')');
+    });
+  </script>
 </body>
 </html>

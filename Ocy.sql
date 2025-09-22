@@ -563,3 +563,8 @@ CREATE TABLE bareme_entretien (
     id_annonce INT REFERENCES annonce(id),
     bareme DOUBLE PRECISION
 );
+CREATE TABLE resultat_entretien (
+    id BIGSERIAL PRIMARY KEY,           -- auto-incrément, équivalent à @GeneratedValue(strategy=IDENTITY)
+    id_candidat INTEGER NOT NULL,       -- identifiant du candidat (colonne non nulle)
+    niveau INTEGER NOT NULL             -- niveau du candidat à l’entretien
+);

@@ -165,6 +165,7 @@
           <th>Nom</th>
           <th>Prénom</th>
           <th>Note</th>
+          <th>Noter entretien</th>
           <th>Annonce</th>
           <th style="width:220px">Actions</th>
           <th>Entretien / Statut</th>
@@ -180,10 +181,17 @@
           <td th:text="${c.nom}" th:attr="data-label='Nom'">Nom</td>
           <td th:text="${c.prenom}" th:attr="data-label='Prénom'">Prénom</td>
           <td th:text="${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id] : '—'}" th:attr="data-label='Note'">—</td>
+          <td th:attr="data-label='Noter entretien'">
+            <form th:action="@{/candidats/noter_entretien}" method="post" style="display:flex;gap:8px;align-items:center;">
+              <input type="hidden" name="candidatId" th:value="${c.id}" />
+              <input type="hidden" name="annonceId" th:value="${c.annonce != null ? c.annonce.id : 0}" />
+              <input type="number" name="niveau" min="0" max="10" step="1" placeholder="Niv" style="width:68px" required />
+              <button type="submit" class="btn btn--primary">Noter</button>
+            </form>
+         </td>
           <td th:text="${c.annonce != null ? c.annonce.profil : '—'}" th:attr="data-label='Annonce'">Profil annonce</td>
           <td class="col-actions" th:attr="data-label='Actions'">
             <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn--primary">Détail</a>
-            <!-- doublon conservé pour ne pas toucher au back (même lien, autre style/label) -->
             <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn--ghost">Voir</a>
           </td>
           <td th:attr="data-label='Entretien / Statut'">
