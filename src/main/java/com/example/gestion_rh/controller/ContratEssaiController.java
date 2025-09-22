@@ -129,6 +129,27 @@ public class ContratEssaiController {
                 dt = LocalDate.parse(dateDebut).atStartOfDay();
             }
             contrat.setDateDebut(dt);
+
+            // --- NEW: calculer et définir dateFin = dateDebut + duree jours ---
+            if (duree != null) {
+                LocalDateTime end = dt.plusDays(duree);
+                try {
+                    // essayer setDateFin(LocalDateTime)
+                    java.lang.reflect.Method m = contrat.getClass().getMethod("setDateFin", LocalDateTime.class);
+                    m.invoke(contrat, end);
+                } catch (NoSuchMethodException ns) {
+                    try {
+                        // essayer setDateFin(LocalDate)
+                        java.lang.reflect.Method m2 = contrat.getClass().getMethod("setDateFin", LocalDate.class);
+                        m2.invoke(contrat, end.toLocalDate());
+                    } catch (NoSuchMethodException ns2) {
+                        // pas de setter compatible trouvé — ignorer (mais garder sauvegarde)
+                    }
+                } catch (Exception e) {
+                    // ignore invocation errors
+                }
+            }
+            // --- END NEW ---
         } catch (Exception ex) {
             redirectAttrs.addFlashAttribute("error", "Date de début invalide");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

@@ -196,16 +196,16 @@ CREATE TABLE historique_score (
 -- TABLES CONTRATS
 -- ===============================
 
-CREATE TABLE contrat_essai (
+create table contrat_essai (
     id SERIAL PRIMARY KEY,
-    id_candidat INT REFERENCES candidat(id),
-    id_poste INT REFERENCES poste(id),
+    id_candidat INT,
+    id_poste INT,
     date_debut DATE,
     duree INT, -- en jours
     date_fin DATE,
-    salaire DOUBLE PRECISION,
-    conditions TEXT,
-    etat VARCHAR(20) DEFAULT 'En attente'
+    salaire NUMERIC(10,2),
+    foreign key (id_candidat) references candidat(id),
+    foreign key (id_poste) references poste(id)
 );
 
 CREATE TABLE historique_contrat_essai (
