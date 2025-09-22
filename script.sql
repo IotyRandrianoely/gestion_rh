@@ -46,7 +46,7 @@ create table historique_annonce(
     date_historique DATE 
 );
 create table candidat(
-    id INT,
+    id SERIAL PRIMARY KEY,
     id_annonce INT,
     nom VARCHAR(40),
     prenom VARCHAR(40),
@@ -86,12 +86,11 @@ create table situation_matrimonial(
     situation VARCHAR(30);
 );
 create table poste(
-    id INT,
-    nom_poste varchar(30),
-    
+    id SERIAL PRIMARY KEY,
+    nom_poste varchar(30)
 );
 create table poste_employe(
-    id INT,
+    id SERIAL PRIMARY KEY,
     id_employee INT,
     id_poste INT,
     last_date DATE 

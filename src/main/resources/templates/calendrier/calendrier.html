@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Calendrier des entretiens</title>
+    <link rel="stylesheet" th:href="@{/css/calendrier.css}" />
+</head>
+<body>
+    <div class="container">
+        <div class="cal-header">
+            <h1>Calendrier des Entretiens</h1>
+        </div>
+        <div id="calendar"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        let calendarEl = document.getElementById('calendar');
+    
+        let calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          locale: 'fr',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth'
+          },
+          events: async function(fetchInfo, successCallback, failureCallback) {
+            try {
+              let year = fetchInfo.start.getFullYear();
+              let month = fetchInfo.start.getMonth() + 1;
+      
+              let response = await fetch(`/api/entretiens/${year}/${month}`);
+              
+              if (!response.ok) {
+                throw new Error('Erreur lors du chargement des entretiens');
+              }
+              
+              let data = await response.json();
+              console.log('Données reçues:', data); // Debug
+      
+              let events = [];
+      
+              // Vérifier si data.entretiens existe
+              const entretiens = data.entretiens || data;
+              
+              for (let [dateStr, entretiensJour] of Object.entries(entretiens)) {
+                if (!entretiensJour || entretiensJour.length === 0) continue;
+                
+                // Trier les entretiens par heure de début
+                entretiensJour.sort((a, b) => new Date(a.dateDebut) - new Date(b.dateDebut));
+                
+                let premierEntretien = new Date(entretiensJour[0].dateDebut);
+                let dernierEntretien = new Date(entretiensJour[entretiensJour.length - 1].dateDebut);
+                
+                let heureDebut = premierEntretien.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+                let heureFin = dernierEntretien.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+      
+                events.push({
+                  title: `Entretiens prévus de ${heureDebut} à ${heureFin}`,
+                  start: dateStr,
+                  allDay: true,
+                  backgroundColor: '#0f62fe',
+                  borderColor: '#0f62fe',
+                  extendedProps: { 
+                    entretiens: entretiensJour,
+                    tooltipContent: entretiensJour.map(e => {
+                      let debut = new Date(e.dateDebut).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+                      let fin = e.dateFin ? new Date(e.dateFin).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '';
+                      let horaire = fin ? `${debut} à ${fin}` : debut;
+                      return `${horaire} — ${e.nom} ${e.prenom} — ${e.poste}`;
+                    }).join('\n')
+                  }
+                });
+              }
+      
+              console.log('Events créés:', events); // Debug
+              successCallback(events);
+            } catch (error) {
+              console.error('Erreur:', error);
+              failureCallback(error);
+            }
+          },
+          eventDidMount: function(info) {
+            // Ajouter le tooltip au survol
+            let tooltipContent = info.event.extendedProps.tooltipContent;
+            
+            info.el.setAttribute('title', tooltipContent);
+            
+            // Optionnel : style plus avancé pour le tooltip
+            info.el.style.cursor = 'pointer';
+            
+            // Événement pour afficher le tooltip personnalisé
+            info.el.addEventListener('mouseenter', function(e) {
+              showTooltip(e, tooltipContent);
+            });
+            
+            info.el.addEventListener('mouseleave', function() {
+              hideTooltip();
+            });
+          }
+        });
+    
+        calendar.render();
+        
+        // Fonctions pour tooltip personnalisé
+        let tooltipEl = null;
+        
+        function showTooltip(event, content) {
+          hideTooltip(); // Cacher le précédent s'il existe
+          
+          tooltipEl = document.createElement('div');
+          tooltipEl.className = 'custom-tooltip';
+          tooltipEl.innerHTML = content.replace(/\n/g, '<br>');
+          tooltipEl.style.cssText = `
+            position: fixed;
+            z-index: 1000;
+            background: rgba(10,10,10,0.92);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            pointer-events: none;
+            white-space: nowrap;
+          `;
+          
+          document.body.appendChild(tooltipEl);
+          
+          // Positionner le tooltip
+          let rect = tooltipEl.getBoundingClientRect();
+          tooltipEl.style.left = (event.clientX - rect.width / 2) + 'px';
+          tooltipEl.style.top = (event.clientY - rect.height - 10) + 'px';
+        }
+        
+        function hideTooltip() {
+          if (tooltipEl) {
+            document.body.removeChild(tooltipEl);
+            tooltipEl = null;
+          }
+        }
+      });
+    </script>    
+</body>
+</html>

@@ -1,0 +1,155 @@
+@page {
+    margin: 20mm 15mm;
+    size: A4;
+}
+
+body { 
+    font-family: 'Times New Roman', serif; 
+    color: #333; 
+    margin: 0; 
+    padding: 0;
+    line-height: 1.4; 
+    font-size: 11pt;
+}
+
+.container { 
+    max-width: 100%; 
+    margin: 0 auto; 
+}
+
+.header { 
+    text-align: center; 
+    margin-bottom: 15px; 
+    border-bottom: 2px solid #2c5aa0;
+    padding-bottom: 10px;
+}
+
+.company { 
+    font-weight: bold; 
+    font-size: 16pt; 
+    color: #2c5aa0;
+    margin-bottom: 5px;
+}
+
+.company-details {
+    font-size: 9pt;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+h1 { 
+    font-size: 18pt; 
+    margin: 8px 0 12px 0; 
+    color: #2c5aa0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.reference {
+    font-size: 9pt;
+    color: #888;
+    margin-bottom: 15px;
+}
+
+h2 { 
+    font-size: 12pt; 
+    margin: 12px 0 6px 0; 
+    color: #2c5aa0;
+    border-left: 4px solid #2c5aa0;
+    padding-left: 8px;
+}
+
+p { 
+    margin: 6px 0; 
+    text-align: justify;
+}
+
+.parties { 
+    margin: 10px 0; 
+}
+
+.partie-box { 
+    background: #f8f9fa; 
+    border: 1px solid #dee2e6; 
+    padding: 8px 12px; 
+    margin: 6px 0;
+    border-radius: 4px;
+}
+
+.bold { 
+    font-weight: bold; 
+}
+
+.article { 
+    margin: 10px 0; 
+}
+
+.article-content {
+    margin-left: 15px;
+    text-align: justify;
+}
+
+.highlight {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 4px 8px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.info-grid {
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+}
+
+.info-item {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.signatures { 
+    margin-top: 25px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start;
+}
+
+.sign-block { 
+    width: 45%; 
+    text-align: center; 
+}
+
+.sign-title {
+    font-weight: bold;
+    margin-bottom: 40px;
+    color: #2c5aa0;
+}
+
+.sign-line { 
+    border-top: 1px solid #333; 
+    padding-top: 5px; 
+    font-size: 9pt;
+}
+
+.footer { 
+    margin-top: 20px; 
+    font-size: 9pt; 
+    color: #666; 
+    text-align: center; 
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.date-lieu {
+    text-align: right;
+    margin: 15px 0;
+    font-style: italic;
+}
+
+.important {
+    background: #e8f4fd;
+    border-left: 4px solid #2c5aa0;
+    padding: 8px 12px;
+    margin: 8px 0;
+}
