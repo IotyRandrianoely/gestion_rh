@@ -54,15 +54,18 @@ public class CandidatController {
     private final ContratEssaiService contratEssaiService;
     private final PlaningEntretienService planingEntretienService;
     private final HistoriqueScoreService historiqueScoreService; // <--- NEW
-
+    private final com.example.gestion_rh.service.DiplomeService diplomeService;
+    
     public CandidatController(CandidatService candidatService,
                               ContratEssaiService contratEssaiService,
                               PlaningEntretienService planingEntretienService,
-                              HistoriqueScoreService historiqueScoreService) { // <--- NEW param
+                              HistoriqueScoreService historiqueScoreService,
+                              com.example.gestion_rh.service.DiplomeService diplomeService) { // <--- NEW param
         this.candidatService = candidatService;
         this.contratEssaiService = contratEssaiService;
         this.planingEntretienService = planingEntretienService;
         this.historiqueScoreService = historiqueScoreService; // <--- assign
+        this.diplomeService = diplomeService;
     }
 
     // Liste des candidats (avec filtres)
@@ -87,7 +90,30 @@ public class CandidatController {
                 scoresMap.put(c.getId(), null);
             }
         }
-
+        
+        Map<Integer, Integer> niveauxMap = new java.util.HashMap<>();
+        try {
+            List<ResultatEntretien> allResults = resultatEntretienService.findAll(); // adapte si la méthode a un autre nom (findAll / lister / ...)
+            if (allResults == null) allResults = List.of();
+            Map<Integer, ResultatEntretien> latestByCandidat = allResults.stream()
+                    .filter(r -> r != null)
+                    .collect(Collectors.toMap(
+                            r -> Integer.valueOf(r.getIdCandidat()),   // clé = id candidat
+                            r -> r,
+                            (r1, r2) -> {
+                                // choisir le "plus récent" : ici on compare l'id (adapter si vous avez une date)
+                                Integer id1 = r1.getId() != null ? r1.getId().intValue() : 0;
+                                Integer id2 = r2.getId() != null ? r2.getId().intValue() : 0;
+                                return id1 >= id2 ? r1 : r2;
+                            }
+                    ));
+            for (Map.Entry<Integer, ResultatEntretien> e : latestByCandidat.entrySet()) {
+                ResultatEntretien rr = e.getValue();
+                niveauxMap.put(e.getKey(), rr != null ? rr.getNiveau() : null);
+            }
+        } catch (Exception ex) {
+            // en cas d'erreur on laisse niveauxMap vide
+        }
         // Construire contratsMap
         List<PlaningEntretien> contrats = planingEntretienService.listerPLaningEntretien();
         Map<Integer, PlaningEntretien> contratsMap = new java.util.HashMap<>();
@@ -173,6 +199,10 @@ public class CandidatController {
         model.addAttribute("contratsMap", contratsMap);
         model.addAttribute("scoresMap", scoresMap);
         model.addAttribute("profils", profils);
+        model.addAttribute("niveauxMap", niveauxMap);
+
+        // fournir la liste des diplômes au template pour le filtre
+        model.addAttribute("diplomes", diplomeService.getAll());
 
         // conserver valeurs des filtres pour le formulaire
         model.addAttribute("filterName", name);

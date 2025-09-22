@@ -154,6 +154,26 @@
           <option th:value="no" th:selected="${filterPropose=='no'}">Non</option>
         </select>
       </div>
+
+      <!-- NOUVEAUX FILTRES -->
+      <div class="form-group">
+        <label for="filter-agemin">Âge min</label>
+        <input type="number" id="filter-agemin" name="ageMin" min="16" max="120" th:value="${filterAgeMin}" placeholder="ex : 20" />
+      </div>
+
+      <div class="form-group">
+        <label for="filter-agemax">Âge max</label>
+        <input type="number" id="filter-agemax" name="ageMax" min="16" max="120" th:value="${filterAgeMax}" placeholder="ex : 40" />
+      </div>
+
+      <div class="form-group">
+        <label for="filter-diplome">Diplôme</label>
+        <select id="filter-diplome" name="diplomeId" th:value="${filterDiplome}">
+          <option value="">— Tous —</option>
+          <option th:each="d : ${diplomes}" th:value="${d.id}" th:text="${d.nomDiplome}"
+                  th:selected="${filterDiplome != null and filterDiplome == d.id}"></option>
+        </select>
+      </div>
     </form>
   </div>
 
@@ -177,17 +197,25 @@
                      data-prenom=${c.prenom != null ? c.prenom.toLowerCase() : ''},
                      data-score=${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id] : ''},
                      data-profil=${c.annonce != null ? c.annonce.profil : ''},
-                     data-propose=${c.estPropose}">
+                     data-propose=${c.estPropose},
+                     data-age=${c.age},
+                     data-diplome=${c.diplome != null ? c.diplome.nomDiplome : ''}">
           <td th:text="${c.nom}" th:attr="data-label='Nom'">Nom</td>
           <td th:text="${c.prenom}" th:attr="data-label='Prénom'">Prénom</td>
-          <td th:text="${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id] : '—'}" th:attr="data-label='Note'">—</td>
+          <td th:text="${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id]/10 : '—'}" th:attr="data-label='Note'">—</td>
           <td th:attr="data-label='Noter entretien'">
-            <form th:action="@{/candidats/noter_entretien}" method="post" style="display:flex;gap:8px;align-items:center;">
-              <input type="hidden" name="candidatId" th:value="${c.id}" />
-              <input type="hidden" name="annonceId" th:value="${c.annonce != null ? c.annonce.id : 0}" />
-              <input type="number" name="niveau" min="0" max="10" step="1" placeholder="Niv" style="width:68px" required />
-              <button type="submit" class="btn btn--primary">Noter</button>
-            </form>
+            <div th:if="${niveauxMap == null or niveauxMap[c.id] == null}">
+              <form th:action="@{/candidats/noter_entretien}" method="post" style="display:flex;gap:8px;align-items:center;">
+                <input type="hidden" name="candidatId" th:value="${c.id}" />
+                <input type="hidden" name="annonceId" th:value="${c.annonce != null ? c.annonce.id : 0}" />
+                <input type="number" name="niveau" min="0" max="10" step="1" placeholder="Niv" style="width:68px" required />
+                <button type="submit" class="btn btn--primary">Noter</button>
+              </form>
+            </div>
+            <!-- Si un résultat existe, afficher le niveau (sans bouton) -->
+            <div th:if="${niveauxMap != null and niveauxMap[c.id] != null}" class="small">
+              Niveau : <b th:text="${niveauxMap[c.id]}">0</b>
+            </div>
          </td>
           <td th:text="${c.annonce != null ? c.annonce.profil : '—'}" th:attr="data-label='Annonce'">Profil annonce</td>
           <td class="col-actions" th:attr="data-label='Actions'">
@@ -226,11 +254,22 @@
       const minScoreInput = document.getElementById('filter-minscore');
       const profilInput = document.getElementById('filter-profil');
       const proposeSelect = document.getElementById('filter-propose');
+
+      // nouveaux éléments
+      const ageMinInput = document.getElementById('filter-agemin');
+      const ageMaxInput = document.getElementById('filter-agemax');
+      const diplomeSelect = document.getElementById('filter-diplome');
+
       const tbody = document.querySelector('table tbody');
       let debounceTimer = null;
 
       function parseScore(v){
         const n = parseFloat(v);
+        return isNaN(n) ? null : n;
+      }
+
+      function parseIntOrNull(v){
+        const n = parseInt(v,10);
         return isNaN(n) ? null : n;
       }
 
@@ -240,12 +279,18 @@
         const profil = profilInput ? profilInput.value.trim().toLowerCase() : '';
         const propose = proposeSelect ? proposeSelect.value : '';
 
+        const ageMin = ageMinInput ? parseIntOrNull(ageMinInput.value) : null;
+        const ageMax = ageMaxInput ? parseIntOrNull(ageMaxInput.value) : null;
+        const diplome = diplomeSelect ? (diplomeSelect.options[diplomeSelect.selectedIndex].text || '').trim().toLowerCase() : '';
+
         tbody.querySelectorAll('tr[data-name]').forEach(row => {
           const dName = (row.dataset.name || '').toLowerCase();
           const dPrenom = (row.dataset.prenom || '').toLowerCase();
           const dScore = row.dataset.score ? parseFloat(row.dataset.score) : null;
           const dProfil = row.dataset.profil || '';
           const dPropose = (row.dataset.propose === 'true');
+          const dAge = row.dataset.age ? parseInt(row.dataset.age,10) : null;
+          const dDiplome = (row.dataset.diplome || '').toLowerCase();
 
           let visible = true;
           if (name && !(dName.includes(name) || dPrenom.includes(name))) visible = false;
@@ -253,6 +298,13 @@
           if (profil && !( (dProfil || '').toLowerCase().includes(profil) )) visible = false;
           if (propose === 'yes' && !dPropose) visible = false;
           if (propose === 'no' && dPropose) visible = false;
+
+          // filtres Age
+          if (ageMin != null && (dAge == null || dAge < ageMin)) visible = false;
+          if (ageMax != null && (dAge == null || dAge > ageMax)) visible = false;
+
+          // filtre Diplôme (compare texte visible de la liste)
+          if (diplome && diplome !== '— tous —' && !(dDiplome.includes(diplome))) visible = false;
 
           row.style.display = visible ? '' : 'none';
         });
@@ -267,6 +319,11 @@
       if (minScoreInput) minScoreInput.addEventListener('input', scheduleFilter);
       if (profilInput) profilInput.addEventListener('input', scheduleFilter);
       if (proposeSelect) proposeSelect.addEventListener('change', filterRows);
+
+      // nouveaux listeners
+      if (ageMinInput) ageMinInput.addEventListener('input', scheduleFilter);
+      if (ageMaxInput) ageMaxInput.addEventListener('input', scheduleFilter);
+      if (diplomeSelect) diplomeSelect.addEventListener('change', filterRows);
 
       document.addEventListener('DOMContentLoaded', filterRows);
     })();

@@ -47,24 +47,24 @@ public class ContratEssaiService {
         repository.deleteById(id);
     }
     // ...existing code...
-        public void creerContratPourCandidat(int candidatId) {
-            Candidat candidat = candidatRepository.findById(candidatId).orElseThrow();
-            ContratEssai contrat = new ContratEssai();
-            contrat.setCandidat(candidat);
-            Poste poste = posteRepository.findAll().stream().findFirst().orElse(null);
-            contrat.setPoste(poste);
-            int i = 0;
-            ContratEssai c = this.listerContrats().get(this.listerContrats().size()-1);
-            LocalDateTime d = c.getDateFin();
-            contrat.setDateDebut(d.plusHours(2));
-            contrat.setDateFin(contrat.getDateDebut().plusHours(1));
-            contrat.setDuree(30);
-            contrat.setEtat("En attente");
-            repository.save(contrat);
+        // public void creerContratPourCandidat(int candidatId) {
+        //     Candidat candidat = candidatRepository.findById(candidatId).orElseThrow();
+        //     ContratEssai contrat = new ContratEssai();
+        //     contrat.setCandidat(candidat);
+        //     Poste poste = posteRepository.findAll().stream().findFirst().orElse(null);
+        //     contrat.setPoste(poste);
+        //     int i = 0;
+        //     ContratEssai c = this.listerContrats().get(this.listerContrats().size()-1);
+        //     LocalDateTime d = c.getDateFin();
+        //     contrat.setDateDebut(d.plusHours(2));
+        //     contrat.setDateFin(contrat.getDateDebut().plusHours(1));
+        //     contrat.setDuree(30);
+        //     contrat.setEtat("En attente");
+        //     repository.save(contrat);
 
-            // Mettre à jour estPropose à true
-            candidat.setEstPropose(true);
-            candidatRepository.save(candidat);
-        }
+        //     // Mettre à jour estPropose à true
+        //     candidat.setEstPropose(true);
+        //     candidatRepository.save(candidat);
+        // }
     // ...existing code...
 }
