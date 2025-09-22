@@ -3,6 +3,8 @@ package com.example.gestion_rh.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.example.gestion_rh.model.Poste;
+
 @Entity
 @Table(name = "contrat_essai")
 public class ContratEssai {
