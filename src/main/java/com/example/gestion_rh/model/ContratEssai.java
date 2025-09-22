@@ -28,11 +28,6 @@ public class ContratEssai {
     private LocalDateTime dateFin;
     private Double salaire;
 
-    @Column(length = 500)
-    private String conditions;
-
-    private String etat = "En attente";
-
     // Getters et setters
     public Long getId() {
         return id;
@@ -89,21 +84,4 @@ public class ContratEssai {
     public void setSalaire(Double salaire) {
         this.salaire = salaire;
     }
-
-    public String getConditions() {
-        return conditions;
-    }
-
-    public void setConditions(String conditions) {
-        this.conditions = conditions;
-    }
-
-    public String getEtat() {
-        return etat;
-    }
-
-    public void setEtat(String etat) {
-        this.etat = etat;
-    }
-
 }

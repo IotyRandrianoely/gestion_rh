@@ -132,6 +132,11 @@ public class ContratEssaiController {
 
             // --- NEW: calculer et définir dateFin = dateDebut + duree jours ---
             if (duree != null) {
+                if (duree > 180) {
+                    redirectAttrs.addFlashAttribute("error", "La durée du contrat d'essai ne peut pas dépasser 180 jours.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+                }
+
                 LocalDateTime end = dt.plusDays(duree);
                 try {
                     // essayer setDateFin(LocalDateTime)
