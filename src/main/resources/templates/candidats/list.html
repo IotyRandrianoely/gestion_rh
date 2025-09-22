@@ -143,10 +143,7 @@
 
       <div class="form-group">
         <label for="filter-profil">Profil annonce</label>
-        <select id="filter-profil" name="profil">
-          <option value="">— Tous —</option>
-          <option th:each="p : ${profils}" th:value="${p}" th:text="${p}" th:selected="${p==filterProfil}">Profil</option>
-        </select>
+        <input type="text" id="filter-profil" name="profil" th:value="${filterProfil}" placeholder="Recherche profil…" />
       </div>
 
       <div class="form-group">
@@ -219,7 +216,7 @@
     (function(){
       const nameInput = document.getElementById('filter-name');
       const minScoreInput = document.getElementById('filter-minscore');
-      const profilSelect = document.getElementById('filter-profil');
+      const profilInput = document.getElementById('filter-profil');
       const proposeSelect = document.getElementById('filter-propose');
       const tbody = document.querySelector('table tbody');
       let debounceTimer = null;
@@ -232,7 +229,7 @@
       function filterRows(){
         const name = nameInput ? nameInput.value.trim().toLowerCase() : '';
         const minScore = minScoreInput ? parseScore(minScoreInput.value) : null;
-        const profil = profilSelect ? profilSelect.value : '';
+        const profil = profilInput ? profilInput.value.trim().toLowerCase() : '';
         const propose = proposeSelect ? proposeSelect.value : '';
 
         tbody.querySelectorAll('tr[data-name]').forEach(row => {
@@ -245,7 +242,7 @@
           let visible = true;
           if (name && !(dName.includes(name) || dPrenom.includes(name))) visible = false;
           if (minScore != null && (dScore == null || dScore < minScore)) visible = false;
-          if (profil && dProfil !== profil) visible = false;
+          if (profil && !( (dProfil || '').toLowerCase().includes(profil) )) visible = false;
           if (propose === 'yes' && !dPropose) visible = false;
           if (propose === 'no' && dPropose) visible = false;
 
@@ -260,7 +257,7 @@
 
       if (nameInput) nameInput.addEventListener('input', scheduleFilter);
       if (minScoreInput) minScoreInput.addEventListener('input', scheduleFilter);
-      if (profilSelect) profilSelect.addEventListener('change', filterRows);
+      if (profilInput) profilInput.addEventListener('input', scheduleFilter);
       if (proposeSelect) proposeSelect.addEventListener('change', filterRows);
 
       document.addEventListener('DOMContentLoaded', filterRows);
