@@ -39,10 +39,11 @@ body {
 
 h1 { 
     font-size: 18pt; 
-    margin: 8px 0 12px 0; 
+    margin: 8px 0 12px 0;
     color: #2c5aa0;
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-align: center;
 }
 
 .reference {
