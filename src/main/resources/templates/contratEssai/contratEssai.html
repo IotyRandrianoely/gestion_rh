@@ -10,7 +10,7 @@
 <form th:action="@{/contratEssai/save}" method="post" onsubmit="return validateAndSubmit(this);">
     <input type="hidden" name="candidateId" id="candidateId" th:value="${candidateId != null ? candidateId : param.candidateId}" />
 
-    <p>
+    <!-- <p>
         <label for="posteId">Poste :</label>
         <select name="posteId" id="posteId" required>
             <option value="">Choisir</option>
@@ -21,7 +21,7 @@
                 Poste
             </option>
         </select>
-    </p>
+    </p> !-->
 
     <p>
         <label for="dateDebut">Date de début :</label>

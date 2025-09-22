@@ -61,15 +61,15 @@ public class ContratEssaiController {
     // Traite la soumission : sauvegarde puis renvoie le PDF en téléchargement
     @PostMapping("/save")
     public ResponseEntity<byte[]> saveFromForm(@RequestParam(required = false) Long candidateId,
-                                               @RequestParam Long posteId,
+                                               @RequestParam(required = false) Long posteId,
                                                @RequestParam String dateDebut,
                                                @RequestParam Integer duree,
                                                @RequestParam Double salaire,
-                                            //    @RequestParam(required = false) String conditions,
                                                RedirectAttributes redirectAttrs) {
 
         ContratEssai contrat = new ContratEssai();
 
+        // associer le candidat si présent
         if (candidateId != null) {
             Optional<Candidat> cand = candidatRepo.findById(candidateId);
             if (cand.isPresent()) {
@@ -80,6 +80,38 @@ public class ContratEssaiController {
             }
         }
 
+        // si posteId non fourni, tenter de le déduire depuis le candidat -> annonce -> poste
+        if (posteId == null) {
+            if (contrat.getCandidat() != null && contrat.getCandidat().getAnnonce() != null) {
+                try {
+                    // plusieurs variantes possibles selon le modèle Annonce : poste (entity) ou idPoste (Long/Integer)
+                    Object maybePoste = contrat.getCandidat().getAnnonce().getPoste();
+                    if (maybePoste instanceof Poste) {
+                        Long id = ((Poste) maybePoste).getId();
+                        if (id != null) posteId = id;
+                    } else {
+                        // si Annonce expose idPoste (Integer/Long), gérer le cas
+                        try {
+                            // reflection fallback to support different model variants
+                            java.lang.reflect.Method m = contrat.getCandidat().getAnnonce().getClass().getMethod("getIdPoste");
+                            Object v = m.invoke(contrat.getCandidat().getAnnonce());
+                            if (v instanceof Number) posteId = ((Number) v).longValue();
+                        } catch (NoSuchMethodException ignore) {
+                            // rien à faire si la méthode n'existe pas
+                        }
+                    }
+                } catch (Exception ex) {
+                    // ignore and continue to validation below
+                }
+            }
+        }
+
+        // validation posteId
+        if (posteId == null) {
+            redirectAttrs.addFlashAttribute("error", "Veuillez sélectionner un poste ou utilisez la page détail du candidat.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
         Optional<Poste> p = posteRepo.findById(posteId);
         if (p.isEmpty()) {
             redirectAttrs.addFlashAttribute("error", "Poste introuvable");
@@ -87,8 +119,16 @@ public class ContratEssaiController {
         }
         contrat.setPoste(p.get());
 
+        // parsing de la date : robust à yyyy-MM-dd ou yyyy-MM-ddTHH:mm[:ss]
         try {
-            contrat.setDateDebut(LocalDateTime.parse(dateDebut));
+            LocalDateTime dt;
+            try {
+                dt = LocalDateTime.parse(dateDebut);
+            } catch (Exception ex) {
+                // fallback : date-only -> start of day
+                dt = LocalDate.parse(dateDebut).atStartOfDay();
+            }
+            contrat.setDateDebut(dt);
         } catch (Exception ex) {
             redirectAttrs.addFlashAttribute("error", "Date de début invalide");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -104,7 +144,6 @@ public class ContratEssaiController {
         // Préparer le HTML via Thymeleaf
         Context ctx = new Context();
         ctx.setVariable("contrat", saved);
-        // ajouter la date du jour formatée pour le PDF (évite l'utilisation complexe de #dates dans le template)
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         ctx.setVariable("dateNow", LocalDate.now().format(dtf));
         String html = templateEngine.process("contratEssai/contratEssai-pdf", ctx);
