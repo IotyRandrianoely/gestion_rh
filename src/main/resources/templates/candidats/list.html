@@ -187,6 +187,7 @@
           <th>Note</th>
           <th>Noter entretien</th>
           <th>Annonce</th>
+          <th>Passer entretien</th> <!-- Nouvelle colonne -->
           <th style="width:220px">Actions</th>
           <th>Entretien / Statut</th>
         </tr>
@@ -218,6 +219,17 @@
             </div>
          </td>
           <td th:text="${c.annonce != null ? c.annonce.profil : '—'}" th:attr="data-label='Annonce'">Profil annonce</td>
+          <td th:attr="data-label='Passer entretien'">
+            <div th:if="${not c.estPropose}">
+              <a th:href="@{'/qcm/start-interview/' + ${c.id}}" 
+                 class="btn btn--info">
+                 📝 Passer l'entretien
+              </a>
+            </div>
+            <div th:if="${c.estPropose}" class="small">
+              Entretien effectué
+            </div>
+          </td>
           <td class="col-actions" th:attr="data-label='Actions'">
             <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn--primary">Détail</a>
             <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn--ghost">Voir</a>

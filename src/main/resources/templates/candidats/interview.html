@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Entretien - Questions QCM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --bg:#f5f7fa;
+            --text:#2c3e50;
+            --primary:#3498db;
+            --accent:#2ecc71;
+            --card:#ffffff;
+            --line:#e6ecf2;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--line);
+        }
+        
+        .candidate-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        
+        .info-grid p {
+            margin: 0;
+        }
+        
+        .info-grid strong {
+            color: var(--primary);
+        }
+        
+        .question {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .question h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        
+        .options {
+            margin-top: 15px;
+        }
+        
+        .option {
+            display: block;
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option:hover {
+            background: #f0f7ff;
+            border-color: var(--primary);
+        }
+        
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-weight: bold;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52,152,219,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Entretien QCM</h1>
+            <p>Répondez aux questions suivantes pour votre entretien</p>
+        </div>
+
+        <div class="candidate-info">
+            <h3>Informations du candidat</h3>
+            <div class="info-grid">
+                <p><strong>ID Candidat:</strong> <span th:text="${candidat.id}">ID</span></p>
+                <p><strong>Nom:</strong> <span th:text="${candidat.nom}">Nom</span></p>
+                <p><strong>Prénom:</strong> <span th:text="${candidat.prenom}">Prénom</span></p>
+                <p><strong>ID Annonce:</strong> <span th:text="${candidat.annonce.id}">ID Annonce</span></p>
+                <p><strong>Poste:</strong> <span th:text="${candidat.annonce.poste.profil}">Poste</span></p>
+            </div>
+        </div>
+
+        <form th:action="@{/qcm/submit-interview}" method="post" th:object="${interviewSubmission}">
+            <input type="hidden" name="candidatId" th:value="${candidat.id}" />
+            
+            <div class="questions">
+                <div th:each="question, questionStat : ${questions}" class="question">
+                    <h3 th:text="${'Question ' + (questionStat.index + 1)}">Question 1</h3>
+                    <p th:text="${question.text}">Texte de la question</p>
+                    
+                    <div class="options">
+                        <label th:each="option : ${question.options}" class="option">
+                            <input type="checkbox" 
+                                   th:name="'answers[' + ${questionStat.index} + '].selectedOptionIds'"
+                                   th:value="${option.id}" />
+                            <span th:text="${option.text}">Option text</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn" onclick="history.back()">Retour</button>
+                <button type="submit" class="btn btn-primary">Terminer l'entretien</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="timer" id="timer">Temps restant: 30:00</div>
+
+    <script>
+        // Timer simple
+        let timeLeft = 30 * 60; // 30 minutes en secondes
+        const timerElement = document.getElementById('timer');
+        
+        const timer = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `Temps restant: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                alert("Le temps est écoulé !");
+                document.querySelector('form').submit();
+            }
+            timeLeft--;
+        }, 1000);
+    </script>
+</body>
+</html>
