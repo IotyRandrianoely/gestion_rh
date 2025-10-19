@@ -18,6 +18,28 @@
       --info: #1abc9c;
     }
     
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
@@ -151,151 +173,293 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
   <script th:inline="javascript">
-    let calendar = null;
-
-    function initializeCalendar() {
-      const calendarEl = document.getElementById('calendar');
-      if (!calendarEl) {
-        console.error('Element calendar not found');
-        return;
+    class EntretiensCalendar {
+      constructor() {
+        this.calendar = null;
+        this.calendarEl = document.getElementById('calendar');
       }
-      
-      calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'listDay',
-        locale: 'fr',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'listDay,listWeek,dayGridMonth'
-        },
-        
-        // Configuration de l'affichage
-        slotMinTime: '08:00:00',
-        slotMaxTime: '20:00:00',
-        slotDuration: '00:30:00',
-        
-        // Format des vues
-        views: {
-          listDay: {
-            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
-          },
-          listWeek: {
-            titleFormat: { year: 'numeric', month: 'long' }
-          }
-        },
-        
-        // Configuration de l'affichage des horaires
-        displayEventTime: true,
-        displayEventEnd: true,
-        eventTimeFormat: {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        },
-        
-        // Chargement des événements
-        events: async function(fetchInfo, successCallback, failureCallback) {
-          try {
-            const year = fetchInfo.start.getFullYear();
-            const month = fetchInfo.start.getMonth() + 1;
-            
-            const response = await fetch(`/api/entretiens/${year}/${month}`);
-            if (!response.ok) {
-              throw new Error('Erreur lors du chargement des entretiens');
-            }
-            
-            const data = await response.json();
-            const entretiensData = data.entretiens || data;
-            const events = [];
-            
-            for (const [dateStr, entretiensJour] of Object.entries(entretiensData)) {
-              if (!entretiensJour || entretiensJour.length === 0) continue;
-              
-              for (const entretien of entretiensJour) {
-                if (entretien.etat === 2) continue; // Skip les entretiens annulés
-                
-                const dateDebut = new Date(entretien.dateDebut);
-                const dateFin = entretien.dateFin ? 
-                  new Date(entretien.dateFin) : 
-                  new Date(dateDebut.getTime() + 60 * 60 * 1000);
-                
-                let backgroundColor;
-                let etatStr;
-                
-                switch(entretien.etat) {
-                  case 0:
-                    backgroundColor = '#ffc107'; // warning color
-                    etatStr = 'Proposé';
-                    break;
-                  case 1:
-                    backgroundColor = '#28a745'; // success color
-                    etatStr = 'Terminé';
-                    break;
-                  default:
-                    backgroundColor = '#6c757d'; // secondary color
-                    etatStr = 'État inconnu';
-                }
-                
-                events.push({
-                  title: `${entretien.nom} ${entretien.prenom} - ${entretien.poste}`,
-                  start: entretien.dateDebut,
-                  end: entretien.dateFin || dateFin,
-                  backgroundColor: backgroundColor,
-                  borderColor: backgroundColor,
-                  textColor: '#fff',
-                  extendedProps: {
-                    etat: etatStr,
-                    candidat: `${entretien.nom} ${entretien.prenom}`,
-                    poste: entretien.poste,
-                    id: entretien.id
-                  }
-                });
-              }
-            }
-            
-            successCallback(events);
-          } catch (error) {
-            console.error('Erreur:', error);
-            failureCallback(error);
-          }
-        },
-        
-        // Personnalisation de l'affichage des événements
-        eventDidMount: function(info) {
-          info.el.style.cursor = 'pointer';
-          
-          const event = info.event;
-          const props = event.extendedProps;
-          
-          // Info-bulle détaillée
-          info.el.title = `
-            Candidat: ${props.candidat}
-            Poste: ${props.poste}
-            État: ${props.etat}
-          `.trim();
-        },
-        
-        // Gestion du clic sur un événement
-        eventClick: function(info) {
-          const props = info.event.extendedProps;
-          window.location.href = `/admin/candidats/${props.id}`;
-        }
-      });
 
-      });
-      
-      // Rendu du calendrier
-      calendar.render();
+      initialize() {
+        if (!this.calendarEl) {
+          console.error('Element calendar not found');
+          return;
+        }
+
+        this.calendar = new FullCalendar.Calendar(this.calendarEl, {
+          initialView: 'listDay',
+          locale: 'fr',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'listDay,listWeek,dayGridMonth'
+          },
+          
+          // Configuration de l'affichage
+          slotMinTime: '08:00:00',
+          slotMaxTime: '20:00:00',
+          slotDuration: '00:30:00',
+          
+          // Format des vues
+          views: {
+            listDay: {
+              titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+            },
+            listWeek: {
+              titleFormat: { year: 'numeric', month: 'long' }
+            }
+          },
+          
+          // Configuration de l'affichage des horaires
+          displayEventTime: true,
+          displayEventEnd: true,
+          eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          },
+          
+          // Chargement des événements
+          events: this.fetchEvents.bind(this),
+          
+          // Personnalisation de l'affichage des événements
+          eventDidMount: this.customizeEvent.bind(this),
+          
+          // Gestion du clic sur un événement
+          eventClick: this.handleEventClick.bind(this)
+        });
+
+        this.calendar.render();
+      }
+
+      async fetchEvents(fetchInfo, successCallback, failureCallback) {
+        try {
+          const year = fetchInfo.start.getFullYear();
+          const month = fetchInfo.start.getMonth() + 1;
+          
+          const response = await fetch(`/api/entretiens/${year}/${month}`);
+          if (!response.ok) {
+            throw new Error('Erreur lors du chargement des entretiens');
+          }
+          
+          const data = await response.json();
+          const entretiensData = data.entretiens || data;
+          const events = this.processEntretiens(entretiensData);
+          
+          successCallback(events);
+        } catch (error) {
+          console.error('Erreur:', error);
+          failureCallback(error);
+        }
+      }
+
+      processEntretiens(entretiensData) {
+        const events = [];
+        
+        for (const [dateStr, entretiensJour] of Object.entries(entretiensData)) {
+          if (!entretiensJour || entretiensJour.length === 0) continue;
+          
+          for (const entretien of entretiensJour) {
+            if (entretien.etat === 2) continue; // Skip les entretiens annulés
+            
+            const event = this.createEventFromEntretien(entretien);
+            if (event) events.push(event);
+          }
+        }
+        
+        return events;
+      }
+
+      createEventFromEntretien(entretien) {
+        const dateDebut = new Date(entretien.dateDebut);
+        const dateFin = entretien.dateFin ? 
+          new Date(entretien.dateFin) : 
+          new Date(dateDebut.getTime() + 60 * 60 * 1000);
+
+        const { backgroundColor, etatStr } = this.getEntretienStyle(entretien.etat);
+        
+        return {
+          title: `${entretien.nom} ${entretien.prenom} - ${entretien.poste}`,
+          start: entretien.dateDebut,
+          end: entretien.dateFin || dateFin,
+          backgroundColor: backgroundColor,
+          borderColor: backgroundColor,
+          textColor: '#fff',
+          extendedProps: {
+            etat: etatStr,
+            candidat: `${entretien.nom} ${entretien.prenom}`,
+            poste: entretien.poste,
+            id: entretien.id
+          }
+        };
+      }
+
+      getEntretienStyle(etat) {
+        switch(etat) {
+          case 0:
+            return { backgroundColor: '#ffc107', etatStr: 'Proposé' };
+          case 1:
+            return { backgroundColor: '#28a745', etatStr: 'Terminé' };
+          default:
+            return { backgroundColor: '#6c757d', etatStr: 'État inconnu' };
+        }
+      }
+
+      customizeEvent(info) {
+        info.el.style.cursor = 'pointer';
+        const event = info.event;
+        const props = event.extendedProps;
+        
+        // Créer le bouton d'annulation
+        const cancelBtn = document.createElement('button');
+        cancelBtn.innerHTML = '&#x2716;'; // Symbole X
+        cancelBtn.className = 'cancel-interview-btn';
+        cancelBtn.title = 'Annuler cet entretien';
+        
+        // Style du bouton
+        cancelBtn.style.cssText = `
+          background: #dc3545;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          font-size: 12px;
+          cursor: pointer;
+          margin-left: 8px;
+          opacity: 0;
+          transition: opacity 0.2s;
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        `;
+
+        // Ajouter les événements de survol
+        info.el.style.position = 'relative';
+        info.el.addEventListener('mouseenter', () => {
+          cancelBtn.style.opacity = '1';
+        });
+        info.el.addEventListener('mouseleave', () => {
+          cancelBtn.style.opacity = '0';
+        });
+
+        // Gérer le clic sur le bouton d'annulation
+        cancelBtn.addEventListener('click', async (e) => {
+          e.stopPropagation(); // Empêcher la navigation vers la page du candidat
+          
+          if (confirm('Êtes-vous sûr de vouloir annuler cet entretien ?')) {
+            try {
+              const response = await fetch(`/api/entretiens/${props.id}/annuler`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
+                }
+              });
+
+              if (!response.ok) {
+                throw new Error('Erreur lors de l\'annulation');
+              }
+
+              // Supprimer visuellement l'événement du calendrier avec une animation
+              info.el.style.transition = 'all 0.3s';
+              info.el.style.transform = 'scale(0.8)';
+              info.el.style.opacity = '0';
+              
+              setTimeout(() => {
+                event.remove(); // Supprimer l'événement du calendrier
+                
+                // Afficher une notification de succès
+                this.showNotification('Entretien annulé avec succès', 'success');
+              }, 300);
+            } catch (error) {
+              console.error('Erreur:', error);
+              this.showNotification('Erreur lors de l\'annulation de l\'entretien', 'error');
+            }
+          }
+        });
+
+        // Ajouter le bouton à l'élément de l'événement
+        info.el.appendChild(cancelBtn);
+        
+        // Info-bulle détaillée
+        info.el.title = `
+          Candidat: ${props.candidat}
+          Poste: ${props.poste}
+          État: ${props.etat}
+        `.trim();
+      }
+
+      showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        
+        // Style de la notification
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 12px 24px;
+          border-radius: 8px;
+          color: white;
+          font-weight: 500;
+          z-index: 1000;
+          animation: slideIn 0.3s ease-out;
+        `;
+        
+        // Couleur selon le type
+        const colors = {
+          success: '#28a745',
+          error: '#dc3545',
+          info: '#17a2b8'
+        };
+        notification.style.backgroundColor = colors[type] || colors.info;
+        
+        document.body.appendChild(notification);
+        
+        // Disparition après 3 secondes
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.3s ease-out';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      handleEventClick(info) {
+        // Ne pas naviguer si on clique sur le bouton d'annulation
+        if (event.target.classList.contains('cancel-interview-btn')) {
+          return;
+        }
+        const props = info.event.extendedProps;
+        window.location.href = `/admin/candidats/${props.id}`;
+      }
+
+      destroy() {
+        if (this.calendar) {
+          this.calendar.destroy();
+          this.calendar = null;
+        }
+      }
     }
 
-    // Initialiser le calendrier quand le DOM est chargé
-    document.addEventListener('DOMContentLoaded', initializeCalendar);
+    // Instance unique du calendrier
+    let entretiensCalendar = null;
+
+    // Initialisation quand le DOM est chargé
+    document.addEventListener('DOMContentLoaded', () => {
+      entretiensCalendar = new EntretiensCalendar();
+      entretiensCalendar.initialize();
+    });
 
     // Nettoyage lors de la destruction de la page
     window.addEventListener('unload', () => {
-      if (calendar) {
-        calendar.destroy();
-        calendar = null;
+      if (entretiensCalendar) {
+        entretiensCalendar.destroy();
+        entretiensCalendar = null;
       }
     });
   </script>

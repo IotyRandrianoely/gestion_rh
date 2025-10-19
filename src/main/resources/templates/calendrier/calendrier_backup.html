@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Calendrier des entretiens – Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" th:href="@{/css/calendrier.css}" />
+  
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --text: #2c3e50;
+      --sub: #4b5a6a;
+      --card: #ffffff;
+      --line: #e6ecf2;
+      --primary: #667eea;
+      --primary-d: #5563d6;
+      --info: #1abc9c;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    
+    .hero {
+      height: 260px;
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+                  url('/images/banner.jpg') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 3px 12px rgba(0,0,0,.45);
+    }
+    
+    .hero h1 { font-size: 32px; font-weight: 700; }
+    .hero p { margin-top: 8px; font-size: 14px; opacity: .95; }
+    
+    nav {
+      background: #1f2b38;
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      padding: 12px 16px;
+    }
+    
+    nav a {
+      color: #ecf0f1;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background .25s, color .25s;
+      font-size: 14px;
+    }
+    
+    nav a:hover { background: #2b3b4f; color: #1abc9c; }
+    nav a.active { background: #2b3b4f; color: #fff; }
+    
+    .container {
+      max-width: 1200px;
+      margin: 26px auto;
+      padding: 0 18px;
+    }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed var(--line);
+      padding-bottom: 10px;
+    }
+    
+    .card-header h2 { font-size: 18px; margin: 0; }
+    .hint { color: var(--sub); font-size: 13px; }
+    #calendar { min-height: 680px; }
+    
+    footer {
+      text-align: center;
+      padding: 18px;
+      color: #7f8c8d;
+      background: #f0f3f6;
+      margin-top: 32px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* Styles pour les événements du calendrier */
+    .fc-event {
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: 2px 0;
+    }
+
+    .fc-list-event-title {
+      font-weight: 600;
+    }
+
+    .fc-list-event-time {
+      font-weight: normal;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div>
+      <h1>Calendrier des entretiens</h1>
+      <p>Visualisez les entretiens planifiés par jour et leurs créneaux horaires.</p>
+    </div>
+  </section>
+
+  <nav>
+    <a th:href="@{/admin/dashboard}">Dashboard</a>
+    <a th:href="@{/admin/candidats}">Candidats</a>
+    <a th:href="@{/admin/annonces}">Annonces</a>
+    <a href="/qcm/admin">QCM</a>
+    <a class="active" th:href="@{/admin/entretiens/calendrier}">Calendrier</a>
+    <a th:href="@{/admin/files}">Fichiers</a>
+  </nav>
+
+  <main class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2>Planning des entretiens</h2>
+        <div class="hint">Consultez les entretiens planifiés</div>
+      </div>
+      <div id="calendar"></div>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Gestion RH — Calendrier des entretiens
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+      
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'listDay',
+        locale: 'fr',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'listDay,listWeek,dayGridMonth'
+        },
+        
+        // Configuration de l'affichage
+        slotMinTime: '08:00:00',
+        slotMaxTime: '20:00:00',
+        slotDuration: '00:30:00',
+        
+        // Format des vues
+        views: {
+          listDay: {
+            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+          },
+          listWeek: {
+            titleFormat: { year: 'numeric', month: 'long' }
+          }
+        },
+        
+        // Configuration de l'affichage des horaires
+        displayEventTime: true,
+        displayEventEnd: true,
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
+        
+        // Chargement des événements
+        events: async function(fetchInfo, successCallback, failureCallback) {
+          try {
+            const year = fetchInfo.start.getFullYear();
+            const month = fetchInfo.start.getMonth() + 1;
+            
+            const response = await fetch(`/api/entretiens/${year}/${month}`);
+            if (!response.ok) {
+              throw new Error('Erreur lors du chargement des entretiens');
+            }
+            
+            const data = await response.json();
+            const entretiensData = data.entretiens || data;
+            const events = [];
+            
+            for (const [dateStr, entretiensJour] of Object.entries(entretiensData)) {
+              if (!entretiensJour || entretiensJour.length === 0) continue;
+              
+              for (const entretien of entretiensJour) {
+                if (entretien.etat === 2) continue; // Skip les entretiens annulés
+                
+                const dateDebut = new Date(entretien.dateDebut);
+                const dateFin = entretien.dateFin ? 
+                  new Date(entretien.dateFin) : 
+                  new Date(dateDebut.getTime() + 60 * 60 * 1000);
+                
+                let backgroundColor;
+                let etatStr;
+                
+                switch(entretien.etat) {
+                  case 0:
+                    backgroundColor = '#ffc107'; // warning color
+                    etatStr = 'Proposé';
+                    break;
+                  case 1:
+                    backgroundColor = '#28a745'; // success color
+                    etatStr = 'Terminé';
+                    break;
+                  default:
+                    backgroundColor = '#6c757d'; // secondary color
+                    etatStr = 'État inconnu';
+                }
+                
+                events.push({
+                  title: `${entretien.nom} ${entretien.prenom} - ${entretien.poste}`,
+                  start: entretien.dateDebut,
+                  end: entretien.dateFin || dateFin,
+                  backgroundColor: backgroundColor,
+                  borderColor: backgroundColor,
+                  textColor: '#fff',
+                  extendedProps: {
+                    etat: etatStr,
+                    candidat: `${entretien.nom} ${entretien.prenom}`,
+                    poste: entretien.poste,
+                    id: entretien.id
+                  }
+                });
+              }
+            }
+            
+            successCallback(events);
+          } catch (error) {
+            console.error('Erreur:', error);
+            failureCallback(error);
+          }
+        },
+        
+        // Personnalisation de l'affichage des événements
+        eventDidMount: function(info) {
+          info.el.style.cursor = 'pointer';
+          
+          const event = info.event;
+          const props = event.extendedProps;
+          
+          // Info-bulle détaillée
+          info.el.title = `
+            Candidat: ${props.candidat}
+            Poste: ${props.poste}
+            État: ${props.etat}
+          `.trim();
+        },
+        
+        // Gestion du clic sur un événement
+        eventClick: function(info) {
+          const props = info.event.extendedProps;
+          window.location.href = `/admin/candidats/${props.id}`;
+        }
+      });
+
+      // Rendu du calendrier
+      calendar.render();
+    });
+  </script>
+</body>
+</html>
