@@ -18,4 +18,8 @@ public interface PlaningEntretienRepository extends JpaRepository<PlaningEntreti
     // Alternative avec requête explicite si la méthode automatique ne fonctionne pas
     @Query("SELECT p FROM PlaningEntretien p WHERE p.dateDebut >= :start AND p.dateDebut <= :end ORDER BY p.dateDebut")
     List<PlaningEntretien> findEntretiensBetweenDates(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    // Trouver tous les entretiens d'un candidat, triés par date de début décroissante
+    @Query("SELECT p FROM PlaningEntretien p WHERE p.candidat.id = :candidatId ORDER BY p.dateDebut DESC")
+    List<PlaningEntretien> findByCandidatIdOrderByDateDebutDesc(@Param("candidatId") Integer candidatId);
 }

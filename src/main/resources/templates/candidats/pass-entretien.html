@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Passage d'entretien</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        :root {
+            --bg: #f5f7fa;
+            --text: #2c3e50;
+            --primary: #3498db;
+            --accent: #2ecc71;
+            --card: #ffffff;
+            --line: #e6ecf2;
+            --danger: #e74c3c;
+            --muted: #8aa0b2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .interview-card {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--line);
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .candidate-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            padding: 10px;
+        }
+
+        .info-item strong {
+            color: var(--primary);
+            display: block;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .interview-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .interview-section h2 {
+            color: var(--primary);
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .grading-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 1px solid var(--line);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+        }
+
+        .note-input {
+            width: 80px !important;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52,152,219,0.3);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="interview-card">
+            <div class="header">
+                <h1>Entretien en cours</h1>
+                <p>Session d'entretien avec évaluation</p>
+            </div>
+
+            <div class="candidate-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Candidat</strong>
+                        <span th:text="${candidat.nom + ' ' + candidat.prenom}">Nom Prénom</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Poste</strong>
+                        <span th:text="${candidat.annonce.poste.profil}">Poste</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Date</strong>
+                        <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">Date</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interview-section">
+                <h2>Notes et observations</h2>
+                <textarea 
+                    class="form-control" 
+                    rows="5" 
+                    placeholder="Prenez des notes pendant l'entretien..."></textarea>
+            </div>
+
+            <div class="grading-form">
+                <h2>Notation de l'entretien</h2>
+                <form th:action="@{/candidats/noter_entretien}" method="post" class="form-group">
+                    <input type="hidden" name="candidatId" th:value="${candidat.id}" />
+                    <input type="hidden" name="annonceId" th:value="${candidat.annonce.id}" />
+                    
+                    <div class="form-group">
+                        <label for="niveau">Note globale (sur 10)</label>
+                        <input 
+                            type="number" 
+                            id="niveau" 
+                            name="niveau" 
+                            class="form-control note-input"
+                            min="0" 
+                            max="10" 
+                            step="1" 
+                            required />
+                    </div>
+
+                    <div class="actions">
+                        <a href="/candidats" class="btn">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Valider la note</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="timer" id="timer">Durée: 00:00</div>
+
+    <script>
+        // Timer croissant pour la durée de l'entretien
+        let seconds = 0;
+        const timerElement = document.getElementById('timer');
+        
+        setInterval(() => {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            timerElement.textContent = `Durée: ${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -27,6 +27,9 @@ public class PlaningEntretien {
     @Column(name = "date_fin", columnDefinition = "TIMESTAMP")
     private LocalDateTime dateFin;
 
+    @Column(name = "etat")
+    private Integer etat = 0; // 0=proposé, 1=fait, 2=annulé
+
     // Getters et setters
     public Long getId() {
         return id;
@@ -58,6 +61,14 @@ public class PlaningEntretien {
 
     public void setDateFin(LocalDateTime dateFin) {
         this.dateFin = dateFin;
+    }
+
+    public Integer getEtat() {
+        return etat;
+    }
+
+    public void setEtat(Integer etat) {
+        this.etat = etat;
     }
 
     

@@ -139,8 +139,20 @@ create table planing_entretien (
     id INT primary key auto_increment,
     id_candidat INT,
     date_debut DATETIME,
-    date_fin DATETIME
+    date_fin DATETIME,
+    etat SMALLINT DEFAULT 0 CHECK (etat IN (0, 1, 2)) /* 0=proposé, 1=fait, 2=annulé */
 );
+CREATE TABLE etat_entretien (
+    id SERIAL PRIMARY KEY,
+    id_planing INT,
+    etat SMALLINT DEFAULT 0 CHECK (etat IN (0, 1, 2)),
+    date_modification TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    commentaire VARCHAR(255),
+    FOREIGN KEY (id_planing) REFERENCES planing_entretien(id)
+);
+
+-- Ajouter un commentaire pour expliquer les états
+-- COMMENT ON TABLE etat_entretien IS 'État des entretiens: 0=pas encore passé, 1=fait, 2=annulé';
 create table contrat_essai (
     id INT primary key auto_increment,
     id_candidat INT,

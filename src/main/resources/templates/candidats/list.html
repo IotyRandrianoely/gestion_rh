@@ -113,6 +113,30 @@
     .footer-links{ margin-top:14px; }
     .link{ color:var(--primary); text-decoration:none; }
     .link:hover{ color:var(--primary-d); }
+
+    /* Messages d'erreur et alertes */
+    .error-message {
+        color: var(--danger);
+        font-size: 13px;
+        padding: 8px 12px;
+        background: #fff5f5;
+        border-radius: 6px;
+        border: 1px solid #ffd5d5;
+        margin: 4px 0;
+    }
+    
+    .error-message-icon {
+        display: inline-block;
+        margin-right: 8px;
+        font-size: 16px;
+    }
+    
+    .score-warning {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -203,7 +227,7 @@
                      data-diplome=${c.diplome != null ? c.diplome.nomDiplome : ''}">
           <td th:text="${c.nom}" th:attr="data-label='Nom'">Nom</td>
           <td th:text="${c.prenom}" th:attr="data-label='Prénom'">Prénom</td>
-          <td th:text="${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id]/10 : '—'}" th:attr="data-label='Note'">—</td>
+          <td th:text="${scoresMap != null and scoresMap[c.id] != null ? scoresMap[c.id] : '—'}" th:attr="data-label='Note'">—</td>
           <td th:attr="data-label='Noter entretien'">
             <div th:if="${niveauxMap == null or niveauxMap[c.id] == null}">
               <form th:action="@{/candidats/noter_entretien}" method="post" style="display:flex;gap:8px;align-items:center;">
@@ -220,14 +244,19 @@
          </td>
           <td th:text="${c.annonce != null ? c.annonce.profil : '—'}" th:attr="data-label='Annonce'">Profil annonce</td>
           <td th:attr="data-label='Passer entretien'">
-            <div th:if="${not c.estPropose}">
-              <a th:href="@{'/qcm/start-interview/' + ${c.id}}" 
-                 class="btn btn--info">
-                 📝 Passer l'entretien
-              </a>
+            <!-- Vérifier si l'entretien n'a pas été passé (niveau non existant) -->
+            <div th:if="${niveauxMap == null or niveauxMap[c.id] == null}">
+                <div th:if="${not c.estPropose}">
+                  <a th:href="@{'/candidats/start-interview/' + ${c.id}}" 
+                     class="btn btn--info">
+                     📝 Passer l'entretien
+                  </a>
+                </div>
             </div>
-            <div th:if="${c.estPropose}" class="small">
-              Entretien effectué
+            <!-- Si l'entretien a déjà été passé -->
+            <div th:if="${niveauxMap != null and niveauxMap[c.id] != null}" class="small">
+                Entretien effectué 
+                <span th:text="'(Note: ' + ${niveauxMap[c.id]} + '/10)'"></span>
             </div>
           </td>
           <td class="col-actions" th:attr="data-label='Actions'">
@@ -235,14 +264,40 @@
             <a th:href="@{/candidats/{id}(id=${c.id})}" class="btn btn--ghost">Voir</a>
           </td>
           <td th:attr="data-label='Entretien / Statut'">
-            <div th:if="${c.estPropose == null or !c.estPropose}" style="display:inline-flex; gap:8px; flex-wrap:wrap;">
-              <a th:href="@{'/candidats/planifier_entretien/' + ${c.id}}" class="btn btn--success">Planifier entretien</a>
-              <a th:href="@{'/candidats/planifier_entretien_manual/' + ${c.id}}" class="btn btn--info">Planifier manuel</a>
+            <!-- Vérifier le score avant d'afficher les boutons de planification -->
+            <div th:if="${c.estPropose == null or !c.estPropose}">
+                <!-- Cas où le score est suffisant -->
+                <div th:if="${scoresMap != null and scoresMap[c.id] != null and scoresMap[c.id] >= 100}" 
+                     style="display:inline-flex; gap:8px; flex-wrap:wrap;">
+                    <a th:href="@{'/candidats/planifier_entretien/' + ${c.id}}" 
+                       class="btn btn--success">Planifier entretien</a>
+                    <a th:href="@{'/candidats/planifier_entretien_manual/' + ${c.id}}" 
+                       class="btn btn--info">Planifier manuel</a>
+                </div>
+                
+                <!-- Message d'erreur si score insuffisant ou absent -->
+                <div th:if="${scoresMap == null or scoresMap[c.id] == null or scoresMap[c.id] < 100}" 
+                     class="error-message">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="error-message-icon">⚠️</span>
+                        <span th:if="${scoresMap == null or scoresMap[c.id] == null}">
+                            Le candidat doit d'abord passer l'entretien QCM
+                        </span>
+                        <span th:if="${scoresMap != null and scoresMap[c.id] != null and scoresMap[c.id] < 100}">
+                            Score QCM insuffisant (<span th:text="${scoresMap[c.id]/10}">0</span>/10)
+                        </span>
+                    </div>
+                </div>
             </div>
+
+            <!-- Affichage de la date si déjà planifié -->
             <div th:if="${c.estPropose != null and c.estPropose}">
-              <span th:if="${contratsMap != null and contratsMap[c.id] != null and contratsMap[c.id].dateDebut != null}"
-                    th:text="${#temporals.format(contratsMap[c.id].dateDebut,'dd/MM/yyyy HH:mm')}">01/01/2025 09:00</span>
-              <span th:if="${contratsMap == null or contratsMap[c.id] == null}" class="status-badge">Proposé</span>
+                <span th:if="${contratsMap != null and contratsMap[c.id] != null and contratsMap[c.id].dateDebut != null}"
+                      th:text="${#temporals.format(contratsMap[c.id].dateDebut,'dd/MM/yyyy HH:mm')}">
+                    01/01/2025 09:00
+                </span>
+                <span th:if="${contratsMap == null or contratsMap[c.id] == null}" 
+                      class="status-badge">Proposé</span>
             </div>
           </td>
         </tr>

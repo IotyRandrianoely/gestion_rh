@@ -6,209 +6,247 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
-      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
-      --card:#ffffff; --line:#e6ecf2;
-      --primary:#28a745; --primary-d:#20c997;
-      --accent:#2ecc71; --accent-d:#27ae60;
-      --info:#17a2b8; --warning:#ffc107; --danger:#e74c3c;
-      --muted:#8aa0b2; --header:#1f2b38;
+      --bg:#f5f7fa;
+      --text:#2c3e50;
+      --sub:#4b5a6a;
+      --card:#ffffff;
+      --line:#e6ecf2;
+      --primary:#3498db;
+      --primary-d:#2980b9;
+      --header:#1f2b38;
+      --muted:#6c7a89;
+      --ok:#2ecc71;
+      --ok-d:#27ae60;
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
+    
     body{
-      font-family:'Segoe UI', Arial, sans-serif; color:var(--text);
-      background:var(--bg); line-height:1.6;
+      font-family:'Segoe UI',Arial,sans-serif;
+      line-height:1.6;
+      background:var(--bg);
+      color:var(--text);
     }
 
-    .hero {
-      width:100%; height:160px;
-      background:
-        linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.25)),
-        url('/images/banner1.jpg') center/cover no-repeat;
-      display:flex; align-items:center; justify-content:center; text-align:center; color:#fff;
-      text-shadow:0 3px 10px rgba(0,0,0,.35);
-      margin-bottom:0; /* keep hero flush so userbar visually separates */
-      position:relative;
-      z-index:1;
+    .hero{
+      background:linear-gradient(to bottom, rgba(0,0,0,.4), rgba(0,0,0,.4)), 
+               url('/images/banner.jpg') center/cover;
+      height:240px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      padding:0 20px;
+      text-shadow:0 2px 4px rgba(0,0,0,.1);
     }
     .hero h1{ font-size:30px; font-weight:700 }
     .hero p{ margin-top:8px; opacity:.95 }
 
-    nav{ background:var(--header); display:flex; justify-content:center; gap:28px; padding:12px 10px; }
-    nav a{ color:#ecf0f1; text-decoration:none; font-weight:600; padding:8px 10px; border-radius:8px; }
-    nav a:hover{ background:#2b3b4f; color:var(--primary); }
+    nav{
+      background:var(--header);
+      display:flex;
+      justify-content:center;
+      gap:28px;
+      padding:12px 10px;
+    }
+    nav a{
+      color:#ecf0f1;
+      text-decoration:none;
+      font-weight:600;
+      padding:8px 10px;
+      border-radius:8px;
+    }
+    nav a:hover{
+      background:#2b3b4f;
+      color:var(--primary);
+    }
 
-    .container{ max-width:1200px; margin:0 auto; padding:20px; }
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      padding:20px;
+    }
 
-  .userbar{ max-width:1200px; margin:18px auto 12px; padding:0 20px; position:relative; z-index:2; }
-  .user-info{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; color:#243447; font-size:14px; box-shadow:0 8px 20px rgba(0,0,0,.08); display:flex; gap:12px; align-items:center; justify-content:space-between; }
-    .user-info .meta{ color:var(--sub) }
-    .user-info a{ color:var(--primary); text-decoration:none; font-weight:700 }
-    .user-info a:hover{ color:var(--primary-d) }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:12px;
+    }
+    @media(max-width:900px){
+      .stats{ grid-template-columns:1fr }
+    }
 
-    .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:12px }
-    @media(max-width:900px){ .stats{ grid-template-columns:1fr } }
-    .stat{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; display:flex; align-items:center; gap:12px; box-shadow:0 6px 16px rgba(0,0,0,.06); }
-    .stat .icon{ width:48px; height:48px; border-radius:12px; display:grid; place-items:center; background:#eef6ff; color:#1d6fdc; font-weight:800 }
-    .stat .value{ font-size:18px; font-weight:800; color:#243447 }
-    .stat .meta{ font-size:13px; color:var(--sub) }
+    .stat{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:14px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .stat .icon{
+      width:48px;
+      height:48px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      background:#eef6ff;
+      color:#1d6fdc;
+      font-weight:800;
+    }
+    .stat .value{
+      font-size:18px;
+      font-weight:800;
+      color:#243447;
+    }
+    .stat .meta{
+      font-size:13px;
+      color:var(--sub);
+    }
 
-    .quick-actions{ background:var(--card); border:1px solid var(--line); padding:16px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.06); display:flex; gap:12px; align-items:center; flex-wrap:wrap }
-    .pill{ background:#eef6ff; color:#1d6fdc; padding:6px 12px; border-radius:999px; font-weight:800; }
+    .panel-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(300px,1fr));
+      gap:20px;
+      margin-top:20px;
+    }
 
-    .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:18px }
-    @media(max-width:1100px){ .grid{ grid-template-columns:repeat(2,1fr) } }
-    @media(max-width:720px){ .grid{ grid-template-columns:1fr } }
-
-    .card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; box-shadow:0 6px 16px rgba(0,0,0,.06); transition:transform .2s, box-shadow .2s }
-    .card:hover{ transform:translateY(-3px); box-shadow:0 10px 22px rgba(0,0,0,.10) }
-    .card h3{ font-size:18px; margin-bottom:8px }
-    .card p{ color:var(--sub); margin-bottom:12px }
-
-    .btn{ display:inline-block; padding:10px 14px; border-radius:10px; font-weight:800; font-size:14px; text-decoration:none; border:1px solid transparent; transition:transform .2s, box-shadow .2s }
-    .btn:hover{ transform:translateY(-1px) }
-    .btn--primary{ background:var(--primary); color:#fff }
-    .btn--success{ background:var(--accent); color:#fff }
-    .btn--info{ background:var(--info); color:#fff }
-    .btn--warning{ background:#fff; color:#c27c0e; border-color:#ffe08a }
-
-    footer{ text-align:center; padding:18px; color:#7f8c8d; background:#f0f3f6; margin-top:28px }
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:20px;
+    }
+    .panel h2{
+      font-size:18px;
+      margin-bottom:16px;
+      color:#243447;
+    }
+    .links{
+      display:grid;
+      gap:10px;
+    }
+    .link{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      text-decoration:none;
+      color:inherit;
+      padding:10px;
+      border-radius:8px;
+      transition:background .2s;
+    }
+    .link:hover{
+      background:#f0f7ff;
+    }
+    .link .icon{
+      width:32px;
+      height:32px;
+      border-radius:8px;
+      display:grid;
+      place-items:center;
+      font-size:15px;
+      background:#eef6ff;
+      color:#1d6fdc;
+    }
+    .link strong{
+      font-size:14px;
+      color:#243447;
+    }
+    .link span{
+      font-size:13px;
+      color:var(--sub);
+    }
   </style>
 </head>
 <body>
-  <section class="hero">
-    <div class="container">
-      <h1>Tableau de bord Administrateur</h1>
-      <p>Gérer les annonces, candidats, fichiers et paramètres du système</p>
-    </div>
-  </section>
-
-  <nav>
-    <a th:href="@{/admin/dashboard}">Dashboard</a>
-    <a th:href="@{/admin/candidats}">Candidats</a>
-    <a th:href="@{/admin/annonces}">Annonces</a>
-    
-    <a th:href="@{/logout}">Déconnexion</a>
-  </nav>
-
-  <div class="userbar">
-    <div class="user-info">
-      <div>
-        <b th:text="${user.username}">Utilisateur</b>
-        <div class="meta">Rôle : <b th:text="${user.role}">Rôle</b></div>
-      </div>
-      <div class="meta">
-        Créé le <span th:text="${#temporals.format(user.dateCreation, 'dd/MM/yyyy HH:mm')}">--/--/----</span>
-      </div>
+  <div class="hero">
+    <div>
+      <h1>Dashboard Administration</h1>
+      <p>Gérez vos annonces, candidats et ressources</p>
     </div>
   </div>
+
+  <nav>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/annonces">Annonces</a>
+    <a href="/candidats">Candidats</a>
+    <a href="/qcm/list-questions">QCM</a>
+    <a href="/evaluation">Évaluation</a>
+  </nav>
 
   <main class="container">
     <div class="stats">
       <div class="stat">
-        <div class="icon">📥</div>
-        <div>
-          <div class="value">24</div>
-          <div class="meta">Nouvelles candidatures</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="icon">📅</div>
-        <div>
-          <div class="value">8</div>
-          <div class="meta">Entretiens cette semaine</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="icon">📢</div>
+        <div class="icon">📋</div>
         <div>
           <div class="value">12</div>
           <div class="meta">Annonces actives</div>
         </div>
       </div>
+
+      <div class="stat">
+        <div class="icon">👥</div>
+        <div>
+          <div class="value">48</div>
+          <div class="meta">Candidats</div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="icon">✅</div>
+        <div>
+          <div class="value">8</div>
+          <div class="meta">Entretiens planifiés</div>
+        </div>
+      </div>
     </div>
 
-    <div class="quick-actions" style="margin-top:16px;">
-      <h3 style="margin-right:auto;">Actions rapides</h3>
-      <a th:href="@{/admin/annonces/new}" class="btn btn--success">📝 Nouvelle annonce</a>
-      <a th:href="@{/admin/candidats/new}" class="btn btn--info">👤 Nouveau candidat</a>
-
-    </div>
-
-    <section class="grid">
-      <div class="card">
-        <h3>Suivi des candidatures</h3>
-        <p>Consulter et analyser toutes les candidatures reçues.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a th:href="@{/admin/candidats}" class="btn btn--primary">Liste des candidats</a>
-          <a th:href="@{/candidats}" class="btn btn--info">Vue publique</a>
-
+    <div class="panel-grid">
+      <div class="panel">
+        <h2>Gestion des annonces</h2>
+        <div class="links">
+          <a href="/annonces/new" class="link">
+            <div class="icon">+</div>
+            <div>
+              <strong>Nouvelle annonce</strong>
+              <span>Créer une offre d'emploi</span>
+            </div>
+          </a>
+          <a href="/annonces" class="link">
+            <div class="icon">📋</div>
+            <div>
+              <strong>Liste des annonces</strong>
+              <span>Voir et gérer les annonces</span>
+            </div>
+          </a>
         </div>
       </div>
 
-      <div class="card">
-        <h3>Gestion des annonces</h3>
-        <p>Créer, modifier et publier des offres d'emploi.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a th:href="@{/admin/annonces}" class="btn btn--primary">Annonces admin</a>
-          <a th:href="@{/annonces}" class="btn btn--info">Vue publique</a>
-          <a th:href="@{/admin/annonces/new}" class="btn btn--success">Nouvelle annonce</a>
+      <div class="panel">
+        <h2>QCM et évaluation</h2>
+        <div class="links">
+          <a href="/qcm/list-questions" class="link">
+            <div class="icon">❓</div>
+            <div>
+              <strong>Questions QCM</strong>
+              <span>Gérer les questions</span>
+            </div>
+          </a>
+          <a href="/evaluation" class="link">
+            <div class="icon">📊</div>
+            <div>
+              <strong>Résultats</strong>
+              <span>Voir les scores</span>
+            </div>
+          </a>
         </div>
       </div>
-
-      <div class="card">
-        <h3>QCM & Évaluations</h3>
-        <p>Gérer les questions et examiner les résultats.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a href="/qcm/admin" class="btn btn--primary">Questions</a>
-          <a href="/evaluation/admin" class="btn btn--info">Résultats</a>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Données de référence</h3>
-        <p>Diplômes, filières et paramètres système.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a href="#" class="btn btn--warning">Diplômes</a>
-          <a href="#" class="btn btn--warning">Filières</a>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Rapports</h3>
-        <p>Exporter et consulter rapports de recrutement.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a href="#" class="btn btn--info">Tableau de bord</a>
-          <a href="#" class="btn btn--primary">Exporter</a>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Utilisateurs & Sécurité</h3>
-        <p>Gestion des comptes et permissions.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a href="#" class="btn btn--primary">Utilisateurs</a>
-          <a href="#" class="btn btn--warning">Permissions</a>
-        </div>
-      </div>
-    </section>
-
-    <div style="margin-top:20px; background:var(--card); border:1px solid var(--line); padding:16px; border-radius:12px; text-align:center;">
-      <strong>Serveur :</strong> http://localhost:8070 &nbsp;|&nbsp; <strong>Version :</strong> 1.0.0 &nbsp;|&nbsp; <strong>Environnement :</strong> Développement
     </div>
   </main>
-
-  <footer>
-    © 2025 Gestion RH — Tous droits réservés.
-  </footer>
-
-  <script>
-    console.log('Dashboard Admin chargé');
-    // micro-interactions
-    document.querySelectorAll('.card').forEach(card=>{
-      card.addEventListener('mouseenter',()=>card.style.boxShadow='0 10px 22px rgba(40,167,69,.12)');
-      card.addEventListener('mouseleave',()=>card.style.boxShadow='0 6px 16px rgba(0,0,0,.06)');
-    });
-  </script>
 </body>
 </html>

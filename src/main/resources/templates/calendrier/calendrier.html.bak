@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Calendrier des entretiens – Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" th:href="@{/css/calendrier.css}" />
+  
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --text: #2c3e50;
+      --sub: #4b5a6a;
+      --card: #ffffff;
+      --line: #e6ecf2;
+      --primary: #667eea;
+      --primary-d: #5563d6;
+      --info: #1abc9c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    .hero {
+      height: 260px;
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+                  url('/images/banner.jpg') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 3px 12px rgba(0,0,0,.45);
+    }
+    .hero h1 { font-size: 32px; font-weight: 700; }
+    .hero p { margin-top: 8px; font-size: 14px; opacity: .95; }
+    nav {
+      background: #1f2b38;
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      padding: 12px 16px;
+    }
+    nav a {
+      color: #ecf0f1;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: background .25s, color .25s;
+      font-size: 14px;
+    }
+    nav a:hover { background: #2b3b4f; color: #1abc9c; }
+    nav a.active { background: #2b3b4f; color: #fff; }
+    .container { max-width: 1200px; margin: 26px auto; padding: 0 18px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed var(--line);
+      padding-bottom: 10px;
+    }
+    .card-header h2 { font-size: 18px; margin: 0; }
+    .hint { color: var(--sub); font-size: 13px; }
+    #calendar { min-height: 680px; }
+    
+    footer {
+      text-align: center;
+      padding: 18px;
+      color: #7f8c8d;
+      background: #f0f3f6;
+      margin-top: 32px;
+      border-top: 1px solid var(--line);
+    }
+
+    .fc-event {
+      border-radius: 4px !important;
+      padding: 4px 8px !important;
+      margin: 2px 0 !important;
+    }
+
+    .fc-list-event-title { font-weight: 600 !important; }
+    .fc-list-event-time { color: #666 !important; }
+
+    /* Modal d'annulation */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .modal-text {
+      margin-bottom: 24px;
+      color: var(--sub);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .btn-cancel:hover {
+      background: #dee2e6;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 24px;
+      background: #28a745;
+      color: white;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div>
+      <h1>Calendrier des entretiens</h1>
+      <p>Visualisez les entretiens planifiés par jour et leurs créneaux horaires.</p>
+    </div>
+  </section>
+
+  <nav>
+    <a th:href="@{/admin/dashboard}">Dashboard</a>
+    <a th:href="@{/admin/candidats}">Candidats</a>
+    <a th:href="@{/admin/annonces}">Annonces</a>
+    <a href="/qcm/admin">QCM</a>
+    <a class="active" th:href="@{/admin/entretiens/calendrier}">Calendrier</a>
+    <a th:href="@{/admin/files}">Fichiers</a>
+  </nav>
+
+  <main class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2>Planning des entretiens</h2>
+        <div class="hint">Consultez les entretiens planifiés</div>
+      </div>
+      <div id="calendar"></div>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Gestion RH — Calendrier des entretiens
+  </footer>
+
+  <!-- Modal d'annulation -->
+  <div id="cancelModal" class="modal">
+    <div class="modal-content">
+      <h3 class="modal-title">Confirmer l'annulation</h3>
+      <p class="modal-text">Êtes-vous sûr de vouloir annuler cet entretien ?</p>
+      <div class="modal-buttons">
+        <button class="btn btn-cancel" onclick="closeModal()">Non, garder</button>
+        <button class="btn btn-danger" onclick="confirmCancel()">Oui, annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast">
+    Entretien annulé avec succès
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    let selectedEvent = null;
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'listDay',
+        locale: 'fr',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'listDay,listWeek,dayGridMonth'
+        },
+        titleFormat: {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        },
+        displayEventTime: true,
+        displayEventEnd: true,
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
+        events: async (info, successCallback, failureCallback) => {
+          try {
+            const response = await fetch(
+              `/api/entretiens/${info.start.getFullYear()}/${info.start.getMonth() + 1}`
+            );
+            
+            if (!response.ok) throw new Error('Erreur lors du chargement des entretiens');
+            
+            const data = await response.json();
+            const entretiensData = data.entretiens || data;
+            const events = [];
+            
+            Object.entries(entretiensData).forEach(([dateStr, entretiensJour]) => {
+              if (!entretiensJour || !entretiensJour.length) return;
+              
+              entretiensJour.forEach(entretien => {
+                if (entretien.etat === 2) return; // Skip entretiens annulés
+                
+                const dateDebut = new Date(entretien.dateDebut);
+                const dateFin = entretien.dateFin ? 
+                  new Date(entretien.dateFin) : 
+                  new Date(dateDebut.getTime() + 3600000);
+                
+                let bgColor, etatStr;
+                
+                switch(entretien.etat) {
+                  case 0:
+                    bgColor = '#ffc107';
+                    etatStr = 'Proposé';
+                    break;
+                  case 1:
+                    bgColor = '#28a745';
+                    etatStr = 'Terminé';
+                    break;
+                  default:
+                    bgColor = '#6c757d';
+                    etatStr = 'État inconnu';
+                }
+                
+                events.push({
+                  title: `${entretien.nom} ${entretien.prenom} - ${entretien.poste}`,
+                  start: dateDebut,
+                  end: dateFin,
+                  backgroundColor: bgColor,
+                  borderColor: bgColor,
+                  textColor: '#fff',
+                  extendedProps: {
+                    etat: etatStr,
+                    candidat: `${entretien.nom} ${entretien.prenom}`,
+                    poste: entretien.poste,
+                    id: entretien.id
+                  }
+                });
+              });
+            });
+            
+            successCallback(events);
+          } catch (error) {
+            console.error('Erreur:', error);
+            failureCallback(error);
+          }
+        },
+        eventDidMount: (info) => {
+          info.el.style.cursor = 'pointer';
+          const props = info.event.extendedProps;
+          info.el.title = `
+            Candidat: ${props.candidat}
+            Poste: ${props.poste}
+            État: ${props.etat}
+          `.trim();
+        },
+        eventClick: (info) => {
+          selectedEvent = info.event;
+          if (selectedEvent.extendedProps.etat !== 'Terminé') {
+            document.getElementById('cancelModal').classList.add('show');
+          }
+        }
+      }).render();
+    });
+
+    // Fonctions de gestion du modal
+    function closeModal() {
+      document.getElementById('cancelModal').classList.remove('show');
+      selectedEvent = null;
+    }
+
+    async function confirmCancel() {
+      if (!selectedEvent) return;
+      
+      const entretienId = selectedEvent.extendedProps.id;
+      try {
+        const response = await fetch(`/api/entretiens/${entretienId}/cancel`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Erreur lors de l\'annulation');
+        }
+
+        // Supprimer l'événement du calendrier
+        selectedEvent.remove();
+        
+        // Fermer le modal
+        closeModal();
+        
+        // Afficher la notification
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de l\'annulation de l\'entretien');
+      }
+    }
+  </script>
+</body>
+</html>
+
+  <style>
+    :root{
+      --bg:#f5f7fa; --text:#2c3e50; --sub:#4b5a6a;
+      --card:#ffffff; --line:#e6ecf2;
+      --primary:#667eea; --primary-d:#5563d6;
+      --info:#1abc9c;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Segoe UI', Arial, sans-serif; color:var(--text);
+      background:var(--bg); line-height:1.6;
+    }
+
+    /* ===== HERO (avec banner.jpg) ===== */
+    .hero{
+      height: 260px;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+        url('/images/banner.jpg') center/cover no-repeat;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; color:#fff;
+      text-shadow: 0 3px 12px rgba(0,0,0,.45);
+    }
+    .hero h1{ font-size: 32px; font-weight: 700; }
+    .hero p{ margin-top: 8px; font-size: 14px; opacity: .95; }
+
+    /* ===== NAV ===== */
+    nav{
+      background:#1f2b38;
+      display:flex; justify-content:center; gap:28px;
+      padding: 12px 16px;
+    }
+    nav a{
+      color:#ecf0f1; text-decoration:none; font-weight:600;
+      padding:6px 10px; border-radius:8px; transition:background .25s, color .25s;
+      font-size: 14px;
+    }
+    nav a:hover{ background:#2b3b4f; color:#1abc9c; }
+    nav a.active{ background:#2b3b4f; color:#fff; }
+
+    /* ===== CONTAINER & CARD ===== */
+    .container{ max-width:1200px; margin: 26px auto; padding: 0 18px; }
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .card-header{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;
+      border-bottom:1px dashed var(--line); padding-bottom:10px;
+    }
+    .card-header h2{ font-size: 18px; margin:0; }
+    .hint{ color:var(--sub); font-size: 13px; }
+
+    /* ===== FULLCALENDAR HEIGHT ===== */
+    #calendar{ min-height: 680px; }
+
+    /* ===== TOOLTIP ===== */
+    .custom-tooltip{
+      position: fixed; z-index: 1000;
+      background: rgba(10,10,10,0.92); color: #fff;
+      padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      pointer-events: none; white-space: nowrap;
+    }
+
+    /* ===== FOOTER ===== */
+    footer{
+      text-align:center; padding: 18px; color:#7f8c8d; background:#f0f3f6; margin-top: 32px;
+      border-top:1px solid var(--line);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1>Calendrier des entretiens</h1>
+      <p>Visualisez les entretiens planifiés par jour et leurs créneaux horaires.</p>
+    </div>
+  </section>
+
+  <!-- NAVIGATION ADMIN -->
+  <nav>
+    <a th:href="@{/admin/dashboard}">Dashboard</a>
+    <a th:href="@{/admin/candidats}">Candidats</a>
+    <a th:href="@{/admin/annonces}">Annonces</a>
+    <a href="/qcm/admin">QCM</a>
+    <a class="active" th:href="@{/admin/entretiens/calendrier}">Calendrier</a>
+    <a th:href="@{/admin/files}">Fichiers</a>
+  </nav>
+
+  <!-- CONTENU -->
+  <main class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2>Vue mensuelle</h2>
+        <div class="hint">Survolez un jour pour voir le détail des créneaux.</div>
+      </div>
+      <div id="calendar"></div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 Gestion RH — Calendrier des entretiens
+  </footer>
+
+  <!-- LIB FULLCALENDAR -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const calendarEl = document.getElementById('calendar');
+      
+      // Création du calendrier
+      let calendar = new FullCalendar.Calendar(calendarEl, {
+        // Configuration de base
+        initialView: 'listDay',
+        locale: 'fr',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'listDay,listWeek,dayGridMonth'
+        },
+
+        // Configuration des vues et formats
+        views: {
+          listDay: {
+            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+          },
+          listWeek: {
+            titleFormat: { year: 'numeric', month: 'long' }
+          },
+          dayGridMonth: {
+            titleFormat: { year: 'numeric', month: 'long' }
+          }
+        },
+
+        // Configuration des horaires
+        slotMinTime: '08:00:00',
+        slotMaxTime: '20:00:00',
+        slotDuration: '00:30:00',
+        displayEventTime: true,
+        displayEventEnd: true,
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
+
+        // Chargement des événements
+        events: async function(fetchInfo, successCallback, failureCallback) {
+          try {
+            const year = fetchInfo.start.getFullYear();
+            const month = fetchInfo.start.getMonth() + 1;
+            
+            const response = await fetch(`/api/entretiens/${year}/${month}`);
+            if (!response.ok) {
+              throw new Error('Erreur lors du chargement des entretiens');
+            }
+            
+            const data = await response.json();
+            const entretiensData = data.entretiens || data;
+            const events = [];
+            
+            for (const [dateStr, entretiensJour] of Object.entries(entretiensData)) {
+              if (!entretiensJour || entretiensJour.length === 0) continue;
+              
+              for (const entretien of entretiensJour) {
+                if (entretien.etat === 2) continue; // Skip les entretiens annulés
+                
+                const dateDebut = new Date(entretien.dateDebut);
+                const dateFin = entretien.dateFin ? 
+                  new Date(entretien.dateFin) : 
+                  new Date(dateDebut.getTime() + 60 * 60 * 1000);
+                
+                let bgColor;
+                let etatStr;
+                
+                switch(entretien.etat) {
+                  case 0:
+                    bgColor = '#ffc107';
+                    etatStr = 'Proposé';
+                    break;
+                  case 1:
+                    bgColor = '#28a745';
+                    etatStr = 'Terminé';
+                    break;
+                  default:
+                    bgColor = '#6c757d';
+                    etatStr = 'État inconnu';
+                }
+                
+                events.push({
+                  title: `${entretien.nom} ${entretien.prenom} - ${entretien.poste}`,
+                  start: entretien.dateDebut,
+                  end: entretien.dateFin || dateFin,
+                  backgroundColor: bgColor,
+                  borderColor: bgColor,
+                  textColor: '#fff',
+                  extendedProps: {
+                    etat: etatStr,
+                    candidat: `${entretien.nom} ${entretien.prenom}`,
+                    poste: entretien.poste,
+                    id: entretien.id
+                  }
+                });
+              }
+            }
+            
+            successCallback(events);
+          } catch (error) {
+            console.error('Erreur:', error);
+            failureCallback(error);
+          }
+        },
+
+        // Personnalisation de l'affichage
+        eventDidMount: function(info) {
+          info.el.style.cursor = 'pointer';
+          const props = info.event.extendedProps;
+          info.el.title = `
+            Candidat: ${props.candidat}
+            Poste: ${props.poste}
+            État: ${props.etat}
+          `.trim();
+        },
+
+        // Gestion des clics
+        eventClick: function(info) {
+          const props = info.event.extendedProps;
+          if (props.id) {
+            window.location.href = `/admin/candidats/${props.id}`;
+          }
+        }
+      });
+
+      // Rendu du calendrier
+      calendar.render();
+        
+        // Configuration des vues
+        views: {
+          dayGridDay: {
+            titleFormat: { year: 'numeric', month: 'long', day: 'numeric' }
+          },
+          listWeek: {
+            titleFormat: { year: 'numeric', month: 'long' }
+          }
+        },
+        displayEventTime: true,
+        displayEventEnd: true,
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        },
+        events: async function(fetchInfo, successCallback, failureCallback) {
+          try {
+            const year = fetchInfo.start.getFullYear();
+            const month = fetchInfo.start.getMonth() + 1;
+
+            const response = await fetch(`/api/entretiens/${year}/${month}`);
+            if (!response.ok) throw new Error('Erreur lors du chargement des entretiens');
+
+            const data = await response.json();
+            const entretiensData = data.entretiens || data;
+
+            const events = [];
+            
+            // Traiter chaque entretien individuellement
+            for (const [dateStr, entretiensJour] of Object.entries(entretiensData)) {
+              if (!entretiensJour || entretiensJour.length === 0) continue;
+
+              // Trier les entretiens par heure de début
+              entretiensJour.sort((a, b) => new Date(a.dateDebut) - new Date(b.dateDebut));
+
+              // Pour chaque entretien du jour
+              entretiensJour.forEach(entretien => {
+                const dateDebut = new Date(entretien.dateDebut);
+                const dateFin = entretien.dateFin ? new Date(entretien.dateFin) : new Date(dateDebut.getTime() + 60 * 60 * 1000);
+                
+                const heureDebut = dateDebut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                const heureFin = dateFin.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                
+                let etatStr = '';
+                let className = '';
+                
+                switch(entretien.etat) {
+                  case 0:
+                    etatStr = 'Proposé';
+                    className = 'bg-warning';
+                    break;
+                  case 1:
+                    etatStr = 'Terminé';
+                    className = 'bg-success';
+                    break;
+                  case 2:
+                    etatStr = 'Annulé';
+                    className = 'bg-danger';
+                    break;
+                  default:
+                    etatStr = 'État inconnu';
+                    className = 'bg-secondary';
+                }
+
+              const premier = new Date(entretiensJour[0].dateDebut);
+              const dernier = new Date(entretiensJour[entretiensJour.length - 1].dateDebut);
+
+              const heureDebut = premier.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+              const heureFin   = dernier.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+
+              events.push({
+                title: `Entretiens de ${heureDebut} à ${heureFin}`,
+                start: dateStr,
+                allDay: true,
+                backgroundColor: '#667eea',
+                borderColor: '#667eea',
+                textColor: '#fff',
+                extendedProps: {
+                  entretiens: entretiensJour,
+                  tooltipContent: entretiensJour.map(e => {
+                    const d1 = new Date(e.dateDebut);
+                    const d2 = e.dateFin ? new Date(e.dateFin) : null;
+                    const t1 = d1.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+                    const t2 = d2 ? d2.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) : '';
+                    const slot = t2 ? `${t1} à ${t2}` : t1;
+                    return `${slot} — ${e.nom} ${e.prenom} — ${e.poste}`;
+                  }).join('\n')
+                }
+              });
+            }
+
+            successCallback(events);
+          } catch (error) {
+            console.error('Erreur:', error);
+            failureCallback(error);
+          }
+        },
+        eventDidMount: function(info) {
+          const tooltipContent = info.event.extendedProps.tooltipContent || '';
+          info.el.setAttribute('title', tooltipContent);
+          info.el.style.cursor = 'pointer';
+
+          info.el.addEventListener('mouseenter', (e) => showTooltip(e, tooltipContent));
+          info.el.addEventListener('mousemove', (e) => moveTooltip(e));
+          info.el.addEventListener('mouseleave', hideTooltip);
+        }
+      });
+
+      calendar.render();
+
+      // ===== Tooltip personnalisé =====
+      let tooltipEl = null;
+
+      function showTooltip(event, content) {
+        hideTooltip();
+        tooltipEl = document.createElement('div');
+        tooltipEl.className = 'custom-tooltip';
+        tooltipEl.innerHTML = (content || '').replace(/\n/g, '<br>');
+        document.body.appendChild(tooltipEl);
+        moveTooltip(event);
+      }
+
+      function moveTooltip(event) {
+        if (!tooltipEl) return;
+        const rect = tooltipEl.getBoundingClientRect();
+        let left = event.clientX - rect.width / 2;
+        let top  = event.clientY - rect.height - 12;
+
+        // garder dans l'écran
+        left = Math.max(8, Math.min(left, window.innerWidth - rect.width - 8));
+        top  = Math.max(8, top);
+
+        tooltipEl.style.left = left + 'px';
+        tooltipEl.style.top  = top + 'px';
+      }
+
+      function hideTooltip() {
+        if (tooltipEl) {
+          tooltipEl.remove();
+          tooltipEl = null;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -151,16 +151,10 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
 
   <script th:inline="javascript">
-    let calendar = null;
-
-    function initializeCalendar() {
+    document.addEventListener('DOMContentLoaded', function() {
       const calendarEl = document.getElementById('calendar');
-      if (!calendarEl) {
-        console.error('Element calendar not found');
-        return;
-      }
       
-      calendar = new FullCalendar.Calendar(calendarEl, {
+      const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'listDay',
         locale: 'fr',
         headerToolbar: {
@@ -282,21 +276,8 @@
         }
       });
 
-      });
-      
       // Rendu du calendrier
       calendar.render();
-    }
-
-    // Initialiser le calendrier quand le DOM est chargé
-    document.addEventListener('DOMContentLoaded', initializeCalendar);
-
-    // Nettoyage lors de la destruction de la page
-    window.addEventListener('unload', () => {
-      if (calendar) {
-        calendar.destroy();
-        calendar = null;
-      }
     });
   </script>
 </body>
