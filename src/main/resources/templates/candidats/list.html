@@ -263,7 +263,7 @@
                                 Le candidat doit d'abord passer le QCM
                             </span>
                             <span th:if="${scoresMap != null and scoresMap[c.id] != null and scoresMap[c.id] < 500}">
-                                Score QCM insuffisant (<span th:text="${scoresMap[c.id]/100}">0</span>/10)
+                                Score QCM insuffisant (<span th:text="${scoresMap[c.id]}">0</span>/10)
                             </span>
                         </div>
                     </div>
