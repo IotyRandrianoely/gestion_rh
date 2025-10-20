@@ -138,7 +138,6 @@
         <!-- Tabs de choix de rôle -->
         <div class="role-tabs" role="tablist" aria-label="Choix du rôle">
           <button type="button" class="role-tab active" data-role="client"  onclick="switchRole('client', this)">👤 Client</button>
-          <button type="button" class="role-tab"        data-role="rh"      onclick="switchRole('rh', this)">👥 RH</button>
           <button type="button" class="role-tab"        data-role="admin"   onclick="switchRole('admin', this)">👑 Admin</button>
         </div>
         <div class="role-hint" id="roleHint">Espace candidat pour consulter les offres et suivre vos candidatures.</div>
@@ -166,14 +165,11 @@
       <div class="demo">
         <h4>📋 Comptes de test</h4>
         <div class="demo-grid">
-          <div class="demo-item" onclick="quickFill('client','client1','client123')">
-            <div><strong>👤 Client</strong> — client1 / client123</div><div>Remplir</div>
+          <div class="demo-item" onclick="quickFill('client','client1','    ')">
+            <div><strong>👤 Client</strong> — client1 / espace*4</div><div>Remplir</div>
           </div>
-          <div class="demo-item" onclick="quickFill('rh','rh1','rh123')">
-            <div><strong>👥 RH</strong> — rh1 / rh123</div><div>Remplir</div>
-          </div>
-          <div class="demo-item" onclick="quickFill('admin','admin1','admin123')">
-            <div><strong>👑 Admin</strong> — admin1 / admin123</div><div>Remplir</div>
+          <div class="demo-item" onclick="quickFill('admin','admin1','hash_mdp_admin')">
+            <div><strong>👑 Admin</strong> — admin1 / hash_mdp_admin</div><div>Remplir</div>
           </div>
         </div>
       </div>

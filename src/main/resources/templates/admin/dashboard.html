@@ -8,7 +8,7 @@
     :root{
       --bg:#f5f7fa;
       --text:#2c3e50;
-      --sub:#4b5a6a;
+      --sub:#4b5a6a; 
       --card:#ffffff;
       --line:#e6ecf2;
       --primary:#3498db;
@@ -173,14 +173,15 @@
 
   <nav>
     <a href="/admin/dashboard">Dashboard</a>
-    <a href="/annonces">Annonces</a>
-    <a href="/candidats">Candidats</a>
+    <a href="/admin/annonces">Annonces</a>
+    <a href="/admin/candidats">Candidats</a>
     <a href="/qcm/list-questions">QCM</a>
-    <a href="/evaluation">Évaluation</a>
+    <a href="/calendrier">Calendrier</a>
+    <!-- <a href="/evaluation">Évaluation</a> -->
   </nav>
 
   <main class="container">
-    <div class="stats">
+    <!-- <div class="stats">
       <div class="stat">
         <div class="icon">📋</div>
         <div>
@@ -204,20 +205,20 @@
           <div class="meta">Entretiens planifiés</div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="panel-grid">
       <div class="panel">
         <h2>Gestion des annonces</h2>
         <div class="links">
-          <a href="/annonces/new" class="link">
+          <a href="/admin/annonces/new" class="link">
             <div class="icon">+</div>
             <div>
               <strong>Nouvelle annonce</strong>
               <span>Créer une offre d'emploi</span>
             </div>
           </a>
-          <a href="/annonces" class="link">
+          <a href="/admin/annonces" class="link">
             <div class="icon">📋</div>
             <div>
               <strong>Liste des annonces</strong>
@@ -237,7 +238,7 @@
               <span>Gérer les questions</span>
             </div>
           </a>
-          <a href="/evaluation" class="link">
+          <a href="/candidats" class="link">
             <div class="icon">📊</div>
             <div>
               <strong>Résultats</strong>

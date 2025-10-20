@@ -192,9 +192,9 @@
         </div>
 
         <div class="cv-controls">
-          <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
+          <!-- <a th:href="@{/api/files/download/{fileName}(fileName=${candidat.cv})}" 
              class="btn btn-primary" target="_blank">📥 Télécharger</a>
-          <button onclick="toggleFullscreen()" class="btn btn-info">🔍 Plein écran</button>
+          <button onclick="toggleFullscreen()" class="btn btn-info">🔍 Plein écran</button> -->
 
           <!-- Proposer / Renouveler contrat (client) -->
           <a th:if="${canPropose}" 
@@ -262,9 +262,9 @@
   <!-- Actions globales -->
   <div class="actions">
     <a th:href="@{/candidats}" class="btn btn--ghost">← Retour à la liste</a>
-    <a th:if="${candidat.annonce != null}"
+    <!-- <a th:if="${candidat.annonce != null}"
        th:href="@{/candidats?annonceId={id}(id=${candidat.annonce.id})}"
-       class="btn btn--info">📋 Autres candidats de cette annonce</a>
+       class="btn btn--info">📋 Autres candidats de cette annonce</a> -->
   </div>
 
   <script>
