@@ -314,4 +314,14 @@ public class CandidatController {
 
         return "redirect:/candidats";
     }
+    @GetMapping("/start-interview/{id}")
+    public String startInterview(@PathVariable Integer id, Model model) {
+        Candidat candidat = candidatService.getById(id);
+        if (candidat == null) {
+            return "redirect:/error";
+        }
+        
+        model.addAttribute("candidat", candidat);
+        return "candidats/pass-entretien";  // Redirige vers la page d'entretien
+    }
 }
