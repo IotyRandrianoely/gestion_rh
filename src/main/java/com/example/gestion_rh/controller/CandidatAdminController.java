@@ -29,10 +29,10 @@ public class CandidatAdminController {
     private FileStorageService fileStorageService;
 
     public CandidatAdminController(CandidatService candidatService,
-                                   AnnonceService annonceService,
-                                   DiplomeService diplomeService,
-                                   ContratEssaiService contratEssaiService,
-                                   FileStorageService fileStorageService) {
+            AnnonceService annonceService,
+            DiplomeService diplomeService,
+            ContratEssaiService contratEssaiService,
+            FileStorageService fileStorageService) {
         this.candidatService = candidatService;
         this.annonceService = annonceService;
         this.diplomeService = diplomeService;
@@ -85,6 +85,7 @@ public class CandidatAdminController {
     public String save(@ModelAttribute Candidat candidat,
             @RequestParam(name = "annonce.id", required = false) Integer annonceId,
             @RequestParam(value = "cvFile", required = false) MultipartFile cvFile,
+            @RequestParam(value = "forceCreate", required = false) Boolean forceCreate,
             RedirectAttributes redirectAttributes) {
         try {
             // Validation des champs obligatoires
@@ -156,12 +157,28 @@ public class CandidatAdminController {
                 }
             }
 
+            // Vérification d'éligibilité (avec possibilité de forcer pour l'admin)
+            if (forceCreate == null || !forceCreate) {
+                if (!candidatService.isEligible(candidat)) {
+                    String ineligibilityMessage = candidatService.getIneligibilityMessage(candidat);
+                    redirectAttributes.addFlashAttribute("warning",
+                            "Attention : Candidat non éligible :\n" + ineligibilityMessage);
+                    redirectAttributes.addFlashAttribute("showForceOption", true);
+                    redirectAttributes.addFlashAttribute("candidat", candidat);
+                    return "redirect:/admin/candidats/new";
+                }
+            }
+
             Candidat savedCandidat = candidatService.save(candidat);
             System.out.println(
                     "Candidat sauvegardé avec CV: " + (savedCandidat != null ? savedCandidat.getCv() : "null"));
 
             if (savedCandidat != null && savedCandidat.getId() != null) {
-                redirectAttributes.addFlashAttribute("success", "Candidat sauvegardé avec succès !");
+                String successMessage = "Candidat sauvegardé avec succès !";
+                if (forceCreate != null && forceCreate) {
+                    successMessage += " (Création forcée - candidat non éligible)";
+                }
+                redirectAttributes.addFlashAttribute("success", successMessage);
             } else {
                 redirectAttributes.addFlashAttribute("error", "Erreur lors de la sauvegarde");
             }

@@ -4,38 +4,41 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.gestion_rh.service.AnnonceService;
 import com.example.gestion_rh.model.Candidat;
 import com.example.gestion_rh.service.AnnonceService;
 import com.example.gestion_rh.service.CandidatService;
 import com.example.gestion_rh.service.DiplomeService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.example.gestion_rh.service.FileStorageService;
 
 @Controller
 @RequestMapping("/annonces")
 public class ClientController {
 
-    // @Autowired
-     private final CandidatService candidatService;
+    private final CandidatService candidatService;
     private final AnnonceService annonceService;
     private final DiplomeService diplomeService;
+    private final FileStorageService fileStorageService;
 
-    public ClientController(CandidatService candidatService, AnnonceService annonceService, DiplomeService diplomeService) {
+    public ClientController(CandidatService candidatService, AnnonceService annonceService,
+            DiplomeService diplomeService, FileStorageService fileStorageService) {
         this.candidatService = candidatService;
         this.annonceService = annonceService;
         this.diplomeService = diplomeService;
+        this.fileStorageService = fileStorageService;
     }
-
 
     // Liste des annonces
     @GetMapping
     public String list(Model model) {
         model.addAttribute("annonces", annonceService.getAll());
-        return "annonces/list";  // renvoie vers /WEB-INF/views/annonces/list.jsp
+        return "annonces/list"; // renvoie vers /WEB-INF/views/annonces/list.jsp
     }
 
     // Détail d'une annonce
@@ -44,17 +47,20 @@ public class ClientController {
         model.addAttribute("annonce", annonceService.getById(id));
         return "annonces/detail"; // renvoie vers /WEB-INF/views/annonces/detail.jsp
     }
+
     @GetMapping("/{id}/postuler")
-    public String mnmn(@PathVariable Integer id, Model model){
+    public String mnmn(@PathVariable Integer id, Model model) {
         model.addAttribute("candidat", new Candidat());
         model.addAttribute("annonce", annonceService.getById(id));
         model.addAttribute("diplomes", diplomeService.getAll()); // *** NOUVEAU ***
-         
+
         return "admin/candidats/form_client";
     }
+
     @PostMapping
     public String save(@ModelAttribute Candidat candidat,
             @RequestParam(name = "annonce.id", required = false) Integer annonceId,
+            @RequestParam(value = "cvFile", required = false) MultipartFile cvFile,
             RedirectAttributes redirectAttributes) {
         try {
             // Validation des champs obligatoires
@@ -99,16 +105,38 @@ public class ClientController {
                 return "redirect:/admin/candidats/new";
             }
 
-
             System.out.println("=== DEBUG ADMIN CANDIDAT ===");
             System.out.println("Candidat ID: " + annonceId);
             System.out.println("Nom: " + candidat.getNom());
-            System.out.println("Annonce ID: " + (candidat.getAnnonce() != null ? candidat.getAnnonce().getId() : "null"));
-            System.out.println("Diplome ID: " + (candidat.getDiplome() != null ? candidat.getDiplome().getId() : "null"));
+            System.out
+                    .println("Annonce ID: " + (candidat.getAnnonce() != null ? candidat.getAnnonce().getId() : "null"));
+            System.out
+                    .println("Diplome ID: " + (candidat.getDiplome() != null ? candidat.getDiplome().getId() : "null"));
+
+            // Upload du CV si fourni
+            if (cvFile != null && !cvFile.isEmpty()) {
+                try {
+                    String fileName = fileStorageService.storeFile(cvFile);
+                    candidat.setCv(fileName);
+                    System.out.println("CV sauvegardé sous: " + fileName);
+                } catch (Exception e) {
+                    redirectAttributes.addFlashAttribute("error", "Erreur lors de l'upload du CV: " + e.getMessage());
+                    return "redirect:/annonces/" + annonceId + "/postuler";
+                }
+            }
+
+            // *** VALIDATION D'ÉLIGIBILITÉ STRICTE ***
+            if (!candidatService.isEligible(candidat)) {
+                String ineligibilityMessage = candidatService.getIneligibilityMessage(candidat);
+                redirectAttributes.addFlashAttribute("error", "Candidature non éligible :\n" + ineligibilityMessage);
+                redirectAttributes.addFlashAttribute("candidat", candidat); // Garder les données saisies
+                return "redirect:/annonces/" + annonceId + "/postuler";
+            }
 
             Candidat savedCandidat = candidatService.save(candidat);
             if (savedCandidat != null && savedCandidat.getId() != null) {
-                redirectAttributes.addFlashAttribute("success", "Candidat sauvegardé avec succès !");
+                redirectAttributes.addFlashAttribute("success",
+                        "Candidature enregistrée avec succès ! Vous êtes éligible pour cette annonce.");
                 // Passer les IDs comme paramètres dans l'URL
                 return "redirect:/qcm/start?candidatId=" + savedCandidat.getId() + "&annonceId=" + annonceId;
             } else {
@@ -120,7 +148,7 @@ public class ClientController {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Erreur technique: " + e.getMessage());
         }
-        
-        return "redirect:/annonces";  // En cas d'erreur, retour à la liste des annonces
+
+        return "redirect:/annonces"; // En cas d'erreur, retour à la liste des annonces
     }
 }

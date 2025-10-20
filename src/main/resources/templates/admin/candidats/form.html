@@ -66,6 +66,7 @@
     .alert{ padding:14px; border-radius:10px; border:1px solid; margin-bottom:14px }
     .alert-error{ background:#fdecea; color:#a12622; border-color:#f3c3c0 }
     .alert-success{ background:#eafaf1; color:#1b7f45; border-color:#c9eedc }
+    .alert-warning{ background:#fff8e6; color:#856404; border-color:#ffeaa7 }
 
     /* Inline errors (JS) */
     .inline-error{ display:none; font-size:12px; color:#a12622; margin-top:-2px }
@@ -81,6 +82,8 @@
     .btn-success:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 8px 16px rgba(46,204,113,.2) }
     .btn-secondary{ background:#fff; color:#3498db; border-color:#cfe2f7 }
     .btn-secondary:hover{ background:#f3f8ff; border-color:#b7d5f6 }
+    .btn-warning{ background:#f39c12; color:#fff }
+    .btn-warning:hover{ background:#e67e22; transform:translateY(-1px); box-shadow:0 8px 16px rgba(243,156,18,.2) }
 
     /* Tiny badge preview */
     .chip{
@@ -109,6 +112,16 @@
   <!-- Messages serveur -->
   <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
   <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  
+  <!-- Alert d'éligibilité avec option de forcer -->
+  <div th:if="${warning}" class="alert alert-warning">
+    <strong>⚠️ Candidat non éligible</strong>
+    <p th:text="${warning}"></p>
+    <div th:if="${showForceOption}" style="margin-top:12px;">
+      <button type="button" onclick="document.getElementById('forceCreateBtn').style.display='inline-block'; this.style.display='none';" 
+              class="btn btn-warning">Afficher l'option de création forcée</button>
+    </div>
+  </div>
 
   <!-- ===== FORMULAIRE (back-end inchangé) ===== -->
   <div class="card">
@@ -212,6 +225,10 @@
       <!-- Actions -->
       <div class="actions">
         <button type="submit" class="btn btn-success">Enregistrer</button>
+        <button type="submit" id="forceCreateBtn" name="forceCreate" value="true" 
+                class="btn btn-warning" style="display:none;">
+          ⚠️ Créer quand même (Admin)
+        </button>
         <a th:href="@{/admin/candidats}" class="btn btn-secondary">Annuler</a>
       </div>
     </form>

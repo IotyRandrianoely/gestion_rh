@@ -112,7 +112,7 @@
 
   <!-- ===== FORMULAIRE (back-end inchangé) ===== -->
   <div class="card">
-    <form th:action="@{/annonces}" method="post" th:object="${candidat}">
+    <form th:action="@{/annonces}" method="post" th:object="${candidat}" enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}" />
 
       <!-- Annonce liée -->

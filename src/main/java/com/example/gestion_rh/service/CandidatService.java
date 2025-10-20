@@ -44,50 +44,60 @@ public class CandidatService {
 
     // Dans la méthode isEligible, ajouter :
 
-public boolean isEligible(Candidat candidat) {
-    if (candidat.getAnnonce() == null || candidat.getAnnonce().getId() == null) {
-        return false;
-    }
-
-    Annonce annonce = annonceRepo.findById(candidat.getAnnonce().getId()).orElse(null);
-    if (annonce == null || annonce.getCritereRech() == null) {
-        return false;
-    }
-
-    // Vérifier les années d'expérience
-    Integer experienceRequise = annonce.getCritereRech().getAnneesExperience();
-    Integer experienceCandidat = candidat.getAnneesExperience();
-
-    if (experienceRequise != null && experienceCandidat != null) {
-        if (experienceCandidat < experienceRequise) {
+    public boolean isEligible(Candidat candidat) {
+        if (candidat.getAnnonce() == null || candidat.getAnnonce().getId() == null) {
             return false;
         }
-    }
 
-    // Vérifier l'âge
-    Integer ageRequis = annonce.getCritereRech().getAge();
-    Integer ageCandidat = candidat.getAge();
-    
-    if (ageRequis != null && ageCandidat != null) {
-        if (ageCandidat > ageRequis) {
+        Annonce annonce = annonceRepo.findById(candidat.getAnnonce().getId()).orElse(null);
+        if (annonce == null || annonce.getCritereRech() == null) {
             return false;
         }
+
+        // Vérifier les années d'expérience (candidat doit avoir >= expérience requise)
+        Integer experienceRequise = annonce.getCritereRech().getAnneesExperience();
+        Integer experienceCandidat = candidat.getAnneesExperience();
+
+        if (experienceRequise != null && experienceCandidat != null) {
+            if (experienceCandidat < experienceRequise) {
+                return false;
+            }
+        }
+
+        // Vérifier l'âge (candidat doit avoir <= âge maximum requis)
+        Integer ageRequis = annonce.getCritereRech().getAge();
+        Integer ageCandidat = candidat.getAge();
+
+        if (ageRequis != null && ageCandidat != null) {
+            if (ageCandidat > ageRequis) {
+                return false;
+            }
+        }
+
+        // Vérifier le diplôme (candidat doit avoir >= niveau de diplôme requis)
+        Diplome diplomeRequis = annonce.getCritereRech().getDiplome();
+        Diplome diplomeCandidat = candidat.getDiplome();
+
+        if (diplomeRequis != null && diplomeCandidat != null) {
+            // Hiérarchie: 1=BEPC, 2=BAC, 3=Licence, 4=Master, 5=Doctorat
+            if (diplomeCandidat.getId() < diplomeRequis.getId()) {
+                return false;
+            }
+        }
+
+        // Vérifier le genre (doit correspondre exactement si spécifié)
+        Integer genreRequis = annonce.getCritereRech().getGenre();
+        Integer genreCandidat = candidat.getGenre();
+
+        if (genreRequis != null && genreCandidat != null) {
+            if (!genreRequis.equals(genreCandidat)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    // *** NOUVEAU : Vérifier le diplôme ***
-    Diplome diplomeRequis = annonce.getCritereRech().getDiplome();
-    Diplome diplomeCandidat = candidat.getDiplome();
-    
-    if (diplomeRequis != null && diplomeCandidat != null) {
-        // Assumons que les diplômes ont un ordre hiérarchique par ID
-        // (1=BEPC, 2=BAC, 3=Licence, 4=Master, 5=Doctorat)
-        if (diplomeCandidat.getId() < diplomeRequis.getId()) {
-            return false;
-        }
-    }
-    
-    return true;
-}
     /**
      * Obtient le message d'inéligibilité détaillé
      */
@@ -102,7 +112,7 @@ public boolean isEligible(Candidat candidat) {
         }
 
         StringBuilder message = new StringBuilder();
-        message.append("Vous n'êtes pas éligible pour cette annonce.");
+        message.append("Vous n'êtes pas éligible pour cette annonce. Critères non respectés :\n");
 
         // Vérifier les années d'expérience
         Integer experienceRequise = annonce.getCritereRech().getAnneesExperience();
@@ -118,7 +128,7 @@ public boolean isEligible(Candidat candidat) {
             }
         }
 
-        // Ajouter d'autres critères si nécessaire
+        // Vérifier l'âge
         Integer ageRequis = annonce.getCritereRech().getAge();
         Integer ageCandidat = candidat.getAge();
 
@@ -129,6 +139,36 @@ public boolean isEligible(Candidat candidat) {
                         .append(" ans (maximum requis : ")
                         .append(ageRequis)
                         .append(" ans)\n");
+            }
+        }
+
+        // Vérifier le diplôme
+        Diplome diplomeRequis = annonce.getCritereRech().getDiplome();
+        Diplome diplomeCandidat = candidat.getDiplome();
+
+        if (diplomeRequis != null && diplomeCandidat != null) {
+            if (diplomeCandidat.getId() < diplomeRequis.getId()) {
+                message.append("- Diplôme insuffisant : ")
+                        .append(diplomeCandidat.getNomDiplome())
+                        .append(" (minimum requis : ")
+                        .append(diplomeRequis.getNomDiplome())
+                        .append(")\n");
+            }
+        }
+
+        // Vérifier le genre si spécifié
+        Integer genreRequis = annonce.getCritereRech().getGenre();
+        Integer genreCandidat = candidat.getGenre();
+
+        if (genreRequis != null && genreCandidat != null) {
+            if (!genreRequis.equals(genreCandidat)) {
+                String genreRequisStr = genreRequis == 1 ? "Homme" : "Femme";
+                String genreCandidatStr = genreCandidat == 1 ? "Homme" : "Femme";
+                message.append("- Genre non conforme : ")
+                        .append(genreCandidatStr)
+                        .append(" (requis : ")
+                        .append(genreRequisStr)
+                        .append(")\n");
             }
         }
 
