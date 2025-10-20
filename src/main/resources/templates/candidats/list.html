@@ -244,25 +244,24 @@
          </td>
           <td th:text="${c.annonce != null ? c.annonce.profil : '—'}" th:attr="data-label='Annonce'">Profil annonce</td>
           <td th:attr="data-label='Passer entretien'">
-            <!-- Vérifier le score QCM avant d'autoriser l'entretien -->
             <div th:if="${contratsMap == null or contratsMap[c.id] == null or contratsMap[c.id].etat == 0}">
                 <div th:if="${not c.estPropose}">
-                    <!-- Vérifier si le score QCM est suffisant (≥ 50) -->
-                    <div th:if="${scoresMap != null and scoresMap[c.id] != null and scoresMap[c.id] >= 500}">
+                    <!-- Changer la condition pour score >= 5 -->
+                    <div th:if="${scoresMap != null and scoresMap[c.id] != null and scoresMap[c.id] >= 5}">
                         <a th:href="@{'/candidats/start-interview/' + ${c.id}}" 
                            class="btn btn--info">
                            📝 Passer l'entretien
                         </a>
                     </div>
-                    <!-- Message d'erreur si score insuffisant -->
-                    <div th:if="${scoresMap == null or scoresMap[c.id] == null or scoresMap[c.id] < 500}" 
+                    <!-- Message d'erreur seulement si score < 5 -->
+                    <div th:if="${scoresMap == null or scoresMap[c.id] == null or scoresMap[c.id] < 5}" 
                          class="error-message">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span class="error-message-icon">⚠️</span>
                             <span th:if="${scoresMap == null or scoresMap[c.id] == null}">
                                 Le candidat doit d'abord passer le QCM
                             </span>
-                            <span th:if="${scoresMap != null and scoresMap[c.id] != null and scoresMap[c.id] < 500}">
+                            <span th:if="${scoresMap != null and scoresMap[c.id] != null and scoresMap[c.id] < 5}">
                                 Score QCM insuffisant (<span th:text="${scoresMap[c.id]}">0</span>/10)
                             </span>
                         </div>
